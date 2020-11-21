@@ -66,8 +66,10 @@ public class CommandLine implements IConnectivityLogger {
 
   public CommandLine(final String[] args) {
     for ( String arg: args ) {
-      if ( "-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg) )
+      if ( "-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg) ) {
         usage(0);
+        return;
+      }
 
       if ( arg.startsWith(IP) ) {
         String ipField = arg.substring(IP.length());
@@ -87,12 +89,14 @@ public class CommandLine implements IConnectivityLogger {
           timeLimitMs = LangUtilities.parseInt(arg.substring(TIME_LIMIT.length()));
         } catch (NumberFormatException pe) {
           usage(1);
+          return;
         }
       } else if ( arg.startsWith(DELAY)) {
         try {
           delayMs = LangUtilities.parseInt(arg.substring(DELAY.length()));
         } catch (NumberFormatException pe) {
           usage(1);
+          return;
         }
       } else if ( arg.startsWith(ADMIN) ) {
         port = AdapterPort.ADMIN;
@@ -108,6 +112,7 @@ public class CommandLine implements IConnectivityLogger {
         } catch (Exception e) {
           System.err.println("Invalid file format: " + fmt);
           usage(1);
+          return;
         }
       } else if ( arg.equals(INTERACTIVE) ) {
         interactive = true;
@@ -122,12 +127,14 @@ public class CommandLine implements IConnectivityLogger {
           driftCorrectionThreshold = LangUtilities.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));
         } catch (NumberFormatException pe) {
           usage(1);
+          return;
         }
       } else if (arg.startsWith(ZERO_TIME_THRESHOLD)) {
         try {
           zeroTimeThreshold = LangUtilities.parseInt(arg.substring(ZERO_TIME_THRESHOLD.length()));
         } catch (NumberFormatException pe) {
           usage(1);
+          return;
         }
       } else if (arg.startsWith(DISCRETE_NODE_CAPTURE)) {
         discreteNodeCapture = true;

@@ -76,7 +76,7 @@ public enum DebugMessageType {
   INVALID (-1);
 
   private final int value;
-  private static final String BUNDLE_NAME = "com.silabs.pti.debugchannel.debugMessageType";
+  private static final String BUNDLE_NAME = "debugMessageType";
   private static final ResourceBundle names = ResourceBundle.getBundle(BUNDLE_NAME);
 
   private DebugMessageType(final int value) {

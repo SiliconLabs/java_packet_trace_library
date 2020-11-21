@@ -14,6 +14,12 @@ class MainTest {
         Main main = new Main(new String[] {"-?"});
         assertNotNull(main);
         assertTrue(main.cli().shouldExit() );
-        assertEquals(1, main.cli().exitCode());
+        assertEquals(0, main.cli().exitCode());
     }
+    @Test void testCommandLine() {
+      Main main = new Main(new String[] {""});
+      assertNotNull(main);
+      assertTrue(main.cli().shouldExit() );
+      assertEquals(1, main.cli().exitCode());
+  }
 }

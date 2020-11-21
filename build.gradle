@@ -53,15 +53,17 @@ test {
 }
 
 task oneJar(type: OneJar) {
+    dependsOn 'jar'
     mainClass = 'com.silabs.pti.Main'
     mergeManifestFromJar = true
-    archiveName = 'silabs-pti-' + file('VERSION').text.trim() + '.jar'
+    archiveFileName = 'silabs-pti-' + file('VERSION').text.trim() + '.jar'
     targetConfiguration = configurations.oneJar
     oneJarConfiguration = configurations.oneJarLib
     additionalDir = file('one-jar/root')
 }
 
 task runJar(type: JavaExec) {
+   dependsOn 'jar'
    classpath = files('build/libs/silabs-pti-lib-' + file('VERSION').text.trim() + '.jar')
    classpath += sourceSets.main.runtimeClasspath
    main = 'com.silabs.pti.Main'
@@ -69,6 +71,7 @@ task runJar(type: JavaExec) {
 }
 
 task runOneJar(type: JavaExec) {
+   dependsOn 'oneJar'
    classpath = files('build/libs/silabs-pti-' + file('VERSION').text.trim() + '.jar')
    args '-?'
 }

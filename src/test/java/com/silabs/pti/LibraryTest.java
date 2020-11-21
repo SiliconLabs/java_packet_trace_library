@@ -3,12 +3,15 @@
  */
 package com.silabs.pti;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import com.silabs.pti.util.Time;
 
 class LibraryTest {
     @Test void testSomeLibraryMethod() {
-        Library classUnderTest = new Library();
-        assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
+        Time classUnderTest = new Time();
+        assertNotNull(classUnderTest);
     }
 }

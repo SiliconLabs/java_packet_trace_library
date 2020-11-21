@@ -61,6 +61,9 @@ public class CommandLine implements IConnectivityLogger {
   private int zeroTimeThreshold = 2000000; // micro-second
   private boolean discreteNodeCapture = false;
 
+  private boolean shouldExit = false;
+  private int exitCode = -1;
+
   public CommandLine(final String[] args) {
     for ( String arg: args ) {
       if ( "-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg) )
@@ -146,6 +149,9 @@ public class CommandLine implements IConnectivityLogger {
     if ( throwable != null )
       throwable.printStackTrace(System.out);
   }
+
+  public boolean shouldExit() { return shouldExit; }
+  public int exitCode() { return exitCode; }
 
   @Override
   public int bpsRecordPeriodMs() {
@@ -251,7 +257,8 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("                                                                                                     capture_10.4.186.138.log, capture_10.4.186.139.log.");
     System.out.println("  'java -jar " + filename + " -ip=10.4.186.138 -admin discovery'                                    => connect to admin port and print discovery information.");
     System.out.println("  'java -jar " + filename + " -ip=10.4.186.138 -format=log -time=5000 -out=capture.log'             => capture for 5 seconds into capture.log, using network analyzer format.");
-    System.exit(exitCode);
+    this.shouldExit = true;
+    this.exitCode = exitCode;
   }
 
   public boolean hasTimeLimit() { return timeLimitMs != Integer.MIN_VALUE; }

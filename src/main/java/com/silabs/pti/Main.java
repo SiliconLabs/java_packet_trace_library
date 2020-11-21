@@ -47,28 +47,37 @@ public class Main {
    */
   private static final int framingTimeout = 2000;
 
-  private static IoConnector connector = new NioSocketConnector();
-  private static TimeSynchronizer timeSync;
+  private final IoConnector connector = new NioSocketConnector();
+  private final TimeSynchronizer timeSync;
+
+  private final CommandLine cli;
 
   public static void main(final String[] args) {
-    CommandLine cli = new CommandLine(args);
+    Main m = new Main(args);
+    if ( m.cli.shouldExit() )
+      System.exit(m.cli.exitCode());
+
+    int code = m.run(m.cli);
+    m.connector.dispose();
+    System.exit(code);
+  }
+
+  public Main(final String [] args) {
+    cli = new CommandLine(args);
     timeSync = new TimeSynchronizer(TimeSynchronizer.DEFAULT_PC_TIME_SUPPLIER,
                                     cli.driftCorrection(),
                                     cli.driftCorrectionThreshold(),
                                     cli.zeroTimeThreshold());
-    
-    
+
+
     connector.setConnectTimeoutMillis(framingTimeout);
     connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new PtiCodecFactory(Charset.forName("UTF-8"))));
     connector.setHandler(new ConnectionSessionHandler());
-
-    int code = run(cli);
-
-    connector.dispose();
-    System.exit(code);
   }
 
-  private static int run(final CommandLine cli) {
+  public CommandLine cli() { return cli; }
+
+  private int run(final CommandLine cli) {
     try {
       if ( cli.isInteractive() ) {
         return Interactive.runInteractive(cli, timeSync);
@@ -114,15 +123,15 @@ public class Main {
     }
   }
 
-  private static int runCapture(final CommandLine cli, TimeSynchronizer timeSynchronizer) throws IOException {
+  private int runCapture(final CommandLine cli, final TimeSynchronizer timeSynchronizer) throws IOException {
     // inits
     final String outputFilename = cli.output();
     DumpListener dl = null;
     IFramer debugChannelFramer = new DebugChannelFramer(true);
     IFramer asciiFramer = new AsciiFramer();
-    HashMap<String, PrintStream> output = new HashMap<String, PrintStream>();
+    HashMap<String, PrintStream> output = new HashMap<>();
     HashMap<String, List<IConnection>> connections = new HashMap<>();
-    
+
     // connections / attaching listeners
     if (cli.fileFormat() == FileFormat.DUMP) {
       if (outputFilename == null) {
@@ -161,7 +170,7 @@ public class Main {
           output.put(name, System.out);
         }
       }
- 
+
       String timeServer = null;
       List<IConnection> adminConnection = new ArrayList<>();
 
@@ -217,8 +226,8 @@ public class Main {
       adminConnection.clear();
       adminConnection = null;
     }
-    
-    // sleep 
+
+    // sleep
     try {
       if (cli.hasTimeLimit()) {
         Thread.sleep(cli.timeLimitMs());
@@ -227,7 +236,7 @@ public class Main {
         Thread.sleep(1000 * 60 * 60 * 24 * 365);
       }
     } catch (Exception e) { }
-    
+
     // close out
     if (dl != null) { dl.close(); }
     if (output != null) {
@@ -239,7 +248,7 @@ public class Main {
     return 0;
   }
 
-  private static void closeIpConnections(HashMap<String, List<IConnection>> connections) {
+  private void closeIpConnections(final HashMap<String, List<IConnection>> connections) {
     if (connections != null) {
       for (String ip : connections.keySet()) {
         List<IConnection> list = connections.get(ip);
@@ -252,7 +261,7 @@ public class Main {
     if (connector != null) {connector.dispose();}
   }
 
-  private static int runCommandSequence(final CommandLine cli) throws IOException {
+  private int runCommandSequence(final CommandLine cli) throws IOException {
     String hostname = cli.hostnames()[0];
     IConnection c = Adapter.createConnection(hostname, cli.port().defaultPort(), cli);
     c.connect();
@@ -274,13 +283,13 @@ public class Main {
 
 class SimpleConnectionListener implements IConnectionListener {
   private final FileFormat ff;
-  private String originator;
+  private final String originator;
   private volatile int nReceived = 0;
   private final HashMap<String, PrintStream> output;
   private long t0 = -1;
   private boolean readAsText = true;
   private final TimeSynchronizer timeSync;
-  
+
   // typically we capture from N devices and write to 1 single file.
   // this ensures us to only write 1 header entry.
   private static HashSet<PrintStream> writtenHeader = new HashSet<>();
@@ -295,7 +304,7 @@ class SimpleConnectionListener implements IConnectionListener {
     this.output = output;
     this.readAsText = readText;
     this.timeSync = timeSynchronizer;
-    
+
     // write header
     if (!readAsText) {
       output.forEach((k, v) -> {

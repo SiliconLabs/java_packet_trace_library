@@ -8,12 +8,6 @@ package com.silabs.pti.adapter;
  * used for asynchronous processing of serial port data from nodes.
  * Example usages include custom logging of data, or taking action
  * based on a particular messages coming up from the node.
- * <p>
- * Use the {@link TestNetwork#setListener(String, int, IConnectionListener)}
- * method to set your IConnectionListener to listen to the desired
- * connection(s).  Pay attention to thread synchronization
- * issues if installing the same IConnectionListener object as the listener on
- * multiple connections.
  *
  * @author  Matteo Neale Paris (matteo@ember.com)
  */

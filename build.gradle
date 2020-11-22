@@ -52,6 +52,20 @@ test {
     useJUnitPlatform()
 }
 
+task sourceJar(type: Jar, dependsOn: classes) {
+    archiveBaseName = 'silabs-pti-lib'
+    archiveVersion = file('VERSION').text.trim()
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    archiveBaseName = 'silabs-pti-lib'
+    archiveVersion = file('VERSION').text.trim()
+    from javadoc.destinationDir
+}
+
 task oneJar(type: OneJar) {
     dependsOn 'jar'
     mainClass = 'com.silabs.pti.Main'
@@ -74,4 +88,9 @@ task runOneJar(type: JavaExec) {
    dependsOn 'oneJar'
    classpath = files('build/libs/silabs-pti-' + file('VERSION').text.trim() + '.jar')
    args '-?'
+}
+
+task all {
+   dependsOn 'oneJar'
+   dependsOn 'sourceJar'
 }

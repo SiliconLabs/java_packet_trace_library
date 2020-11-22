@@ -12,10 +12,6 @@ import com.silabs.pti.util.Severity;
  * Provides utilities for interacting with an Ember backchannel board and its
  * attached node.
  * <p>
- * Note: EmberPeek users should rarely need to use this class directly, as most
- * of its functionality is exposed more conveniently by the {@link TestNetwork}
- * class.
- * <p>
  * The Ember backchannel board exposes four sockets: one for each of the two
  * serial ports (numbered 0 and 1), an admin port for sending commands to the
  * backchannel software (numbered port 2 for the purposes of this API), and a

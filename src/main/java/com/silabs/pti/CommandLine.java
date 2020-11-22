@@ -230,8 +230,6 @@ public class CommandLine implements IConnectivityLogger {
 
   /**
    * Prints usage and exits with a given exit code.
-   *
-   * @returns void
    */
   public void usage(final int exitCode) {
     String filename = filename();

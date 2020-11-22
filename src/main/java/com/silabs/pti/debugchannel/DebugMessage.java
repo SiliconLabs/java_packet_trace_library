@@ -98,7 +98,7 @@ public class DebugMessage {
   /**
    * Returns the i-th byte
    *
-   * @returns byte
+   * @return byte
    */
   public byte contents(final int i) { return contents[i]; }
 

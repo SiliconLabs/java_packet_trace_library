@@ -12,8 +12,6 @@ package com.silabs.pti.util;
 public interface ILogger {
   /**
    * Logs a message with given severity and optional throwable.
-   *
-   * @returns void
    */
   public void log(final Severity severity, final String message, final Throwable throwable);
 

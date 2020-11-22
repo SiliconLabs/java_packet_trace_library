@@ -17,18 +17,14 @@ public interface IBackchannel {
   /**
    * Returns current portmapper.
    *
-   *
-   * @param
-   * @returns IBackchannelPortMapper
+   * @return IBackchannelPortMapper
    */
   public IBackchannelPortMapper portMapper();
 
   /**
    * Returns current connection enabler.
    *
-   *
-   * @param
-   * @returns IConnectionEnabler
+   * @return IConnectionEnabler
    */
   public IConnectionEnabler connectionEnabler();
 
@@ -40,7 +36,7 @@ public interface IBackchannel {
   /**
    * Returns a connection.
    * @param port
-   * @return
+   * @return connection
    */
   public IConnection getConnection(final AdapterPort port);
 
@@ -55,15 +51,13 @@ public interface IBackchannel {
   /**
    * Returns debug connection if one exists, null otherwise.
    *
-   * @returns IDebugConnection
+   * @return IDebugConnection
    */
   public IDebugConnection debugConnection();
 
   /**
    * Connects socket to the specified port: serial 0, serial 1, admin and debug
    * port. Does not try to reset the board on failure.
-   *
-   * @return true if and only if connection was successful.
    */
   default public void connect(final AdapterPort port) throws IOException {
     IConnection connection = getConnection(port);
@@ -102,7 +96,8 @@ public interface IBackchannel {
   /**
    * Starts the debug session.
    *
-   * @param debugListener
+   * @param debugMessageListener
+   * @param problemListener
    * @return
    */
   public boolean enableDebugChannelCapture(IDebugMessageListener debugMessageListener,

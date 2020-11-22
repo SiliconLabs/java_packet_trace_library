@@ -15,17 +15,15 @@ public interface ISplitter extends ICharacterListener {
    * Sets a character listener for a given bucket.
    * 
    *
-   * @param 
-   * @returns void
+   * @param bucket Bucket identifier.
+   * @param l listener
    */
   public void setCharacterListener(int bucket, ICharacterListener l);
   
   /**
    * Returns the number of buckets that this splitter splits into.
    * 
-   *
-   * @param 
-   * @returns int
+   * @return int
    */
   public int bucketCount();
   

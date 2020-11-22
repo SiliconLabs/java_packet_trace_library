@@ -24,7 +24,7 @@ public class TimeSync {
    * @param adapterName TODO
    * @param successRegex TODO
    * @param canTimeSync TODO
-   * @param timeServer
+   * @param timeServerPresent
    * @param timeServerIp TODO
    * @throws IOException
    *

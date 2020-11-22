@@ -15,9 +15,8 @@ public class WiresharkUtil {
 
   /**
    * Prints out the content in a format where text2pcap can consume it.
-   * @param pw
-   * @param time
-   * @param data
+   * @param time Time.
+   * @param data Data.
    */
   public static String printText2Pcap(final long time, final byte[] data) {
     byte[] prefix = FileFormat.PCAP_DATA_PREFIX;
@@ -39,7 +38,7 @@ public class WiresharkUtil {
   /**
    * Returns a 2-byte crc, as wireshark expects it
    *
-   * @returns int
+   * @return int
    */
   public static int lsbfCrc(final byte[] data,
                             final int startIndex,
@@ -65,7 +64,7 @@ public class WiresharkUtil {
    * Returns an array of 2 numbers that specify how many bytes to drop
    * from beginning and end of the packet, respectively.
    *
-   * @returns int[]
+   * @return int[]
    */
   public static int[] dropBytesFromBeginningEnd(final EventType type) {
     int[] drops = new int[] { 0, 0 };

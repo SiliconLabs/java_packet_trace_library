@@ -65,7 +65,7 @@ public class PtiUtilities {
    * The bytes sent should NOT include the length byte, and should
    * contain everything UP TO, but not including the CRC bytes in the payload.
    *
-   * @returns int
+   * @return int
    */
   public static int fifteenFourCrc(final byte[] bytes) {
     int crc = 0x0000;          // initial value

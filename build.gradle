@@ -93,4 +93,5 @@ task runOneJar(type: JavaExec) {
 task all {
    dependsOn 'oneJar'
    dependsOn 'sourceJar'
+   dependsOn 'javadocJar'
 }

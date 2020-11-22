@@ -14,7 +14,6 @@ package com.silabs.pti.util;
 
 public class Log {
 
-  private static final StatusLineHandlerManager manager = new StatusLineHandlerManager();
   private static ILogger logger = new DefaultLogger();
 
   // Don't instantiate
@@ -24,11 +23,6 @@ public class Log {
   public static void setLogger(final ILogger loggerInstance) {
     logger = loggerInstance;
   }
-
-  public static StatusLineHandlerManager statusLineHandlerManager() {
-    return manager;
-  }
-
   /** Log simple informational message. */
   public static void info(final String message) {
     info(message, null);
@@ -80,33 +74,6 @@ public class Log {
     case NONE:
       break;
     }
-  }
-
-  public static void clearErrorMessage() {
-    if ( manager != null )
-      manager.clearErrorMessage();
-  }
-
-  public static void statusLine(final String message, final boolean isError) {
-    if ( manager != null )
-      manager.statusLine(message, isError);
-  }
-  /**
-   * This is useful for hooking up a status line manager.
-   * It is intended for internal use only.
-   */
-  public static void addStatusLineManager(final IStatusLineHandler slm) {
-    if ( manager != null )
-      manager.addStatusLineManager(slm);
-  }
-
-  /**
-   * This is useful for hooking up a status line manager.
-   * It is intended for internal use only.
-   */
-  public static void removeStatusLineManager(final IStatusLineHandler slm) {
-    if ( manager != null )
-      manager.removeStatusLineManager(slm);
   }
 
 }

@@ -71,7 +71,6 @@ public class Connection extends BaseConnection {
    * Opens a socket to this Connection's host and port.  Starts a thread
    * to listen to the inbound messages.
    *
-   * @return   true if and only if the socket was successfully opened.
    */
   @Override
   public void connect() throws IOException {

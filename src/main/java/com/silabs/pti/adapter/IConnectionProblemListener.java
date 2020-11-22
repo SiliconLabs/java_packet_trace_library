@@ -14,8 +14,6 @@ public interface IConnectionProblemListener {
   /**
    * If some problem happened in the underlying connectivity, which
    * user should be alerted to, then this is the method to tall.
-   *
-   * @returns void
    */
   public void reportProblem(String message, Exception ex);
 

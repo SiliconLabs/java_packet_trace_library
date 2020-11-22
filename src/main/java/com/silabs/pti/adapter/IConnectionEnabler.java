@@ -23,8 +23,7 @@ public interface IConnectionEnabler {
    * will be propagated.
    *
    *
-   * @param
-   * @returns boolean
+   * @param connectionName
    */
   public void prepareConnection(String connectionName) throws IOException;
 
@@ -33,8 +32,7 @@ public interface IConnectionEnabler {
    * it will call this just after the connection is physically closed.
    *
    *
-   * @param
-   * @returns void
+   * @param connectionName
    */
   public void releaseConnection(String connectionName);
 

@@ -12,8 +12,6 @@ public interface IDebugConnection extends IConnection {
 
   /**
    * Pause this connection for a specified amount of milliseconds.
-   *
-   * @returns void
    */
   public void pauseFor(int milliseconds);
 

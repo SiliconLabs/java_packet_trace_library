@@ -13,22 +13,16 @@ public interface IStatusLineHandler {
 
   /**
    * Shows the error message, typically in red.
-   *
-   * @returns void
    */
   public void setErrorMessage(String errorMessage);
 
   /**
    * Shows normal message, typically in normal fonts.
-   *
-   * @returns void
    */
   public void setMessage(String message);
 
   /**
    * Clears all messages.
-   *
-   * @returns void
    */
   public void clearMessage();
 }

@@ -71,7 +71,7 @@ public enum FileFormat {
   /**
    * Takes a raw bytes and formats them.
    *
-   * @returns String
+   * @return String
    */
   public String processDebugMsg(final long timeMs,
                                 final String originator,

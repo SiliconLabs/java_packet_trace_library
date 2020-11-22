@@ -817,8 +817,8 @@ public class EventType implements Comparable<EventType> {
   /**
    * Return true if the type is a generic
    * type such as BROADCAST or UNICAST
-   * @param
-   * @returns boolean
+   * 
+   * @return boolean
    */
   public boolean isGeneric() {
     return ((value() & MASK_GENERIC) != 0);
@@ -942,7 +942,7 @@ public class EventType implements Comparable<EventType> {
   /**
    * Returns event type with a given name.
    *
-   * @returns EventType
+   * @return EventType
    */
   public static final EventType findByName(final String name) {
     for ( EventType et: getAllTypes() ) {

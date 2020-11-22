@@ -84,7 +84,7 @@ public class TimeSynchronizer {
    * Returns the value of time adjust the last time drift correction kicked
    * in. Returns null if there was no drift correction.
    *
-   * @returns Long
+   * @return Long
    */
   public Long lastCorrection() { return lastCorrection; }
 

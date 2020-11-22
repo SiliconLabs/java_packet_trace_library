@@ -141,10 +141,10 @@ public class Time {
 
   /**
    * Create humanly readable time string out of milliseconds.
-   * Example: 171857 (ms) -> to "2 Minutes 51 Seconds 875 Milliseconds" String
+   * Example: 171857 (ms) -&gt; to "2 Minutes 51 Seconds 875 Milliseconds" String
    *
-   * @param
-   * @returns String
+   * @param duration
+   * @return String
    */
   public static String formatMillisecondsToFrendlyRead(final long duration) {
     long durationMsec = duration;
@@ -303,7 +303,7 @@ public class Time {
   /**
    * Returns the current year as a simple integer.
    *
-   * @returns int
+   * @return int
    */
   public static int year() {
     Calendar c = Calendar.getInstance();

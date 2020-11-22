@@ -13,7 +13,7 @@ public interface ISeverityHolder {
   /**
    * Returns the severity of this object.
    * 
-   * @returns Severity
+   * @return Severity
    */
   public Severity severity();
 }

@@ -27,8 +27,8 @@ public enum Severity implements ISeverityHolder {
    * Total severity is the maximum severity present.
    * 
    *
-   * @param 
-   * @returns Severity
+   * @param holders holders that contains severity.
+   * @return Severity
    */
   public static Severity combinedSeverity(List<? extends ISeverityHolder> holders) {
     Severity total = NONE;

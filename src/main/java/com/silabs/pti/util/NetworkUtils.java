@@ -60,7 +60,6 @@ public class NetworkUtils {
 	 * Preference will be implemented in the discovery preferences UI.
 	 *
 	 * @since 4.3
-	 * @returns void
 	 */
 	public static void setNetworkInterfaceRefreshInterval(final long interval) {
 	  networkInterfaceRefreshInterval = interval;
@@ -70,7 +69,7 @@ public class NetworkUtils {
 	 * We need a getter, so that preference page can show it.
 	 *
 	 * @since 4.3
-	 * @returns long
+	 * @return long
 	 */
 	public static long networkInterfaceRefreshInterval() {
 	  return networkInterfaceRefreshInterval;
@@ -79,7 +78,7 @@ public class NetworkUtils {
 	/**
 	 * Returns the mac addresses of this PC.
 	 *
-	 * @returns List<byte[]>
+	 * @return {@link List}
 	 */
 	public static List<byte[]> getMacAddresses()
 			throws SocketException {
@@ -102,8 +101,8 @@ public class NetworkUtils {
 	 * If method returns true, answer is definite. If method returns false,
 	 * it's either definite or some error happened and it inconclusive.
 	 *
-	 * @param IP Address in textual form.
-	 * @returns boolean
+	 * @param ipAddress IP Address in textual form.
+	 * @return boolean
 	 */
 	public static boolean isMyAddress(final String ipAddress) {
 		if ( ipAddress == null )
@@ -124,8 +123,7 @@ public class NetworkUtils {
 	 * If you are looking for a "default" address, then the default address will
 	 * be the first element in the list, if list is non-empty.
 	 *
-	 * @param
-	 * @returns List<InetAddress>
+	 * @return list of IP addresses.
 	 */
 	public static List<InetAddress> getIpAddresses() {
 		List<InetAddress> addresses = new ArrayList<>();

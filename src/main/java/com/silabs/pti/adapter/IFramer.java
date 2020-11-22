@@ -22,7 +22,7 @@ public interface IFramer {
 
   /**
    * Returns the incomplete message that is currently being assembled from the
-   * bytes supplied to the {@link #assembleMessage(int)} method.
+   * bytes supplied to the assembleMessage method.
    *
    * @return         the incomplete message (with framing stripped), or
    *                 null if there is no incomplete message being assembled.

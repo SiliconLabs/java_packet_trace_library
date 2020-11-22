@@ -37,7 +37,7 @@ public class SequenceMonitor {
    * This method return value is as follows:
    *    a non-negative value means an error and specifies an expected sequence number.
    *    a negative value means a success, and can be one of OK_ values above.
-   * @returns int
+   * @return int
    */
   public int newSequence(final int sequence, final int mask) {
     int returnValue;

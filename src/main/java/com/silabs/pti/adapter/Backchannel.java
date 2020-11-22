@@ -82,9 +82,7 @@ public class Backchannel implements IBackchannel {
   /**
    * Returns current portmapper.
    *
-   *
-   * @param
-   * @returns IBackchannelPortMapper
+   * @return IBackchannelPortMapper
    */
   @Override
   public IBackchannelPortMapper portMapper() {
@@ -94,9 +92,7 @@ public class Backchannel implements IBackchannel {
   /**
    * Returns current connection enabler.
    *
-   *
-   * @param
-   * @returns IConnectionEnabler
+   * @return IConnectionEnabler
    */
   @Override
   public IConnectionEnabler connectionEnabler() {

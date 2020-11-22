@@ -11,14 +11,7 @@ import java.util.regex.Pattern;
  * to await a response. The sender should instantiate an instance of this class
  * by passing the {@link IConnection} they wish to use to the constructor. Once
  * this has been done, the sender may send a blocking message to the
- * {@link IConnection} by using the
- * {@link #expect(String, String, int, boolean)} and
- * {@link #expect(String, String)} methods below.
- *
- * Note: This class is intended to replace the use of
- * <code>IConnection.expect(String, String)</code> which was deprecated as of
- * ISD 1.3.
- *
+
  * @author ezra
  *
  */
@@ -40,7 +33,7 @@ public class ExpectConnection {
 
   /**
    * This method is functionally the same as
-   * {@link #expect(String, String, int, boolean)} where 2000ms is used as the
+   * expect where 2000ms is used as the
    * timeout and the collect flag is set to false.
    *
    * @param message
@@ -103,9 +96,6 @@ public class ExpectConnection {
    * basically the same as {@link #expect(String, String, int, boolean)} with
    * the added functionality of returning an {@link ExpectResponse} object which
    * contains complete information about what happened with the sent message.
-   *
-   * @see {@link #expect(String, String)},
-   *      {@link #expect(String, String, int, boolean)}
    *
    * @param message
    *          The message to send to the connection provided when this

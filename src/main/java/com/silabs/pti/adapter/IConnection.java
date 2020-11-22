@@ -45,8 +45,6 @@ public interface IConnection {
   /**
    * Connection enabler is a class that can be invoked just before and just after
    * the connection is physically opened or closed.
-   *
-   * @returns void
    */
   public void setConnectionEnabler(final IConnectionEnabler enabler);
 

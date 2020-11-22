@@ -27,8 +27,8 @@ public interface IBackchannelPortMapper {
    * This method returns the TCP port for a given backchannel logical port.
    *
    *
-   * @param
-   * @returns int
+   * @param logicalPort
+   * @return int
    */
   public int port(AdapterPort logicalPort);
 }

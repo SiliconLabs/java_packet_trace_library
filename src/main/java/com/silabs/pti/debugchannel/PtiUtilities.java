@@ -2,7 +2,7 @@
 
 package com.silabs.pti.debugchannel;
 
-import com.silabs.pti.util.LangUtilities;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * Random static utilities used for PTI.
@@ -72,7 +72,7 @@ public class PtiUtilities {
     int polynomial = 0x1021;   // 0001 0000 0010 0001  (0, 5, 12)
 
     for (byte b : bytes) {
-      b = LangUtilities.reverseBits(b);
+      b = MiscUtil.reverseBits(b);
       for (int i = 0; i < 8; i++) {
         boolean bit = ((b   >> (7-i) & 1) == 1);
         boolean c15 = ((crc >> 15    & 1) == 1);

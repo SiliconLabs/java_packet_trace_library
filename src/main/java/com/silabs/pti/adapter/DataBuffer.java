@@ -1,9 +1,12 @@
 // Copyright (c) 2011 Ember Corporation. All rights reserved.
 
-package com.silabs.pti.util;
+package com.silabs.pti.adapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+import com.silabs.pti.log.PtiLog;
 
 /**
  * This is a producer/consumer class that is used by the peek data source
@@ -22,24 +25,24 @@ import java.util.List;
  * Created on Mar 13, 2012
  * @author timotej
  */
-public class DataBuffer<T> implements Runnable {
+class DataBuffer<T> implements Runnable {
 
-  private final List<T> buffer = new ArrayList<T>(1000);
+  private final List<T> buffer = new ArrayList<>(1000);
   private Thread fetchThread = null;
   private ThreadGroup threadGroup = null;
 
   private boolean stopThread;
-  private final IObjectConsumer<T> listener;
+  private final Consumer<T> listener;
   private final String consumerThreadName;
 
   public DataBuffer(final String consumerThreadName,
-                    final IObjectConsumer<T> listener) {
+                    final Consumer<T> listener) {
     this(null, consumerThreadName, listener);
   }
 
   public DataBuffer(final ThreadGroup tg,
                     final String consumerThreadName,
-                    final IObjectConsumer<T> listener) {
+                    final Consumer<T> listener) {
     this.threadGroup = tg;
     this.consumerThreadName = consumerThreadName;
     if ( listener == null )
@@ -71,7 +74,7 @@ public class DataBuffer<T> implements Runnable {
         // It is possible for fetchThread to become null before join() is called
         // If it happens, no big deal, because the thread is dead anyway.
       } catch (InterruptedException ie) {
-        Log.warning("Could not wait for thread to die.", ie);
+        PtiLog.warning("Could not wait for thread to die.", ie);
       }
     }
   }
@@ -118,7 +121,7 @@ public class DataBuffer<T> implements Runnable {
         }
       }
     } catch (InterruptedException ie) {
-      Log.warning("Data buffer thread is interrupted", ie);
+      PtiLog.warning("Data buffer thread is interrupted", ie);
     }
   }
 }

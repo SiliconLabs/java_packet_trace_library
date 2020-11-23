@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.silabs.pti.splitter.ISplitter;
 import com.silabs.pti.util.ICharacterListener;
-import com.silabs.pti.util.ISplitter;
 
 /**
  * This class takes one connection and splits it into multiple connections

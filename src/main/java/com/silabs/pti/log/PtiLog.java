@@ -1,7 +1,7 @@
 //Copyright 2005 Ember Corporation. All rights reserved.
 
 
-package com.silabs.pti.util;
+package com.silabs.pti.log;
 
 /**
  * This class provides logging through eclipse loggers. All workbench
@@ -12,15 +12,15 @@ package com.silabs.pti.util;
  * @since 4.6
  */
 
-public class Log {
+public class PtiLog {
 
-  private static ILogger logger = new DefaultLogger();
+  private static IPtiLogger logger = new DefaultLogger();
 
   // Don't instantiate
-  private Log() {
+  private PtiLog() {
   }
 
-  public static void setLogger(final ILogger loggerInstance) {
+  public static void setLogger(final IPtiLogger loggerInstance) {
     logger = loggerInstance;
   }
   /** Log simple informational message. */
@@ -30,7 +30,7 @@ public class Log {
 
   /** Log simple informational message with exception */
   public static void info(final String message, final Throwable throwable) {
-    logger.log(Severity.INFO, message, throwable);
+    logger.log(PtiSeverity.INFO, message, throwable);
   }
 
   /** Log error */
@@ -46,7 +46,7 @@ public class Log {
 
   /** Log error with exception */
   public static void error(final String message, final Throwable throwable) {
-    logger.log(Severity.ERROR, message, throwable);
+    logger.log(PtiSeverity.ERROR, message, throwable);
   }
 
   /** Log warning */
@@ -56,7 +56,7 @@ public class Log {
 
   /** Log warning with exception */
   public static void warning(final String message, final Throwable throwable) {
-    logger.log(Severity.WARNING, message, throwable);
+    logger.log(PtiSeverity.WARNING, message, throwable);
   }
 
   /**
@@ -64,7 +64,7 @@ public class Log {
    * Calling this is identical to calling separate info(), error()
    * and warning() methods.
    */
-  public static void message(final Severity severity, final String message, final Throwable t) {
+  public static void message(final PtiSeverity severity, final String message, final Throwable t) {
     switch(severity) {
     case ERROR:
     case INFO:

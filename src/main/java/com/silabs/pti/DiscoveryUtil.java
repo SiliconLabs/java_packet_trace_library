@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Silicon Labs. All rights reserved.
 
-package com.silabs.pti.discover;
+package com.silabs.pti;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,8 +9,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.silabs.pti.CommandLine;
-import com.silabs.pti.util.NetworkUtils;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * Utilities for discovery.
@@ -18,7 +17,7 @@ import com.silabs.pti.util.NetworkUtils;
  * @author timotej
  * Created on Jan 8, 2019
  */
-public class DiscoveryUtil {
+class DiscoveryUtil {
 
   private static byte[] broadcast = { (byte)0xFF, (byte)0xFF,
                                       (byte)0xFF, (byte)0xFF };
@@ -27,7 +26,7 @@ public class DiscoveryUtil {
 
   private DiscoveryUtil() {}
 
-  public static int runDiscovery(final CommandLine cli) {
+  public static int runDiscovery() {
     try {
       discover(500);
       return 0;
@@ -75,7 +74,7 @@ public class DiscoveryUtil {
   private static void discover(final int durationMs) throws Exception {
     count = 0;
     List<Thread> threads = new ArrayList<>();
-    List<InetAddress> allLocalAddresses = NetworkUtils.getIpAddresses();
+    List<InetAddress> allLocalAddresses = MiscUtil.getIpAddresses();
     for ( InetAddress localAddress: allLocalAddresses ) {
       Runnable r = () -> discoverIndividualAddress(localAddress, durationMs);
       threads.add(new Thread(r));

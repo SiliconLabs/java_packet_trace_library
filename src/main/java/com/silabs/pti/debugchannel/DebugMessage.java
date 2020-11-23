@@ -2,7 +2,7 @@
 
 package com.silabs.pti.debugchannel;
 
-import com.silabs.pti.util.FrameUtil;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * A parsed Ember node debug message.  Contains fields for the name
@@ -243,14 +243,14 @@ public class DebugMessage {
    * MSB is raw[startIndex + length - 1].
    */
   private static long bytesToLong(final byte[] raw, final int startIndex, final int length) {
-    return FrameUtil.byteArrayToLong(raw, startIndex, length, false);
+    return MiscUtil.byteArrayToLong(raw, startIndex, length, false);
   }
 
   @Override
   public String toString() {
     return "[" + originatorId
            + " " + networkTime + " " + getTypeName(debugType)
-           + "] [" + FrameUtil.formatByteArray(contents, true) + "]";
+           + "] [" + MiscUtil.formatByteArray(contents, true) + "]";
   }
 
 }

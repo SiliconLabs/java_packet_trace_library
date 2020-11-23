@@ -1,6 +1,6 @@
 // Copyright 2016 Silicon Laboratories, Inc.
 
-package com.silabs.pti.util;
+package com.silabs.pti.log;
 
 import java.io.PrintStream;
 
@@ -11,10 +11,10 @@ import java.io.PrintStream;
  * @author timotej
  * @since 4.6
  */
-public class DefaultLogger implements ILogger {
+class DefaultLogger implements IPtiLogger {
 
   @Override
-  public void log(final Severity severity,
+  public void log(final PtiSeverity severity,
                   final String message,
                   final Throwable throwable) {
     PrintStream ps = null;

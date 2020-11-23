@@ -1,9 +1,11 @@
 // Copyright (c) 2013 Silicon Labs. All rights reserved.
 
-package com.silabs.pti.util;
+package com.silabs.pti.splitter;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.silabs.pti.util.ICharacterListener;
 
 /**
  * Chain splitter takes multiple 2-way splitters and attaches the

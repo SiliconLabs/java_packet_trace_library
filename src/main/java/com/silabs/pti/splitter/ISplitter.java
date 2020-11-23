@@ -1,6 +1,8 @@
 // Copyright (c) 2012 Silicon Labs. All rights reserved.
 
-package com.silabs.pti.util;
+package com.silabs.pti.splitter;
+
+import com.silabs.pti.util.ICharacterListener;
 
 /**
  * Implementations of this interface are able to split data into multiple 

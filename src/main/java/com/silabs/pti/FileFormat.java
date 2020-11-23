@@ -10,7 +10,7 @@ import com.silabs.pti.debugchannel.DebugMessageType;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.debugchannel.PtiUtilities;
 import com.silabs.pti.debugchannel.RadioConfiguration;
-import com.silabs.pti.util.FrameUtil;
+import com.silabs.pti.util.MiscUtil;
 import com.silabs.pti.util.WiresharkUtil;
 
 /**
@@ -78,7 +78,7 @@ public enum FileFormat {
                                 final byte[] bytes,
                                 final TimeSynchronizer timeSync) {
     if ( RAW == this )
-      return RAW_PREFIX + FrameUtil.formatByteArray(bytes) + RAW_SUFFIX;
+      return RAW_PREFIX + MiscUtil.formatByteArray(bytes) + RAW_SUFFIX;
 
     DebugMessage dm = DebugMessage.make("", bytes, timeMs);
     EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));
@@ -127,7 +127,7 @@ public enum FileFormat {
           + "] ["
           + originator
           + "] ["
-          + FrameUtil.formatByteArray(dm.contents())
+          + MiscUtil.formatByteArray(dm.contents())
           + "]";
     }
   }

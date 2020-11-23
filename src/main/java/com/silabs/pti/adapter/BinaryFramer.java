@@ -2,7 +2,7 @@
 
 package com.silabs.pti.adapter;
 
-import com.silabs.pti.util.FrameUtil;
+import com.silabs.pti.util.MiscUtil;
 
 
 /**
@@ -50,7 +50,7 @@ public class BinaryFramer implements IFramer {
 
   @Override
   public String toString(byte[] message) {
-    return FrameUtil.formatByteArray(message, true);
+    return MiscUtil.formatByteArray(message, true);
   }
 
 }

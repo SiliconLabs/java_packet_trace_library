@@ -30,8 +30,8 @@ public class WiresharkUtil {
               minutes%60,
               seconds%60,
               useconds,
-              FrameUtil.formatByteArray(prefix),
-              FrameUtil.formatByteArray(data));
+              MiscUtil.formatByteArray(prefix),
+              MiscUtil.formatByteArray(data));
 
   }
 

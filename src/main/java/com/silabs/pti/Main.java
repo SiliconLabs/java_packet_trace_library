@@ -28,10 +28,9 @@ import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
-import com.silabs.pti.discover.DiscoveryUtil;
+import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
 import com.silabs.pti.util.LineTerminator;
-import com.silabs.pti.util.Log;
 
 /**
  * Main entry point to the standalone PTI functionality.
@@ -82,7 +81,7 @@ public class Main {
       if ( cli.isInteractive() ) {
         return Interactive.runInteractive(cli, timeSync);
       } else if ( cli.isDiscovery() ) {
-        return DiscoveryUtil.runDiscovery(cli);
+        return DiscoveryUtil.runDiscovery();
       } else {
         switch (cli.port()) {
         case DEBUG:
@@ -93,12 +92,12 @@ public class Main {
           return runCommandSequence(cli);
 
         default:
-          Log.error("Unknown port: " + cli.port());
+          PtiLog.error("Unknown port: " + cli.port());
           return 1;
         }
       }
     } catch (IOException ioe) {
-      Log.error("Failed to communicate to adapters: " + String.join(", ", cli.hostnames()), ioe);
+      PtiLog.error("Failed to communicate to adapters: " + String.join(", ", cli.hostnames()), ioe);
       return 1;
     }
   }
@@ -114,7 +113,7 @@ public class Main {
       try {
         fos.write(ch, offset, len);
       } catch (IOException ioe) {
-        Log.error("Could not write data.", ioe);
+        PtiLog.error("Could not write data.", ioe);
       }
     }
 

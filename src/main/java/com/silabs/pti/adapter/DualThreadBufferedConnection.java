@@ -10,8 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
-import com.silabs.pti.util.DataBuffer;
-import com.silabs.pti.util.Log;
+import com.silabs.pti.log.PtiLog;
 
 /**
  * This implementation does not do ANY processing on the reading thread
@@ -220,7 +219,7 @@ public class DualThreadBufferedConnection extends BaseConnection {
       try {
         return socket.getInputStream();
       } catch(Exception e) {
-        Log.error("Exception getting input stream, closing socket", e);
+        PtiLog.error("Exception getting input stream, closing socket", e);
         close();
       }
     }

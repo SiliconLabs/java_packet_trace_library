@@ -14,8 +14,8 @@ import java.util.Properties;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
-import com.silabs.pti.util.LangUtilities;
-import com.silabs.pti.util.Severity;
+import com.silabs.pti.log.PtiSeverity;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * Command line parsing for the standalone PTI.
@@ -86,14 +86,14 @@ public class CommandLine implements IConnectivityLogger {
         output = arg.substring(OUT.length());
       } else if ( arg.startsWith(TIME_LIMIT)) {
         try {
-          timeLimitMs = LangUtilities.parseInt(arg.substring(TIME_LIMIT.length()));
+          timeLimitMs = MiscUtil.parseInt(arg.substring(TIME_LIMIT.length()));
         } catch (NumberFormatException pe) {
           usage(1);
           return;
         }
       } else if ( arg.startsWith(DELAY)) {
         try {
-          delayMs = LangUtilities.parseInt(arg.substring(DELAY.length()));
+          delayMs = MiscUtil.parseInt(arg.substring(DELAY.length()));
         } catch (NumberFormatException pe) {
           usage(1);
           return;
@@ -124,14 +124,14 @@ public class CommandLine implements IConnectivityLogger {
         driftCorrection = arg.substring(FORMAT.length()).toLowerCase().indexOf("enable") == -1;
       } else if (arg.startsWith(DRIFT_CORRECTION_THRESHOLD)) {
         try {
-          driftCorrectionThreshold = LangUtilities.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));
+          driftCorrectionThreshold = MiscUtil.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));
         } catch (NumberFormatException pe) {
           usage(1);
           return;
         }
       } else if (arg.startsWith(ZERO_TIME_THRESHOLD)) {
         try {
-          zeroTimeThreshold = LangUtilities.parseInt(arg.substring(ZERO_TIME_THRESHOLD.length()));
+          zeroTimeThreshold = MiscUtil.parseInt(arg.substring(ZERO_TIME_THRESHOLD.length()));
         } catch (NumberFormatException pe) {
           usage(1);
           return;
@@ -151,7 +151,7 @@ public class CommandLine implements IConnectivityLogger {
   }
 
   @Override
-  public void log(final Severity severity, final String message, final Throwable throwable) {
+  public void log(final PtiSeverity severity, final String message, final Throwable throwable) {
     System.out.println(severity.name() + ": " + message);
     if ( throwable != null )
       throwable.printStackTrace(System.out);

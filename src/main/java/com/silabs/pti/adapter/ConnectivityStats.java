@@ -2,7 +2,7 @@
 
 package com.silabs.pti.adapter;
 
-import com.silabs.pti.util.Severity;
+import com.silabs.pti.log.PtiSeverity;
 
 /**
  * Simple class that can calculate statistics for connectivity.
@@ -49,7 +49,7 @@ public class ConnectivityStats {
            && t - lastPrintTime  > logger.bpsRecordPeriodMs()
            && msElapsed > 0 ) {
         bitPerSecLifetime = (int)((8000 * totalCountedBytes ) / msElapsed);
-        logger.log(Severity.INFO,
+        logger.log(PtiSeverity.INFO,
                    String.format("%s => %12d bytes / %8d ms = %10d kbit/s",
                                  prefix,
                                  totalBytes,

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.silabs.pti.log.PtiLog;
+import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.ICharacterListener;
-import com.silabs.pti.util.Log;
-import com.silabs.pti.util.Severity;
 
 /**
  * Underlying commonality of all connections.
@@ -86,7 +86,7 @@ abstract class BaseConnection implements IDebugConnection {
         try {
           l.connectionStateChanged(state);
         } catch (Exception e) {
-          Log.warning("Connection listener error", e);
+          PtiLog.warning("Connection listener error", e);
         }
       }
     }
@@ -136,11 +136,11 @@ abstract class BaseConnection implements IDebugConnection {
   }
 
   protected final void logInfo(final String message) {
-    logger.log(Severity.INFO, host + ":" + port + " =>> " + message, null);
+    logger.log(PtiSeverity.INFO, host + ":" + port + " =>> " + message, null);
   }
 
   protected final void logError(final String message, final Throwable t) {
-    logger.log(Severity.ERROR, host + ":" + port + " =>> " + message, t);
+    logger.log(PtiSeverity.ERROR, host + ":" + port + " =>> " + message, t);
   }
 
   protected final void processMessage(final long pcTime,
@@ -162,7 +162,7 @@ abstract class BaseConnection implements IDebugConnection {
         try {
           l.messageReceived(messageBytes, pcTime);
         } catch (Exception e) {
-          Log.warning("Connection listener error", e);
+          PtiLog.warning("Connection listener error", e);
         }
       }
     }

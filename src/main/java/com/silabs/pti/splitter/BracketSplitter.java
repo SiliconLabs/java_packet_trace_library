@@ -1,6 +1,9 @@
 // Copyright (c) 2012 Silicon Labs. All rights reserved.
 
-package com.silabs.pti.util;
+package com.silabs.pti.splitter;
+
+import com.silabs.pti.util.ICharacterListener;
+import com.silabs.pti.util.ICharacterMatcher;
 
 /**
  * This is a generic stream splitter based on open/close brackets.

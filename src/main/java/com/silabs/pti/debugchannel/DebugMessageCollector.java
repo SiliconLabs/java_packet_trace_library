@@ -4,7 +4,7 @@ package com.silabs.pti.debugchannel;
 
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IDebugMessageListener;
-import com.silabs.pti.util.Log;
+import com.silabs.pti.log.PtiLog;
 
 /**
  * A connection listener that extract byte[] messages and creates
@@ -30,7 +30,7 @@ public class DebugMessageCollector implements IConnectionListener {
       try {
         listener.processMessage(debugMessage);
       } catch (Exception e) {
-        Log.warning("Connection listener error", e);
+        PtiLog.warning("Connection listener error", e);
       }
     }
 

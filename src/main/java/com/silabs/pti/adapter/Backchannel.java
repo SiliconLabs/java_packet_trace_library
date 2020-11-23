@@ -5,8 +5,8 @@ package com.silabs.pti.adapter;
 import java.io.IOException;
 
 import com.silabs.pti.debugchannel.DebugMessageCollector;
-import com.silabs.pti.util.ILogger;
-import com.silabs.pti.util.Severity;
+import com.silabs.pti.log.IPtiLogger;
+import com.silabs.pti.log.PtiSeverity;
 
 /**
  * Provides utilities for interacting with an Ember backchannel board and its
@@ -37,7 +37,7 @@ public class Backchannel implements IBackchannel {
   private final IBackchannelPortMapper portMapper;
   private final IConnectionEnabler enabler;
 
-  private final ILogger logger;
+  private final IPtiLogger logger;
 
   private final DebugMessageCollector debugMessageCollector;
   /**
@@ -138,7 +138,7 @@ public class Backchannel implements IBackchannel {
     debugConn.setConnectionProblemListener(null);
     debugMessageCollector.setDebugMessageListener(null);
     debugConn.removeConnectionListener(debugMessageCollector);
-    logger.log(Severity.INFO, "Disable capture.", null);
+    logger.log(PtiSeverity.INFO, "Disable capture.", null);
     return true;
   }
 
@@ -180,7 +180,7 @@ public class Backchannel implements IBackchannel {
     if ( problemListener != null )
       debugConn.setConnectionProblemListener(problemListener);
 
-    logger.log(Severity.INFO, "Enable capture.", null);
+    logger.log(PtiSeverity.INFO, "Enable capture.", null);
 
     return true;
   }

@@ -2,7 +2,7 @@
 
 package com.silabs.pti.adapter;
 
-import com.silabs.pti.util.ILogger;
+import com.silabs.pti.log.IPtiLogger;
 
 /**
  * Interface that describes a logger for connectivity.
@@ -10,7 +10,7 @@ import com.silabs.pti.util.ILogger;
  * @author Timotej
  * Created on Mar 28, 2018
  */
-public interface IConnectivityLogger extends ILogger {
+public interface IConnectivityLogger extends IPtiLogger {
 
   /**
    * What is the minimum period in milliseconds between the consecutive

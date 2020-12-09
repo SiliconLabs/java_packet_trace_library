@@ -1,35 +1,36 @@
 # What is this?
 
-Silabs-pti is a java based client side to communication with Silicon Labs ISA3 or WSTK development board adapters, and stream debug channel messages to a PC.
+Silabs-pti is a java based client side library, to communicate with Silicon Labs ISA3 or WSTK adapters and stream debug channel messages to a file.
 That includes energy consumption data, network packet data or any other data available over the debug channel.
 
 Data can be saved in a format to be consumed by wireshark, Silicon Labs Network Analyzer, or as plain text or binary files.
 
 # How do I build this library?
 
-You can build it using gradle via:
+You should build it using gradle via:
 ```
 ./gradlew all
 ```
 This will result in following files:
 ```
-build/libs/silabs-pti-lib-1.0.1-sources.jar
-build/libs/silabs-pti-1.0.1.jar
-build/libs/silabs-pti-lib-1.0.1.jar
-build/libs/silabs-pti-lib-1.0.1-javadoc.jar
+build/libs/silabs-pti-lib-X.Y.Z-sources.jar
+build/libs/silabs-pti-X.Y.Z.jar
+build/libs/silabs-pti-lib-X.Y.Z.jar
+build/libs/silabs-pti-lib-X.Y.Z-javadoc.jar
 ```
+where X.Y.Z is the version of the library.
 
 # How do I use this library?
 
-If you wish to use this library in your own java project, then you should use `silabs-pti-x.y.z.jar` file, but you will have to satisfy a dependency on Apache Mina in your own project.
+If you wish to use this library in your own java project, then you should use `silabs-pti-lib-X.Y.Z.jar` file on your classpath, but you will have to satisfy a dependency on [Apache Mina](https://mina.apache.org/) in your own project.
 
-If you wish to use this library as a program from the command line, then simply run:
-`java -jar build/libs/silabs-pti-x.y.z.jar`
+If you wish to use this library as a program from the command line, then simply run a on-jar archive:
+`java -jar build/libs/silabs-pti-X.Y.Z.jar`
 and it will execute and print the command line usage help:
 ```
-$ java -jar build/libs/silabs-pti-1.0.1.jar 
+$ java -jar build/libs/silabs-pti-X.Y.Z.jar 
 
-Usage: java -jar silabs-pti-1.0.1.jar [ARGUMENTS] [COMMANDS]
+Usage: java -jar silabs-pti-X.Y.Z.jar [ARGUMENTS] [COMMANDS]
 
 Mandatory arguments:
 
@@ -71,4 +72,4 @@ Examples:
 
 # License
 
-This library was developed by Silicon Labs and is covered my standard [Silicon Labs MSLA](https://www.silabs.com/about-us/legal/master-software-license-agreement).
+This library was developed by Silicon Labs and is covered by a [standard Silicon Labs MSLA](https://www.silabs.com/about-us/legal/master-software-license-agreement).

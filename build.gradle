@@ -1,35 +1,37 @@
 plugins {
-    // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id "com.github.onslip.gradle-one-jar" version "1.0.5"
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
 configurations {
     oneJar.extendsFrom(implementation)
     oneJarLib
+    simAdapterCompile
 }
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    //api 'org.apache.commons:commons-math3:3.6.1'
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'org.apache.mina:mina-core:2.1.4'
     implementation 'org.slf4j:slf4j-simple:1.7.26'
     
-    // Use JUnit Jupiter API for testing.
+    simAdapterCompile 'org.apache.mina:mina-core:2.1.4'
+    simAdapterCompile 'org.slf4j:slf4j-simple:1.7.26'
+    
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-
-    // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     
     oneJarLib files('one-jar/one-jar-boot-0.97.jar')
+}
+
+sourceSets {
+	simAdapter {
+		java {
+			srcDirs = ['src/sim/java']
+		}
+	}
 }
 
 jar {
@@ -48,7 +50,6 @@ jar {
 }
 
 test {
-    // Use junit platform for unit tests
     useJUnitPlatform()
 }
 
@@ -90,8 +91,30 @@ task runOneJar(type: JavaExec) {
    args '-?'
 }
 
+task simAdapterJar(type: Jar, dependsOn: simAdapterClasses) {
+	archiveBaseName = 'silabs-simadapter'
+    archiveVersion = file('VERSION').text.trim()
+    from (sourceSets.simAdapter.output) {
+        include '**/*.class'
+    }
+    manifest {
+        attributes(
+            'Built-By'       : System.properties['user.name'],
+            'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+            'Created-By'     : "Gradle ${gradle.gradleVersion}",
+            'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+            'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'Main-Class'     : 'com.silabs.sim.adapter.SimMain'
+        )
+    }
+    
+}
+
 task all {
    dependsOn 'oneJar'
    dependsOn 'sourceJar'
+   dependsOn 'simAdapterJar'
    dependsOn 'javadocJar'
 }
+
+

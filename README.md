@@ -1,3 +1,5 @@
+[![Java CI with Gradle](https://github.com/SiliconLabs/java_packet_trace_library/actions/workflows/gradle.yml/badge.svg)](https://github.com/SiliconLabs/java_packet_trace_library/actions/workflows/gradle.yml)
+
 # What is this?
 
 Silabs-pti is a java based client side library, to communicate with Silicon Labs ISA3 or WSTK adapters and stream debug channel messages to a file.

@@ -249,8 +249,8 @@ public class MiscUtil {
    * order of bytes. Original array remains unchanged.
    *
    *
-   * @param byte[]
-   * @returns byte[]
+   * @param old Source byte array.
+   * @return byte[]
    */
   public static byte[] reverseBytes(final byte[] old) {
     byte[] result = new byte[old.length];
@@ -284,8 +284,10 @@ public class MiscUtil {
    * Static method for extracting a float number.
    *
    *
-   * @param
-   * @returns Number
+   * @param raw byte array
+   * @param offset beginning of array
+   * @param length Number of bytes.
+   * @return Number
    */
   public static Number byteArrayToFloat(final byte[] raw,
                                         final int offset,

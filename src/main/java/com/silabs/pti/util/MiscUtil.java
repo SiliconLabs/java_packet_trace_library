@@ -17,6 +17,7 @@ package com.silabs.pti.util;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -242,4 +243,73 @@ public class MiscUtil {
     }
     return value;
   }
+
+  /**
+   * Useful method that returns a new array with reversed
+   * order of bytes. Original array remains unchanged.
+   *
+   *
+   * @param old Source byte array.
+   * @return byte[]
+   */
+  public static byte[] reverseBytes(final byte[] old) {
+    byte[] result = new byte[old.length];
+    for (int i = 0; i < old.length; i++)
+      result[i] = old[old.length - i - 1];
+    return result;
+  }
+
+
+  /**
+   * Converts an array of bytes into an unsigned integer.
+   * The length should be at most 4.  When the length is 4 bytes,
+   * is there a way to make sure this an unsigned integer without using a long?
+   * @throws  ArrayIndexOutOfBoundsException
+   */
+  public static int byteArrayToInt(final byte[] raw,
+                                   final int offset,
+                                   final int length,
+                                   final boolean bigEndian) {
+    int value = 0;
+    int index = bigEndian ? (offset + length) - 1 : offset;
+    int increment = bigEndian ? -1 : 1;
+    for (int i = 0; i < length; i++) {
+      value += (raw[index] & 0xFF) << (8 * i);
+      index += increment;
+    }
+    return value;
+  }
+
+  /**
+   * Static method for extracting a float number.
+   *
+   *
+   * @param raw byte array
+   * @param offset beginning of array
+   * @param length Number of bytes.
+   * @return Number
+   */
+  public static Number byteArrayToFloat(final byte[] raw,
+                                        final int offset,
+                                        final int length,
+                                        final boolean bigEndian) {
+    ByteBuffer bb;
+    if ( bigEndian ) {
+      bb = ByteBuffer.wrap(raw, offset, length);
+    } else {
+      byte[] b = new byte[length];
+      System.arraycopy(raw, offset, b, 0, length);
+      b = reverseBytes(b);
+      bb = ByteBuffer.wrap(b);
+    }
+    switch(length) {
+    case 4:
+      return bb.getFloat();
+    case 8:
+      return bb.getDouble();
+    default:
+      throw new IllegalArgumentException("Only floats of size 4 or 8 can be decoded.");
+    }
+  }
+
 }

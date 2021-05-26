@@ -22,6 +22,8 @@ import com.silabs.pti.debugchannel.DebugMessageType;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.debugchannel.PtiUtilities;
 import com.silabs.pti.debugchannel.RadioConfiguration;
+import com.silabs.pti.decode.AemDecoder;
+import com.silabs.pti.decode.AemSample;
 import com.silabs.pti.util.MiscUtil;
 import com.silabs.pti.util.WiresharkUtil;
 
@@ -35,6 +37,7 @@ public enum FileFormat {
   DUMP("Binary dump of raw bytes, no deframing."),
   RAW("Raw bytes of deframed debug messages, one message per line."),
   LOG("Parsed debug messages, written into a file that Network Analyzer can import."),
+  AEM("All packets but AEM data are ignored, and AEM data is written as time,voltage,current triplet per line"),
   TEXT("Text file format that can be used with wireshark by running through 'text2pcap -q -t %H:%M:%S. <FILENAME>'");
 
 
@@ -108,25 +111,49 @@ public enum FileFormat {
     // TODO: document time correction in trace via Summary event.
   }
 
+  private String formatAemPacket(final long microSecondTime, final byte[] contents) {
+    AemDecoder ad = new AemDecoder(microSecondTime, contents);
+    AemSample as;
+    StringBuilder sb = new StringBuilder();
+    String sep = "";
+    while ( (as = ad.nextSample() ) != null ) {
+      sb.append(sep);
+      sb.append(as.timestamp()).append(",").append(as.voltage()).append(",").append(as.current());
+      sep = "\n";
+    }
+    return sb.toString();
+  }
+
+  private String formatPacketAsText2Pcap(final long timeMs, final EventType type, byte[] contents) {
+    // Text2pcap
+    int[] drops = WiresharkUtil.dropBytesFromBeginningEnd(type);
+    if ( drops[0] != 0 || drops[1] != 0) {
+      if ( drops[0] + drops[1] >= contents.length )
+        return null; // Nothing we can do. There is no data left.
+      contents = Arrays.copyOfRange(contents, drops[0], contents.length-drops[1]);
+    }
+    return WiresharkUtil.printText2Pcap(timeMs, contents);
+  }
+
   private String format(final long timeMs,
                         final String originator,
                         final DebugMessage dm,
                         final EventType type) {
     byte[] contents = dm.contents();
-    if ( this == TEXT ) {
-      // Text2pcap
-      if ( type.isPacket() ) {
-        int[] drops = WiresharkUtil.dropBytesFromBeginningEnd(type);
-        if ( drops[0] != 0 || drops[1] != 0) {
-          if ( drops[0] + drops[1] >= contents.length )
-            return null; // Nothing we can do. There is no data left.
-          contents = Arrays.copyOfRange(contents, drops[0], contents.length-drops[1]);
-        }
-        return WiresharkUtil.printText2Pcap(timeMs, contents);
+    switch(this) {
+    case TEXT:
+      if ( type.isPacket() )
+        return formatPacketAsText2Pcap(timeMs, type, contents);
+      else
+        return null;
+    case AEM:
+      if ( type.isAem() ) {
+        return formatAemPacket(dm.networkTime(), contents);
       } else {
         return null;
       }
-    } else {
+    case LOG:
+    default:
       // Standard ISD log format
       return "["
           + dm.networkTime()
@@ -141,6 +168,7 @@ public enum FileFormat {
           + "] ["
           + MiscUtil.formatByteArray(dm.contents())
           + "]";
+
     }
   }
 }

@@ -37,7 +37,7 @@ public enum FileFormat {
   DUMP("Binary dump of raw bytes, no deframing."),
   RAW("Raw bytes of deframed debug messages, one message per line."),
   LOG("Parsed debug messages, written into a file that Network Analyzer can import."),
-  AEM("All packets but AEM data are ignored, and AEM data is written as time,voltage,current triplet per line"),
+  AEM("All packets but AEM data are ignored, and AEM data is written as data file, with time, voltage and current in each line."),
   TEXT("Text file format that can be used with wireshark by running through 'text2pcap -q -t %H:%M:%S. <FILENAME>'");
 
 
@@ -79,6 +79,8 @@ public enum FileFormat {
     switch(this) {
     case LOG:
       return PtiUtilities.ISD_LOG_HEADER;
+    case AEM:
+      return "#     Time    Voltage    Current";
     default:
       return null;
     }
@@ -117,8 +119,7 @@ public enum FileFormat {
     StringBuilder sb = new StringBuilder();
     String sep = "";
     while ( (as = ad.nextSample() ) != null ) {
-      sb.append(sep);
-      sb.append(as.timestamp()).append(",").append(as.voltage()).append(",").append(as.current());
+      sb.append(String.format("%s%10d %10f %10f", sep, as.timestamp(), as.voltage(), as.current()));
       sep = "\n";
     }
     return sb.toString();

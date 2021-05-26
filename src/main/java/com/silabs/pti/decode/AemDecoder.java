@@ -27,29 +27,31 @@ public class AemDecoder {
 
   // Little endian int decoding.
   private int decode(final int length) {
+    int val = MiscUtil.byteArrayToInt(contents, index, length, false);
     index += length;
-    return MiscUtil.byteArrayToInt(contents, index, length, false);
+    return val;
   }
 
   // Little endian float decoding.
   private float decodeFloat(final int length) {
+    float val = MiscUtil.byteArrayToFloat(contents, index, length, false).floatValue();
     index += length;
-    return MiscUtil.byteArrayToFloat(contents, index, length, false).floatValue();
+    return val;
   }
 
-  private boolean noBytesLeft(final int n) {
-    return contents.length < index + n;
+  private boolean notEnoughBytesLeft(final int requiredBytes) {
+    return contents.length < index + requiredBytes;
   }
 
   private AemSample firstSample() {
     index += AemField.version.length();
-    if ( noBytesLeft(AemField.sampleRate.length())) return null;
+    if ( notEnoughBytesLeft(AemField.sampleRate.length())) return null;
     sampleRate = decode(AemField.sampleRate.length());
     index += AemField.sampleRate.length();
     index += AemField.sampleBufferSize.length();
     index += AemField.sampleBufferSequenceNumber.length();
     index += AemField.reservedConfig.length();
-    if ( noBytesLeft(AemField.voltage.length())) return null;
+    if ( notEnoughBytesLeft(AemField.voltage.length())) return null;
     voltage = decodeFloat(AemField.voltage.length());
     index += AemField.reservedData.length();
     index += AemField.status.length();
@@ -58,7 +60,7 @@ public class AemDecoder {
 
   private AemSample subsequentSample() {
     long sampleT = time + ( 1000000 * sampleCount ) / sampleRate;
-    if ( noBytesLeft(AemField.current.length())) return null;
+    if ( notEnoughBytesLeft(AemField.current.length())) return null;
     float current = decodeFloat(AemField.current.length());
     sampleCount++;
     return new AemSample(sampleT, current, voltage);

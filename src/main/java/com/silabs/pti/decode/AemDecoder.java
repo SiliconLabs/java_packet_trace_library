@@ -47,7 +47,6 @@ public class AemDecoder {
     index += AemField.version.length();
     if ( notEnoughBytesLeft(AemField.sampleRate.length())) return null;
     sampleRate = decode(AemField.sampleRate.length());
-    index += AemField.sampleRate.length();
     index += AemField.sampleBufferSize.length();
     index += AemField.sampleBufferSequenceNumber.length();
     index += AemField.reservedConfig.length();

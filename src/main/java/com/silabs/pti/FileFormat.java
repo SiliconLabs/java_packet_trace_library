@@ -92,6 +92,7 @@ public enum FileFormat {
                                 final String originator,
                                 final byte[] bytes,
                                 final TimeSynchronizer timeSync) {
+	  System.err.println("DEBUG MSG!");
     if ( RAW == this )
       return RAW_PREFIX + MiscUtil.formatByteArray(bytes) + RAW_SUFFIX;
 
@@ -118,7 +119,7 @@ public enum FileFormat {
     String sep = "";
     while ( (as = ad.nextSample() ) != null ) {
       sb.append(sep);
-      sb.append(as.timestamp()).append(",").append(as.voltage()).append(",").append(as.current());
+      sb.append(as.timestamp()).append(",").append(as.voltage()).append(",").append(as.current()).append("\n");
       sep = "\n";
     }
     return sb.toString();

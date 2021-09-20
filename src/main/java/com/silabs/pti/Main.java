@@ -278,7 +278,7 @@ public class Main {
   private void configOutputFiles(final CommandLine cli,
                                  final String outFilename,
                                  final HashMap<String, PrintStream> output) throws FileNotFoundException {
-    if (outFilename != null && !outFilename.isBlank()) {
+    if (outFilename != null && !outFilename.isEmpty()) {
       if (cli.testMode()) {
         for (Integer port : cli.testPort()) {
           String f = makeCaptureFilenames(outFilename, port.toString());

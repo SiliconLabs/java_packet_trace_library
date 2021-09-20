@@ -24,6 +24,8 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     
     oneJarLib files('one-jar/one-jar-boot-0.97.jar')
+    
+    compile 'com.sparkjava:spark-core:2.9.3'
 }
 
 sourceSets {

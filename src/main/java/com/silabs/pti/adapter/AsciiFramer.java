@@ -31,12 +31,12 @@ public class AsciiFramer implements ILineTerminatingFramer {
   private LineTerminator lineTerminator;
   private static final String CHARSET = "US-ASCII";
 
-  private List<Byte> message;
+  private List<Byte> message = new ArrayList<Byte>();
+
   private boolean ignoreNewline = false;
   private Charset cs;
 
   public AsciiFramer() {
-    message = new ArrayList<Byte>();
     lineTerminator = LineTerminator.CRLF;
     try {
       cs = Charset.forName(CHARSET);
@@ -62,7 +62,7 @@ public class AsciiFramer implements ILineTerminatingFramer {
       byte[] ints = new byte[message.size()];
       for(int i = 0; i < ints.length; i++)
         ints[i] = message.get(i);
-      message = new ArrayList<Byte>();
+      message.clear();
       return ints;
     }
     message.add(nextByte);
@@ -78,7 +78,7 @@ public class AsciiFramer implements ILineTerminatingFramer {
     byte[] ints = new byte[message.size()];
     for(int i = 0; i < ints.length; i++)
       ints[i] = message.get(i);
-    message = new ArrayList<Byte>();
+    message.clear();
     return ints;
   }
 

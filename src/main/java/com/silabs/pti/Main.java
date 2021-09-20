@@ -15,6 +15,7 @@
 package com.silabs.pti;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -69,7 +70,7 @@ public class Main {
       System.exit(m.cli.exitCode());
 
     int code = m.run(m.cli);
-    m.connector.dispose();
+    m.closeConnections();
     System.exit(code);
   }
 
@@ -88,7 +89,7 @@ public class Main {
 
   public CommandLine cli() { return cli; }
 
-  private int run(final CommandLine cli) {
+  public int run(final CommandLine cli) {
     try {
       if ( cli.isInteractive() ) {
         return Interactive.runInteractive(cli, timeSync);
@@ -96,6 +97,7 @@ public class Main {
         return DiscoveryUtil.runDiscovery();
       } else {
         switch (cli.port()) {
+        case TEST:
         case DEBUG:
           return runCapture(cli, timeSync);
         case ADMIN:
@@ -116,6 +118,7 @@ public class Main {
 
   private static class DumpListener implements ICharacterListener {
     private final FileOutputStream fos;
+
     public DumpListener(final File f) throws IOException {
       fos = new FileOutputStream(f);
     }
@@ -138,8 +141,6 @@ public class Main {
     // inits
     final String outputFilename = cli.output();
     DumpListener dl = null;
-    IFramer debugChannelFramer = new DebugChannelFramer(true);
-    IFramer asciiFramer = new AsciiFramer();
     HashMap<String, PrintStream> output = new HashMap<>();
     HashMap<String, List<IConnection>> connections = new HashMap<>();
 
@@ -160,82 +161,85 @@ public class Main {
         c.addCharacterListener(dl);
       }
     } else {
-      if (outputFilename != null) {
-        if (cli.discreteNodeCapture()) {
-          for (String ip : cli.hostnames()) {
-            String streamOutput = cli.output();
-            streamOutput = outputFilename.substring(0, outputFilename.lastIndexOf("."));
-            streamOutput += "_";
-            streamOutput += ip;
-            streamOutput += outputFilename.substring(outputFilename.lastIndexOf("."));
-            output.put(ip, new PrintStream(new FileOutputStream(new File(streamOutput))));
-          }
-        } else { // 1 or more node capture goes into 1 file.
-          PrintStream printStream = new PrintStream(new FileOutputStream(new File(cli.output())));
-          for (String name: cli.hostnames()) {
-            output.put(name, printStream);
-          }
-        }
-      } else {
-        for (String name : cli.hostnames()) {
-          output.put(name, System.out);
-        }
-      }
+      configOutputFiles(cli, outputFilename, output);
 
       String timeServer = null;
-      List<IConnection> adminConnection = new ArrayList<>();
+      List<IConnection> adminConnections = new ArrayList<>();
 
-      for (int i = 0; i < cli.hostnames().length; i++) {
-        String ip = cli.hostnames()[i];
-        List<IConnection> debugConnection = new ArrayList<>();
-        connections.put(ip, debugConnection);
-        IConnection debug = Adapter
-            .createConnection(connector,
-                              ip,
-                              AdapterPort.DEBUG.defaultPort(),
-                              cli);
-        debug.connect();
-        debug.setFramers(debugChannelFramer, debugChannelFramer);
-        debug.addConnectionListener(new SimpleConnectionListener(cli
-            .fileFormat(), ip, output, false, timeSynchronizer));
-        debugConnection.add(debug);
+      if (cli.testMode()) {
+        for (Integer port : cli.testPort()) {
+          String originator = "localhost:" + port;
+          List<IConnection> debugConnections = new ArrayList<>();
+          connections.put(originator, debugConnections);
 
-        // return off time sync when doing 1 node or discrete node captures
-        if (cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
-          IConnection admin = Adapter
-              .createConnection(connector,
-                                ip,
-                                AdapterPort.ADMIN.defaultPort(),
-                                cli);
-
-          admin.connect();
-          admin.setFramers(asciiFramer, asciiFramer);
-          TimeSync.synchronizeTime(admin,
-                                   debug.isConnected(),
-                                   ip,
-                                   ".*switched to mode: server.*", // "borrowed"
-                                                                   // from
-                                                                   // wstk.java.
-                                                                   // shoudln't
-                                                                   // be
-                                                                   // hardcoded..
-                                   true, // assume time sync is possible.
-                                   timeServer != null,
-                                   timeServer);
-          adminConnection.add(admin);
+          // Debug connection
+          IConnection testPortConnection = Adapter
+              .createConnection(connector, "localhost", port, cli);
+          IFramer asciiFramer = new AsciiFramer();
+          testPortConnection.connect();
+          testPortConnection.setFramers(asciiFramer, asciiFramer);
+          testPortConnection
+              .addConnectionListener(new SimpleConnectionListener(cli
+                  .fileFormat(), originator, output, true, timeSynchronizer));
+          debugConnections.add(testPortConnection);
         }
+      } else {
+        for (int i = 0; i < cli.hostnames().length; i++) {
+          String ip = cli.hostnames()[i];
+          List<IConnection> debugConnections = new ArrayList<>();
+          connections.put(ip, debugConnections);
 
-        if (i == 0) {
-          timeServer = cli.hostnames()[0];
+          // Debug connection
+          IConnection debug = Adapter.createConnection(connector,
+                                                       ip,
+                                                       AdapterPort.DEBUG
+                                                           .defaultPort(),
+                                                       cli);
+          IFramer debugChannelFramer = new DebugChannelFramer(true);
+          debug.connect();
+          debug.setFramers(debugChannelFramer, debugChannelFramer);
+          debug.addConnectionListener(new SimpleConnectionListener(cli
+              .fileFormat(), ip, output, false, timeSynchronizer));
+          debugConnections.add(debug);
+
+          // Admin connection / configure Time Server
+          if (!cli.testMode() && cli.discreteNodeCapture() == false
+              && cli.hostnames().length > 1) {
+            IConnection admin = Adapter.createConnection(connector,
+                                                         ip,
+                                                         AdapterPort.ADMIN
+                                                             .defaultPort(),
+                                                         cli);
+            IFramer asciiFramer = new AsciiFramer();
+            admin.connect();
+            admin.setFramers(asciiFramer, asciiFramer);
+            TimeSync.synchronizeTime(admin,
+                                     debug.isConnected(),
+                                     ip,
+                                     ".*switched to mode: server.*", // "borrowed"
+                                                                     // from
+                                                                     // wstk.java.
+                                                                     // shoudln't
+                                                                     // be
+                                                                     // hardcoded..
+                                     true, // assume time sync is possible.
+                                     timeServer != null,
+                                     timeServer);
+            adminConnections.add(admin);
+          }
+
+          if (i == 0) {
+            timeServer = cli.hostnames()[0];
+          }
         }
       }
 
       // do not maintain open ADMIN port connections.
-      for (IConnection c: adminConnection) {
+      for (IConnection c : adminConnections) {
         c.close();
       }
-      adminConnection.clear();
-      adminConnection = null;
+      adminConnections.clear();
+      adminConnections = null;
     }
 
     // sleep
@@ -246,20 +250,74 @@ public class Main {
         // Sit for a year
         Thread.sleep(1000 * 60 * 60 * 24 * 365);
       }
-    } catch (Exception e) { }
-
-    // close out
-    if (dl != null) { dl.close(); }
-    if (output != null) {
-    	output.forEach((k,v) -> v.close());
-    	output.clear();
-    	output = null;
+    } catch (Exception e) {
     }
-    closeIpConnections(connections);
+
+    // close handles
+    if (dl != null) {
+      dl.close();
+    }
+
+    if (output != null) {
+      output.forEach((k, v) -> v.close());
+      output.clear();
+      output = null;
+    }
+    closeConnections(connections);
     return 0;
   }
 
-  private void closeIpConnections(final HashMap<String, List<IConnection>> connections) {
+  /**
+   * Setup output stream to either write to a single, multiple files, or stdOut
+   * 
+   * @param cli
+   * @param outFilename
+   * @param output
+   * @throws FileNotFoundException
+   */
+  private void configOutputFiles(final CommandLine cli,
+                                 final String outFilename,
+                                 final HashMap<String, PrintStream> output) throws FileNotFoundException {
+    if (outFilename != null && !outFilename.isBlank()) {
+      if (cli.testMode()) {
+        for (Integer port : cli.testPort()) {
+          String f = makeCaptureFilenames(outFilename, port.toString());
+          output
+              .put("localhost:" + port,
+                   new PrintStream(new FileOutputStream(new File(f))));
+        }
+      } else if (cli.discreteNodeCapture()) {
+        for (String ip : cli.hostnames()) {
+          String f = makeCaptureFilenames(outFilename, ip.toString());
+          output.put(ip, new PrintStream(new FileOutputStream(new File(f))));
+        }
+      } else { // capture all node traffic into 1 file.
+        PrintStream printStream = new PrintStream(new FileOutputStream(new File(cli
+            .output())));
+        for (String ip : cli.hostnames()) {
+          output.put(ip, printStream);
+        }
+      }
+    } else {
+      for (String name : cli.hostnames()) {
+        output.put(name, System.out);
+      }
+    }
+  }
+
+  public String makeCaptureFilenames(String filename, String filename_suffix) {
+    String out = filename.substring(0, filename.lastIndexOf("."));
+    out += "_";
+    out += filename_suffix;
+    out += filename.substring(filename.lastIndexOf("."));
+    return out;
+  }
+
+  public void closeConnections() {
+    closeConnections(null);
+  }
+
+  public void closeConnections(final HashMap<String, List<IConnection>> connections) {
     if (connections != null) {
       for (String ip : connections.keySet()) {
         List<IConnection> list = connections.get(ip);

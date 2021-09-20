@@ -30,7 +30,8 @@ public enum AdapterPort {
   TIMESYNC(4904),
   DEBUG(4905),
   CAMP(4949),
-  TELNET(23);
+  TELNET(23),
+  TEST(4567);
 
   private int defaultPort;
   AdapterPort(final int defaultPort) {

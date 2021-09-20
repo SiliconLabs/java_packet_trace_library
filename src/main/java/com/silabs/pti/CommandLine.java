@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
@@ -53,6 +54,7 @@ public class CommandLine implements IConnectivityLogger {
   private static final String DRIFT_CORRECTION_THRESHOLD = "-driftCorrectionThreshold=";
   private static final String ZERO_TIME_THRESHOLD = "-zeroTimeThreshold=";
   private static final String DISCRETE_NODE_CAPTURE = "-discreteNodeCapture";
+  private static final String TEST_PORT = "-testPort=";
 
   private List<String> hostnames = new ArrayList<>();
   private String output = null;
@@ -72,6 +74,8 @@ public class CommandLine implements IConnectivityLogger {
   private int driftCorrectionThreshold = 5000000; // micro-second
   private int zeroTimeThreshold = 2000000; // micro-second
   private boolean discreteNodeCapture = false;
+  private List<Integer> testPort = new ArrayList<Integer>();
+  private boolean testMode = false;
 
   private boolean shouldExit = false;
   private int exitCode = -1;
@@ -150,6 +154,17 @@ public class CommandLine implements IConnectivityLogger {
         }
       } else if (arg.startsWith(DISCRETE_NODE_CAPTURE)) {
         discreteNodeCapture = true;
+      } else if (arg.startsWith(TEST_PORT)) {
+        testMode = true;
+        port = AdapterPort.TEST;
+        try {
+          String argStr = arg.substring(TEST_PORT.length());
+          String[] ports = argStr.replaceAll(" ", "").split(",");
+          testPort = Arrays.asList(ports).stream().map(x -> Integer.parseInt(x))
+              .collect(Collectors.toList());
+        } catch (Exception e) {
+          usage(1);
+        }
       } else {
         if ( port != AdapterPort.DEBUG ) {
           commands.add(arg);
@@ -157,8 +172,10 @@ public class CommandLine implements IConnectivityLogger {
       }
     }
 
-    if ( !interactive && !discovery && hostnames.size() == 0 ) {
-      usage(1);
+    if (!interactive && !discovery) {
+      if ((!testMode && testPort.size() >= 0) && hostnames.size() == 0) {
+        usage(1);
+      }
     }
   }
 
@@ -292,7 +309,8 @@ public class CommandLine implements IConnectivityLogger {
   public int driftCorrectionThreshold () { return driftCorrectionThreshold; }
   public int zeroTimeThreshold () { return zeroTimeThreshold; }
   public boolean discreteNodeCapture() { return discreteNodeCapture; };
+  public List<Integer> testPort() { return testPort; };
+  public boolean testMode() { return testMode; };
+
 }
-
-
 

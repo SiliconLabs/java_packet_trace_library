@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'pti'
-include('app')
+include('silabs-pti')

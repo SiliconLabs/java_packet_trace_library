@@ -24,14 +24,14 @@ pipeline
         {
             steps
             {
-                sh './gradlew all'
+                sh './gradlew jar'
             }
         }
         stage('archive artifacts')
         {
             steps
             {
-                archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
+                archiveArtifacts artifacts: 'silabs-pti/build/libs/*.jar', fingerprint: true
             }
         }
     }

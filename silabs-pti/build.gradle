@@ -1,35 +1,43 @@
 plugins {
-    id 'application'
-    id 'java'
+  id 'application'
+  id 'java'
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
+  withJavadocJar()
+  withSourcesJar()
 }
 
 jar {
-    archiveBaseName = 'silabs-pti-lib'
+  archiveBaseName = 'silabs-pti-lib'
+  manifest {
+    attributes(
+      'Built-By'       : System.properties['user.name'],
+      'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+      'Created-By'     : "Gradle ${gradle.gradleVersion}",
+      'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+      'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+      'Main-Class'     : 'com.silabs.pti.Main'
+    )
+  }
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
-
-    implementation 'org.apache.mina:mina-core:2.1.4'
-    implementation 'org.slf4j:slf4j-simple:1.7.26'
-    
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+  implementation 'org.apache.mina:mina-core:2.1.4'
+  implementation 'org.slf4j:slf4j-simple:1.7.26'    
 }
 
 application {
-    mainClass = 'com.silabs.pti.Main'
+  mainClass = 'com.silabs.pti.Main'
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 tasks.register('all') {

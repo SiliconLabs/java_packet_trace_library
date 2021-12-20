@@ -26,6 +26,23 @@ jar {
   }
 }
 
+task fatJar(type: Jar) {
+  archiveBaseName = 'silabs-pti'
+  manifest {
+    attributes(
+      'Built-By'       : System.properties['user.name'],
+      'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+      'Created-By'     : "Gradle ${gradle.gradleVersion}",
+      'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+      'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+      'Main-Class'     : 'com.silabs.pti.Main'
+    )
+  }
+  from {
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+  with jar
+}
 dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
   implementation 'org.apache.mina:mina-core:2.1.4'
@@ -41,5 +58,5 @@ tasks.named('test') {
 }
 
 tasks.register('all') {
-  dependsOn jar,javadocJar,sourcesJar
+  dependsOn jar,javadocJar,sourcesJar,fatJar
 }

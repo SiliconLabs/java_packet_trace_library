@@ -4,5 +4,8 @@
 # Ignore Gradle build output directory
 build
 
+# Ignore build stamp that is produced by gradle
+build.stamp
+
 # Ignore eclipse build dir
 bin

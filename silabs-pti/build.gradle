@@ -12,8 +12,19 @@ java {
   withSourcesJar()
 }
 
+javadocJar {
+  archiveBaseName = 'silabs-pti-lib'
+  archiveVersion = file('VERSION').text.trim()
+}
+
+sourcesJar {
+  archiveBaseName = 'silabs-pti-lib'
+  archiveVersion = file('VERSION').text.trim()
+}
+
 jar {
   archiveBaseName = 'silabs-pti-lib'
+  archiveVersion = file('VERSION').text.trim()
   manifest {
     attributes(
       'Built-By'       : System.properties['user.name'],
@@ -28,6 +39,7 @@ jar {
 
 task fatJar(type: Jar) {
   archiveBaseName = 'silabs-pti'
+  archiveVersion = file('VERSION').text.trim()
   manifest {
     attributes(
       'Built-By'       : System.properties['user.name'],

@@ -15,10 +15,10 @@ You should build it using gradle via:
 ```
 This will result in following files:
 ```
-build/libs/silabs-pti-lib-X.Y.Z-sources.jar
-build/libs/silabs-pti-X.Y.Z.jar
-build/libs/silabs-pti-lib-X.Y.Z.jar
-build/libs/silabs-pti-lib-X.Y.Z-javadoc.jar
+silabs-pti/build/libs/silabs-pti-lib-X.Y.Z-sources.jar
+silabs-pti/build/libs/silabs-pti-X.Y.Z.jar
+silabs-pti/build/libs/silabs-pti-lib-X.Y.Z.jar
+silabs-pti/build/libs/silabs-pti-lib-X.Y.Z-javadoc.jar
 ```
 where X.Y.Z is the version of the library.
 
@@ -27,12 +27,12 @@ where X.Y.Z is the version of the library.
 If you wish to use this library in your own java project, then you should use `silabs-pti-lib-X.Y.Z.jar` file on your classpath, but you will have to satisfy a dependency on [Apache Mina](https://mina.apache.org/) in your own project.
 
 If you wish to use this library as a program from the command line, then simply run a on-jar archive:
-`java -jar build/libs/silabs-pti-X.Y.Z.jar`
+`java -jar silabs-pti/build/libs/silabs-pti-X.Y.Z.jar`
 and it will execute and print the command line usage help:
 ```
-$ java -jar build/libs/silabs-pti-X.Y.Z.jar 
+$ java -jar silabs-pti/build/libs/silabs-pti-X.Y.Z.jar 
 
-Usage: java -jar silabs-pti-X.Y.Z.jar [ARGUMENTS] [COMMANDS]
+Usage: java -jar silabs-pti-X.Y.Z.jar \[ARGUMENTS\] \[COMMANDS\]
 
 Mandatory arguments:
 

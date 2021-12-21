@@ -24,7 +24,7 @@ pipeline
         {
             steps
             {
-                sh './gradlew jar'
+                sh './gradlew all'
             }
         }
         stage('archive artifacts')

@@ -21,6 +21,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.silabs.pti.discovery.DiscoveryProtocol;
 import com.silabs.pti.util.MiscUtil;
 
 /**
@@ -63,9 +64,9 @@ class DiscoveryUtil {
         return;
       }
 
-      byte[] inBuff = new byte[500];
+      byte[] inBuff = new byte[DiscoveryProtocol.RECEIVE_LENGTH];
       DatagramPacket incoming = new DatagramPacket(inBuff, inBuff.length);
-      incoming.setPort(4920);
+      incoming.setPort(DiscoveryProtocol.UDP_PORT);
       long lastDiscoverTime = System.currentTimeMillis();
       do {
         try {

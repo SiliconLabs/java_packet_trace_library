@@ -12,42 +12,58 @@ java {
   withSourcesJar()
 }
 
+project.ext.set('archiveName', 'silabs-pti-lib')
+project.ext.set('fatArchiveName', 'silabs-pti')
+project.ext.set('silabsPtiVersion', file('VERSION').text.trim())
+project.ext.set('buildDate', new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())) 
+project.ext.set('mainClass', 'com.silabs.pti.Main')
+
 javadocJar {
-  archiveBaseName = 'silabs-pti-lib'
-  archiveVersion = file('VERSION').text.trim()
+  archiveBaseName = project.archiveName
+  archiveVersion = project.silabsPtiVersion
 }
 
 sourcesJar {
-  archiveBaseName = 'silabs-pti-lib'
-  archiveVersion = file('VERSION').text.trim()
+  archiveBaseName = project.archiveName
+  archiveVersion = project.silabsPtiVersion
 }
 
 jar {
-  archiveBaseName = 'silabs-pti-lib'
-  archiveVersion = file('VERSION').text.trim()
+  archiveBaseName = project.archiveName
+  archiveVersion = project.silabsPtiVersion
   manifest {
     attributes(
       'Built-By'       : System.properties['user.name'],
-      'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+      'Build-Timestamp': project.buildDate,
       'Created-By'     : "Gradle ${gradle.gradleVersion}",
       'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
       'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-      'Main-Class'     : 'com.silabs.pti.Main'
+      'Main-Class'     : project.mainClass
     )
   }
 }
 
+task createBuildStamp() {
+  doLast {
+    def gitOutput = 'git log -1 --format=hash=%H%ndate=%cI'.execute().text
+    file('src/main/resources/build.stamp').text = """version=${project.silabsPtiVersion}
+${gitOutput}"""
+    project.logger.lifecycle('Created build.stamp.')
+  }
+}
+tasks.processResources.dependsOn << 'createBuildStamp'
+
 task fatJar(type: Jar) {
-  archiveBaseName = 'silabs-pti'
-  archiveVersion = file('VERSION').text.trim()
+  archiveBaseName = project.fatArchiveName
+  archiveVersion = project.silabsPtiVersion
   manifest {
     attributes(
       'Built-By'       : System.properties['user.name'],
-      'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+      'Build-Timestamp': project.buildDate,
       'Created-By'     : "Gradle ${gradle.gradleVersion}",
       'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
       'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-      'Main-Class'     : 'com.silabs.pti.Main'
+      'Main-Class'     : project.mainClass
     )
   }
   from {
@@ -61,8 +77,9 @@ dependencies {
   implementation 'org.slf4j:slf4j-simple:1.7.26'    
 }
 
+
 application {
-  mainClass = 'com.silabs.pti.Main'
+  mainClass = project.mainClass
 }
 
 tasks.named('test') {
@@ -70,5 +87,5 @@ tasks.named('test') {
 }
 
 tasks.register('all') {
-  dependsOn jar,javadocJar,sourcesJar,fatJar
+  dependsOn createBuildStamp,jar,javadocJar,sourcesJar,fatJar
 }

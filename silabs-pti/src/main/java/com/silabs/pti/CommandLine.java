@@ -220,10 +220,11 @@ public class CommandLine implements IConnectivityLogger {
   }
 
   private void printVersionAndExit() {
-    String date = "Unknown build date.";
-    String hash = "Unknown git hash.";
-
-    URL u = getClass().getClassLoader().getResource("build.properties");
+    String date = "unknown";
+    String hash = "unknown";
+    String version = "unknown";
+    
+    URL u = getClass().getClassLoader().getResource("build.stamp");
     if ( u != null ) {
       Properties p = new Properties();
       try {
@@ -232,12 +233,15 @@ public class CommandLine implements IConnectivityLogger {
         }
         date = p.getProperty("date");
         hash = p.getProperty("hash");
+        version = p.getProperty("version");
       } catch (Exception e) {
         System.err.println("Error reading build information.");
       }
     }
-    System.out.println("Build date: " + date);
-    System.out.println("Build hash: " + hash);
+    System.out.println("Library information:");
+    System.out.println("  - version: " + version);
+    System.out.println("  - date: " + date);
+    System.out.println("  - hash: " + hash);
     System.exit(0);
   }
 

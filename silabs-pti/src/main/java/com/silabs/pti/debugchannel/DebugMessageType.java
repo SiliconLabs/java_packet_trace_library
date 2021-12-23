@@ -85,7 +85,7 @@ public enum DebugMessageType {
   CPU_USAGE(0x0070),
   USER_COMMAND(0xFFFE),
   USER_RESPONSE(0xFFFF),
-  INVALID (-1);
+  INVALID(-1);
 
   private final int value;
   private static final String BUNDLE_NAME = "debugMessageType";
@@ -96,7 +96,9 @@ public enum DebugMessageType {
   }
 
   /** Returns the integer value of this debug message type */
-  public int value() { return value; }
+  public int value() {
+    return value;
+  }
 
   /** Returns human-readable description of the debug message type, 10 char max */
   public String description() {
@@ -110,29 +112,29 @@ public enum DebugMessageType {
   /** Returns human-readable long description of the debug message type */
   public String longDescription() {
     try {
-      return names.getString(name()+".long");
+      return names.getString(name() + ".long");
     } catch (Exception e) {
       return description();
     }
   }
 
   /**
-   * Finds the debug message type that matches value or INVALID if
-   * the value is not valid debug message type.
+   * Finds the debug message type that matches value or INVALID if the value is
+   * not valid debug message type.
    */
   public static DebugMessageType get(final int value) {
     DebugMessageType[] values = values();
     int low = 0;
-    int high = values.length-1;
-    while(low<=high) {
-      int mid = (low+high)>>>1;
+    int high = values.length - 1;
+    while (low <= high) {
+      int mid = (low + high) >>> 1;
       DebugMessageType dmt = values[mid];
-      if ( dmt.value() == value ) {
+      if (dmt.value() == value) {
         return dmt;
-      } else if ( dmt.value() > value ) {
-        high = mid-1;
+      } else if (dmt.value() > value) {
+        high = mid - 1;
       } else {
-         low = mid+1;
+        low = mid + 1;
       }
     }
     return DebugMessageType.INVALID;

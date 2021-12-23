@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 plugins {
   id 'application'
   id 'java'
@@ -17,6 +19,15 @@ project.ext.set('fatArchiveName', 'silabs-pti')
 project.ext.set('silabsPtiVersion', file('VERSION').text.trim())
 project.ext.set('buildDate', new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())) 
 project.ext.set('mainClass', 'com.silabs.pti.Main')
+project.ext.set('manifestMap', [
+      'Built-By'       : System.properties['user.name'],
+      'Build-Timestamp': project.buildDate,
+      'Created-By'     : "Gradle ${gradle.gradleVersion}",
+      'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+      'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+      'Main-Class'     : project.mainClass
+    ])
+project.ext.set('wsExtcapDir', '.config/wireshark/extcap')
 
 javadocJar {
   archiveBaseName = project.archiveName
@@ -32,14 +43,7 @@ jar {
   archiveBaseName = project.archiveName
   archiveVersion = project.silabsPtiVersion
   manifest {
-    attributes(
-      'Built-By'       : System.properties['user.name'],
-      'Build-Timestamp': project.buildDate,
-      'Created-By'     : "Gradle ${gradle.gradleVersion}",
-      'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-      'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-      'Main-Class'     : project.mainClass
-    )
+    attributes(project.manifestMap)
   }
 }
 
@@ -54,23 +58,18 @@ ${gitOutput}"""
 tasks.processResources.dependsOn << 'createBuildStamp'
 
 task fatJar(type: Jar) {
+  description 'Build a self-contained fat jar that includes all dependencies.'
   archiveBaseName = project.fatArchiveName
   archiveVersion = project.silabsPtiVersion
   manifest {
-    attributes(
-      'Built-By'       : System.properties['user.name'],
-      'Build-Timestamp': project.buildDate,
-      'Created-By'     : "Gradle ${gradle.gradleVersion}",
-      'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-      'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-      'Main-Class'     : project.mainClass
-    )
+    attributes(project.manifestMap)
   }
   from {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
   with jar
 }
+
 dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
   implementation 'org.apache.mina:mina-core:2.1.4'
@@ -86,6 +85,36 @@ tasks.named('test') {
   useJUnitPlatform()
 }
 
-tasks.register('all') {
+task all {
+  description 'Toplevel task that creates everything.'
   dependsOn createBuildStamp,jar,javadocJar,sourcesJar,fatJar
 }
+
+task wireshark {
+  description 'Setup flow to tie this library with the wireshark extcap mechanism.'
+  dependsOn all
+  doLast {
+    project.logger.lifecycle("Locating wireshark extcap directory....")
+    def dir = file(Paths.get(System.getProperty('user.home')).resolve(project.wsExtcapDir))
+    def ptiJar = file(Paths.get(file('.').toString()).resolve("build/libs/silabs-pti-${project.silabsPtiVersion}.jar"))
+    def script = "#!/usr/bin/env bash\nexport EXTCAP_LOC=\"${dir}\"\njava -jar ${ptiJar} extcap \$@\n"
+    if ( dir.exists() ) {
+      def extCapFile = file(Paths.get(dir.toString()).resolve('silabs-pti'))
+      project.logger.lifecycle("Found ${dir}.")
+      project.logger.lifecycle("Creating ${extCapFile} for use with ${ptiJar}")
+      extCapFile.text = script
+      "chmod 755 ${extCapFile.toString()}".execute()
+    } else {
+      project.logger.lifecycle("""Not found ${dir}!
+      
+Please locate the 'extcap' directory of wireshark. You can do that by executing wireshark, go to "Help->About" and look under the "Folders" tab on the about dialog.
+Once you locate the directory, please copy the following script into that directory, name it silabs-pti and make sure it has "execute" permission.
+
+---------- SCRIPT START ---------- 
+${script}
+---------- SCRIPT END ---------- 
+      """)
+    }
+  }
+}
+

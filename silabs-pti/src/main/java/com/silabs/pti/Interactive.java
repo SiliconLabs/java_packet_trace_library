@@ -72,11 +72,12 @@ public class Interactive {
   @Target(ElementType.METHOD)
   public @interface Cli {
     String help() default "";
+
     String args() default "";
   }
 
   private Interactive(final CommandLine cli, final TimeSynchronizer timeSync) {
-    if ( cli.hostnames().length > 0 )
+    if (cli.hostnames().length > 0)
       host = cli.hostnames()[0];
     this.logger = cli;
     this.timeSync = timeSync;
@@ -87,12 +88,12 @@ public class Interactive {
   /**
    * Main entrypoint.
    */
-  public static int runInteractive(final CommandLine cli, final TimeSynchronizer timeSync)  {
+  public static int runInteractive(final CommandLine cli, final TimeSynchronizer timeSync) {
     @SuppressWarnings("resource")
     Scanner scanner = new Scanner(new InputStreamReader(System.in));
     System.out.println("Entering interactive mode. Use 'help' to get help.");
     Interactive in = new Interactive(cli, timeSync);
-    while(true) {
+    while (true) {
       in.printPompt();
       String cmd;
       try {
@@ -100,9 +101,11 @@ public class Interactive {
       } catch (Exception e) {
         cmd = null;
       }
-      if ( cmd == null ) break;
-      if ( cmd.trim().length() == 0 ) continue;
-      if(in.runCommand(cmd))
+      if (cmd == null)
+        break;
+      if (cmd.trim().length() == 0)
+        continue;
+      if (in.runCommand(cmd))
         break;
     }
 
@@ -111,8 +114,8 @@ public class Interactive {
 
   private List<Method> getCliMethods() {
     List<Method> l = new ArrayList<>();
-    for ( Method m: getClass().getMethods() ) {
-      if ( m.getAnnotation(Cli.class) != null )
+    for (Method m : getClass().getMethods()) {
+      if (m.getAnnotation(Cli.class) != null)
         l.add(m);
     }
     Collections.sort(l, (o1, o2) -> o1.getName().compareTo(o2.getName()));
@@ -120,7 +123,7 @@ public class Interactive {
   }
 
   private void printPompt() {
-    if ( connectionListener != null ) {
+    if (connectionListener != null) {
       System.out.print("[" + connectionListener.count() + " events from " + host + "]");
     }
     System.out.print(prompt + " ");
@@ -129,22 +132,22 @@ public class Interactive {
   // Returns true if quit
   private boolean runCommand(final String cmd) {
     String[] cmdLine = cmd.split("\\s++");
-    if ( cmdLine.length == 0 )
+    if (cmdLine.length == 0)
       return false;
 
-    for ( Method m: getCliMethods() ) {
-      if ( cmdLine[0].equalsIgnoreCase(m.getName()) ) {
+    for (Method m : getCliMethods()) {
+      if (cmdLine[0].equalsIgnoreCase(m.getName())) {
         Object[] args = null;
-        if ( cmdLine.length > 1 ) {
-          args = new Object[] {Arrays.copyOfRange(cmdLine, 1, cmdLine.length)};
+        if (cmdLine.length > 1) {
+          args = new Object[] { Arrays.copyOfRange(cmdLine, 1, cmdLine.length) };
         }
         try {
-          if ( m.isVarArgs() && args == null ) {
+          if (m.isVarArgs() && args == null) {
             args = new Object[] { new String[0] };
           }
           Object ret = m.invoke(this, args);
-          if ( ret instanceof Boolean ) {
-            return ((Boolean)ret).booleanValue();
+          if (ret instanceof Boolean) {
+            return ((Boolean) ret).booleanValue();
           } else {
             return false;
           }
@@ -159,37 +162,37 @@ public class Interactive {
     return false;
   }
 
-  @Cli(help="Quits the interactive application")
+  @Cli(help = "Quits the interactive application")
   public boolean quit() {
     return true;
   }
 
-  @Cli(help="Prints out the available commands")
+  @Cli(help = "Prints out the available commands")
   public void help() {
     System.out.println("Valid commands:");
     Map<String, String> cmdsHelp = new LinkedHashMap<>();
-    for ( Method m: getCliMethods() ) {
+    for (Method m : getCliMethods()) {
       Cli c = m.getAnnotation(Cli.class);
       StringBuilder help = new StringBuilder();
       help.append("  ");
       help.append(m.getName().toLowerCase());
-      if ( c.args() != null && c.args().length() > 0 ) {
+      if (c.args() != null && c.args().length() > 0) {
         help.append(" ").append(c.args());
       }
       cmdsHelp.put(help.toString(), c.help());
     }
 
     int n = 0;
-    for ( String key: cmdsHelp.keySet() ) {
-      if ( key.length() > n )
+    for (String key : cmdsHelp.keySet()) {
+      if (key.length() > n)
         n = key.length();
     }
-    for ( String key: cmdsHelp.keySet() ) {
+    for (String key : cmdsHelp.keySet()) {
       System.out.print("  ");
       System.out.print(key);
       String help = cmdsHelp.get(key);
-      if ( help != null && help.length() > 0 ) {
-        for ( int i=0; i< n-key.length(); i++ )
+      if (help != null && help.length() > 0) {
+        for (int i = 0; i < n - key.length(); i++)
           System.out.print(" ");
         System.out.print(" - ");
         System.out.println(help);
@@ -198,7 +201,7 @@ public class Interactive {
   }
 
   private void cli(final String s) throws IOException {
-    if ( cliConnection == null || !cliConnection.isConnected() ) {
+    if (cliConnection == null || !cliConnection.isConnected()) {
       try {
         cliOutStream.put(host, System.out);
       } catch (Exception e) {
@@ -206,11 +209,7 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      cliConnectionListener = new SimpleConnectionListener(FileFormat.RAW,
-                                                           host,
-                                                           cliOutStream,
-                                                           true,
-                                                           timeSync);
+      cliConnectionListener = new SimpleConnectionListener(FileFormat.RAW, host, cliOutStream, true, timeSync);
       cliConnection = Adapter.createConnection(host, cliPort, logger);
       cliConnection.connect();
       cliConnection.addConnectionListener(cliConnectionListener);
@@ -218,12 +217,12 @@ public class Interactive {
     cliConnection.send(s + LineTerminator.CRLF);
   }
 
-  @Cli(help="Turns the radio on or off", args="{ on | off }")
+  @Cli(help = "Turns the radio on or off", args = "{ on | off }")
   public void radio(final String... ch) {
-    if ( ch.length > 0 ) {
+    if (ch.length > 0) {
       boolean on = ch[0].equalsIgnoreCase("on") || ch[0].equalsIgnoreCase("1");
       String cmd;
-      if ( on ) {
+      if (on) {
         cmd = (radioOnCommand + " 1");
       } else {
         cmd = (radioOnCommand + " 0");
@@ -237,9 +236,9 @@ public class Interactive {
     }
   }
 
-  @Cli(help="Sets the channel", args="CHANNEL")
+  @Cli(help = "Sets the channel", args = "CHANNEL")
   public void channel(final String... ch) {
-    if ( ch.length > 0 ) {
+    if (ch.length > 0) {
       try {
         cli(setChannelCommand + " " + ch[0]);
       } catch (Exception e) {
@@ -249,12 +248,12 @@ public class Interactive {
     }
   }
 
-  @Cli(help="Sets the TCP/IP port to use for the CLI interaction", args="PORT")
+  @Cli(help = "Sets the TCP/IP port to use for the CLI interaction", args = "PORT")
   public void cli_port(final String... port) {
-    if ( port.length > 0 ) {
+    if (port.length > 0) {
       try {
         cliPort = MiscUtil.parseInt(port[0]);
-        if ( cliConnection != null ) {
+        if (cliConnection != null) {
           cliConnection.close();
           cliConnection = null;
         }
@@ -265,41 +264,41 @@ public class Interactive {
     System.out.println("Cli port is: " + cliPort);
   }
 
-  @Cli(help="Sets the 'set channel' command", args="SETCHANNELCMD")
+  @Cli(help = "Sets the 'set channel' command", args = "SETCHANNELCMD")
   public void channel_command(final String... chcmd) {
-    if ( chcmd.length > 0 ) {
+    if (chcmd.length > 0) {
       setChannelCommand = chcmd[0];
     }
     System.out.println("Channel command is: '" + setChannelCommand + "'");
   }
 
-  @Cli(help="Sets the enable radio command", args="SETRADIOCMD")
+  @Cli(help = "Sets the enable radio command", args = "SETRADIOCMD")
   public void radio_command(final String... chcmd) {
-    if ( chcmd.length > 0 ) {
+    if (chcmd.length > 0) {
       radioOnCommand = chcmd[0];
     }
     System.out.println("Radio command is: '" + radioOnCommand + "'");
   }
 
-  @Cli(help="Sets the prompt", args="PROMPT")
+  @Cli(help = "Sets the prompt", args = "PROMPT")
   public void prompt(final String... s) {
-    if ( s.length > 0 )
+    if (s.length > 0)
       this.prompt = s[0];
   }
 
-  @Cli(help="Shows or sets the output file for captured data", args="[FILENAME]")
-  public void file(final String...s) {
-    if ( s.length > 0 ) {
+  @Cli(help = "Shows or sets the output file for captured data", args = "[FILENAME]")
+  public void file(final String... s) {
+    if (s.length > 0) {
       out = new File(s[0]);
     }
     System.out.println("Output file: " + out.getAbsolutePath());
   }
 
-  @Cli(help="Sends a command", args="COMMAND")
-  public void send(final String... ch){
-    if ( ch.length > 0 ) {
+  @Cli(help = "Sends a command", args = "COMMAND")
+  public void send(final String... ch) {
+    if (ch.length > 0) {
       String command = "";
-      for(String a: ch) {
+      for (String a : ch) {
         command = command + a + " ";
       }
       try {
@@ -311,14 +310,13 @@ public class Interactive {
     }
   }
 
-
-  @Cli(help="Reconnects to the same host as previous connect command.")
+  @Cli(help = "Reconnects to the same host as previous connect command.")
   public void reconnect() {
-    if ( debugConnection != null ) {
+    if (debugConnection != null) {
       debugConnection.close();
       debugConnection = null;
     }
-    if ( host == null ) {
+    if (host == null) {
       System.err.println("You should first use 'connect' command at least once.");
       return;
     }
@@ -331,14 +329,14 @@ public class Interactive {
     }
   }
 
-  @Cli(help="Connects to a specified hostname or IP address.", args="HOSTNAME")
-  public void connect(final String...s) {
-    if ( debugConnection != null ) {
+  @Cli(help = "Connects to a specified hostname or IP address.", args = "HOSTNAME")
+  public void connect(final String... s) {
+    if (debugConnection != null) {
       debugConnection.close();
       debugConnection = null;
     }
 
-    if ( s.length < 1 ) {
+    if (s.length < 1) {
       System.err.println("Missing argument: hostname.");
       return;
     }
@@ -353,15 +351,15 @@ public class Interactive {
     }
   }
 
-  @Cli(help="Closes the connection.")
+  @Cli(help = "Closes the connection.")
   public void close() {
-    if ( debugConnection != null ) {
-      if ( connectionListener != null ) {
+    if (debugConnection != null) {
+      if (connectionListener != null) {
         debugConnection.removeConnectionListener(connectionListener);
         connectionListener = null;
       }
-      if ( captureStream != null ) {
-    	captureStream.forEach((k,v) -> v.close());
+      if (captureStream != null) {
+        captureStream.forEach((k, v) -> v.close());
         captureStream.clear();
         captureStream = null;
       }
@@ -369,23 +367,23 @@ public class Interactive {
       debugConnection = null;
     }
 
-    if ( cliConnection != null ) {
+    if (cliConnection != null) {
       cliConnection.close();
       cliConnection = null;
     }
 
   }
 
-  @Cli(help="Starts or stops capture", args="start|stop")
-  public void capture(final String...s) {
-    if ( s.length == 0 ) {
+  @Cli(help = "Starts or stops capture", args = "start|stop")
+  public void capture(final String... s) {
+    if (s.length == 0) {
       System.err.println("Expecting 'start' or 'stop'.");
       return;
     }
     boolean isStart;
-    if ( "start".equalsIgnoreCase(s[0]) ) {
+    if ("start".equalsIgnoreCase(s[0])) {
       isStart = true;
-    } else if ( "stop".equalsIgnoreCase(s[0]) ) {
+    } else if ("stop".equalsIgnoreCase(s[0])) {
       isStart = false;
 
     } else {
@@ -393,13 +391,13 @@ public class Interactive {
       return;
     }
 
-    if ( isStart && debugConnection == null ) {
+    if (isStart && debugConnection == null) {
       System.err.println("You must connect first.");
       return;
     }
 
-    if ( isStart ) {
-      if ( captureStream != null ) {
+    if (isStart) {
+      if (captureStream != null) {
         System.err.println("Already capturing.");
         return;
       }
@@ -412,31 +410,28 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      connectionListener = new SimpleConnectionListener(format,
-                                                        host,
-                                                        captureStream,
-                                                        false,
-                                                        timeSync);
+      connectionListener = new SimpleConnectionListener(format, host, captureStream, false, timeSync);
       debugConnection.addConnectionListener(connectionListener);
     } else {
-      try{
-        captureStream.forEach((k,v) -> v.close());
+      try {
+        captureStream.forEach((k, v) -> v.close());
         captureStream.clear();
         captureStream = null;
         debugConnection.removeConnectionListener(connectionListener);
         connectionListener = null;
-      } catch(NullPointerException e) {
+      } catch (NullPointerException e) {
         System.err.println("Stream already closed");
       }
     }
   }
 
-  @Cli(help="Sets the format of the capture file", args="[raw|log|text]")
-  public void format(final String...s) {
-    if ( s.length > 0 ) {
+  @Cli(help = "Sets the format of the capture file", args = "[raw|log|text]")
+  public void format(final String... s) {
+    if (s.length > 0) {
       try {
         format = FileFormat.valueOf(s[0].toUpperCase());
-        if (format == null ) throw new Exception();
+        if (format == null)
+          throw new Exception();
       } catch (Exception e) {
         System.err.println("Invalid file format: " + s[0]);
       }
@@ -445,4 +440,3 @@ public class Interactive {
   }
 
 }
-

@@ -18,6 +18,7 @@ package com.silabs.pti.log;
  * Class that can log messages to error log.
  *
  * Created on Feb 13, 2017
+ * 
  * @author timotej
  * @since 4.6
  */

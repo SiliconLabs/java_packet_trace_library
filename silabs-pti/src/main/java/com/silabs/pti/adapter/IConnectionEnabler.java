@@ -23,16 +23,17 @@ import java.io.IOException;
  * connected the executable has to be launched.
  *
  * Created on Nov 30, 2014
+ * 
  * @author timotej
  */
 public interface IConnectionEnabler {
 
   /**
-   * Before Connection class will physically connect the socket,
-   * this method will be called.
+   * Before Connection class will physically connect the socket, this method will
+   * be called.
    *
-   * If it returns, connection will proceed, otherwise exception
-   * will be propagated.
+   * If it returns, connection will proceed, otherwise exception will be
+   * propagated.
    *
    *
    * @param connectionName
@@ -40,8 +41,8 @@ public interface IConnectionEnabler {
   public void prepareConnection(String connectionName) throws IOException;
 
   /**
-   * When underlying connection object is ready to release a given connection
-   * it will call this just after the connection is physically closed.
+   * When underlying connection object is ready to release a given connection it
+   * will call this just after the connection is physically closed.
    *
    *
    * @param connectionName

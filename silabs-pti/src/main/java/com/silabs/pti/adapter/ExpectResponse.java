@@ -17,7 +17,7 @@ package com.silabs.pti.adapter;
 /**
  * Provides utilities for accessing the expect result
  *
- * @author  Guohui Liu (guohui@ember.com)
+ * @author Guohui Liu (guohui@ember.com)
  */
 public class ExpectResponse {
   private final boolean expectSuccess;
@@ -38,22 +38,29 @@ public class ExpectResponse {
     this.collectedOutput = collectedOutput;
   }
 
-  public boolean succeeded() { return expectSuccess; }
-  public boolean failed() { return !expectSuccess; }
+  public boolean succeeded() {
+    return expectSuccess;
+  }
+
+  public boolean failed() {
+    return !expectSuccess;
+  }
 
   public String failedReason() {
     return failedReason;
   }
+
   public String matchedOutput() {
     return matchedOutput;
   }
+
   public String collectedOutput() {
     return collectedOutput;
   }
 
   @Override
   public String toString() {
-    if ( expectSuccess ) {
+    if (expectSuccess) {
       return "OK: " + matchedOutput + " / " + collectedOutput;
     } else {
       return "FAIL: " + failedReason + " / " + collectedOutput;

@@ -3,17 +3,15 @@
 package com.silabs.pti.decode;
 
 /**
- * Individual sample of the AEM data, representing a single data point
- * in the same stream.
+ * Individual sample of the AEM data, representing a single data point in the
+ * same stream.
  */
 public class AemSample {
   private final long timestamp;
   private final float current;
   private final float voltage;
 
-  public AemSample(final long timestamp,
-                   final float current,
-                   final float voltage) {
+  public AemSample(final long timestamp, final float current, final float voltage) {
     this.timestamp = timestamp;
     this.current = current;
     this.voltage = voltage;
@@ -21,23 +19,29 @@ public class AemSample {
 
   @Override
   public String toString() {
-    return "[TimeStamp: " + timestamp + "  Current: " + current +"]";
+    return "[TimeStamp: " + timestamp + "  Current: " + current + "]";
   }
 
   /**
    * Timestamp in microseconds \
    */
-  public long timestamp() { return timestamp; }
+  public long timestamp() {
+    return timestamp;
+  }
 
   /**
    * Current
    */
-  public float current() { return current; }
+  public float current() {
+    return current;
+  }
 
   /**
    * Voltage
    */
-  public float voltage() { return voltage; }
+  public float voltage() {
+    return voltage;
+  }
 
   @Override
   public int hashCode() {

@@ -18,6 +18,7 @@ package com.silabs.pti.debugchannel;
  * Radio configuration is used in determining event start/end times.
  *
  * Created on Dec 12, 2017
+ * 
  * @author Timotej Ecimovic
  */
 public enum RadioConfiguration {
@@ -44,20 +45,27 @@ public enum RadioConfiguration {
   /**
    * Returns description of the radio configuration.
    */
-  public String description() { return description; }
+  public String description() {
+    return description;
+  }
 
   /** How many bits does the preamble have? */
-  private int preambleBits() { return preambleBits; }
+  private int preambleBits() {
+    return preambleBits;
+  }
 
   /** How many bits does the sync word have? */
-  private int syncWordBits() { return syncWordBits; }
+  private int syncWordBits() {
+    return syncWordBits;
+  }
 
   /** What is the data rate (in kiloBitsPerSecond) */
-  private int dataRateInKiloBitsPerSecond() { return dataRateInKiloBitsPerSecond; }
+  private int dataRateInKiloBitsPerSecond() {
+    return dataRateInKiloBitsPerSecond;
+  }
 
   /**
-   * With a given length of bytes, calculate microsecond duration for this
-   * packet.
+   * With a given length of bytes, calculate microsecond duration for this packet.
    *
    * @param lengthInBytes
    * @return number of microseconds that is a duration of this event.
@@ -76,14 +84,14 @@ public enum RadioConfiguration {
   }
 
   /**
-   * With a given length of bytes, calculate microsecond duration for this
-   * packet without taking sync and preamble into consideration.
+   * With a given length of bytes, calculate microsecond duration for this packet
+   * without taking sync and preamble into consideration.
    *
    * @param lengthInBytes
    * @return number of microseconds that is a duration of this event.
    */
   public int microsecondDurationWithNoSyncAndPreamble(final int lengthInBytes) {
-    return (1000 * (lengthInBytes * 8 )) / dataRateInKiloBitsPerSecond();
+    return (1000 * (lengthInBytes * 8)) / dataRateInKiloBitsPerSecond();
   }
 
   /**
@@ -93,8 +101,8 @@ public enum RadioConfiguration {
    * @return
    */
   public static RadioConfiguration valueFromPreference(final String preferenceValue) {
-    for ( RadioConfiguration rc: values() ) {
-      if ( rc.name().equals(preferenceValue) )
+    for (RadioConfiguration rc : values()) {
+      if (rc.name().equals(preferenceValue))
         return rc;
     }
     return FIFTEENFOUR;

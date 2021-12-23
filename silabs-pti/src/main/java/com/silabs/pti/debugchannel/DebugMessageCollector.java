@@ -19,11 +19,10 @@ import com.silabs.pti.adapter.IDebugMessageListener;
 import com.silabs.pti.log.PtiLog;
 
 /**
- * A connection listener that extract byte[] messages and creates
- * DebugMessage objects out of them, feeding them upwards to a listener.
+ * A connection listener that extract byte[] messages and creates DebugMessage
+ * objects out of them, feeding them upwards to a listener.
  *
- * @author Timotej
- * Created on Mar 27, 2018
+ * @author Timotej Created on Mar 27, 2018
  */
 public class DebugMessageCollector implements IConnectionListener {
 
@@ -35,8 +34,7 @@ public class DebugMessageCollector implements IConnectionListener {
   }
 
   @Override
-  public void messageReceived(final byte[] message,
-                              final long pcTime) {
+  public void messageReceived(final byte[] message, final long pcTime) {
     DebugMessage debugMessage = DebugMessage.make(originatorId, message, pcTime);
     if (debugMessage != null && listener != null) {
       try {

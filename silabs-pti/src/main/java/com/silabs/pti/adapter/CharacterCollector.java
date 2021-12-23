@@ -20,6 +20,7 @@ import com.silabs.pti.util.ICharacterListener;
  * Simple character listener that simply collects the data as UTF-8 string.
  *
  * Created on Jan 28, 2016
+ * 
  * @author timotej
  */
 public class CharacterCollector implements ICharacterListener {
@@ -28,20 +29,20 @@ public class CharacterCollector implements ICharacterListener {
 
   @Override
   public void received(final byte[] ch, final int offset, final int len) {
-    synchronized(sb) {
+    synchronized (sb) {
       sb.append(new String(ch, offset, len));
     }
   }
 
   /** Returns the collected string, assuming UTF-8. */
   public String text() {
-    synchronized(sb) {
+    synchronized (sb) {
       return sb.toString();
     }
   }
 
   public String textAndClean() {
-    synchronized(sb) {
+    synchronized (sb) {
       String text = sb.toString();
       sb.delete(0, sb.length());
       return text;
@@ -50,21 +51,21 @@ public class CharacterCollector implements ICharacterListener {
 
   /** Returns the collected lines, assuming UTF-8. */
   public String[] lines() {
-    synchronized(sb) {
+    synchronized (sb) {
       return sb.toString().split("\\r?\\n");
     }
   }
 
   /** Returns true if the collected data contains a given text. */
   public boolean contains(final String text) {
-    synchronized(sb) {
+    synchronized (sb) {
       return sb.indexOf(text) != -1;
     }
   }
 
   /** Cleans the text */
   public void clean() {
-    synchronized(sb) {
+    synchronized (sb) {
       sb.delete(0, sb.length());
     }
   }

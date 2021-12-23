@@ -5,8 +5,7 @@ package com.silabs.pti.decode;
 /**
  * This enum contains the fields and sizes for the AEM decoding.
  *
- * @author timotej
- * Created on May 26, 2021
+ * @author timotej Created on May 26, 2021
  */
 public enum AemField implements IFieldNameWithLength {
   version(2),
@@ -25,10 +24,14 @@ public enum AemField implements IFieldNameWithLength {
   currentRaw(-1);
 
   private final int length;
+
   AemField(final int length) {
     this.length = length;
   }
+
   @Override
-  public int length() { return length; }
+  public int length() {
+    return length;
+  }
 
 }

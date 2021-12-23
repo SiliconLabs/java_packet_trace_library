@@ -25,12 +25,11 @@ import com.silabs.pti.util.ICharacterListener;
 /**
  * Underlying commonality of all connections.
  *
- * This class is currently abstract, which makes it by definition evil.
- * It's following the squeeze-from-the-sides refactoring pattern, so
- * it will dissapear ultimately.
+ * This class is currently abstract, which makes it by definition evil. It's
+ * following the squeeze-from-the-sides refactoring pattern, so it will
+ * dissapear ultimately.
  *
- * @author Timotej
- * Created on Mar 27, 2018
+ * @author Timotej Created on Mar 27, 2018
  */
 abstract class BaseConnection implements IDebugConnection {
 
@@ -52,10 +51,7 @@ abstract class BaseConnection implements IDebugConnection {
 
   private final ConnectivityStats stats;
 
-
-  protected BaseConnection(final String host,
-                           final int port,
-                           final IConnectivityLogger logger) {
+  protected BaseConnection(final String host, final int port, final IConnectivityLogger logger) {
     this.host = host;
     this.port = port;
     this.logger = logger;
@@ -64,37 +60,37 @@ abstract class BaseConnection implements IDebugConnection {
 
   @Override
   public final void addCharacterListener(final ICharacterListener listener) {
-    synchronized(characterListeners) {
-      if(!characterListeners.contains(listener) )
+    synchronized (characterListeners) {
+      if (!characterListeners.contains(listener))
         characterListeners.add(listener);
     }
   }
 
   @Override
   public final void removeCharacterListener(final ICharacterListener listener) {
-    synchronized(characterListeners) {
+    synchronized (characterListeners) {
       characterListeners.remove(listener);
     }
   }
 
   @Override
   public final void addConnectionListener(final IConnectionListener listener) {
-    synchronized(connectionListeners) {
-      if(!connectionListeners.contains(listener) )
+    synchronized (connectionListeners) {
+      if (!connectionListeners.contains(listener))
         connectionListeners.add(listener);
     }
   }
 
   @Override
   public final void removeConnectionListener(final IConnectionListener listener) {
-    synchronized(connectionListeners) {
+    synchronized (connectionListeners) {
       connectionListeners.remove(listener);
     }
   }
 
   protected final void informListenersOfState(final boolean state) {
     synchronized (connectionListeners) {
-      for ( IConnectionListener l: connectionListeners ) {
+      for (IConnectionListener l : connectionListeners) {
         try {
           l.connectionStateChanged(state);
         } catch (Exception e) {
@@ -105,9 +101,9 @@ abstract class BaseConnection implements IDebugConnection {
   }
 
   /**
-   * Turns on and off framing of outgoing messages.  On by default.
+   * Turns on and off framing of outgoing messages. On by default.
    *
-   * @param on  true for on, false for off.
+   * @param on true for on, false for off.
    */
   @Override
   public final void setOutgoingFramingEnabled(final boolean on) {
@@ -128,21 +124,19 @@ abstract class BaseConnection implements IDebugConnection {
   public final IFramer outgoingFramer() {
     return outgoingFramer;
   }
+
   @Override
   public final void setConnectionEnabler(final IConnectionEnabler enabler) {
     this.connectionEnabler = enabler;
   }
-
 
   @Override
   public final void pauseFor(final int milliseconds) {
     resumeTime = System.currentTimeMillis() + milliseconds;
   }
 
-
   @Override
-  public final void setFramers(final IFramer incomingFramer,
-                               final IFramer outgoingFramer) {
+  public final void setFramers(final IFramer incomingFramer, final IFramer outgoingFramer) {
     this.incomingFramer = incomingFramer;
     this.outgoingFramer = outgoingFramer;
   }
@@ -155,14 +149,13 @@ abstract class BaseConnection implements IDebugConnection {
     logger.log(PtiSeverity.ERROR, host + ":" + port + " =>> " + message, t);
   }
 
-  protected final void processMessage(final long pcTime,
-                                      final byte[] messageBytes) {
+  protected final void processMessage(final long pcTime, final byte[] messageBytes) {
     if (messageBytes == null) {
       return;
     }
 
-    if ( resumeTime != -1 ) {
-      if ( pcTime > resumeTime ) {
+    if (resumeTime != -1) {
+      if (pcTime > resumeTime) {
         resumeTime = -1;
       } else {
         return;
@@ -170,7 +163,7 @@ abstract class BaseConnection implements IDebugConnection {
     }
 
     synchronized (connectionListeners) {
-      for ( IConnectionListener l: connectionListeners ) {
+      for (IConnectionListener l : connectionListeners) {
         try {
           l.messageReceived(messageBytes, pcTime);
         } catch (Exception e) {
@@ -181,46 +174,46 @@ abstract class BaseConnection implements IDebugConnection {
   }
 
   protected final void reportProblem(final String msg, final Exception e) {
-    if ( problemListener != null ) {
+    if (problemListener != null) {
       problemListener.reportProblem(msg, e);
     }
   }
 
-  protected final void processIncomingData(final long readTime,
-                                           final int readCount,
-                                           final byte[] readBytes) {
+  protected final void processIncomingData(final long readTime, final int readCount, final byte[] readBytes) {
 
     stats.recordData(readTime, readCount);
-    synchronized(characterListeners) {
-      for ( ICharacterListener l: characterListeners ) {
+    synchronized (characterListeners) {
+      for (ICharacterListener l : characterListeners) {
         l.received(readBytes, 0, readCount);
       }
     }
     try {
-      for ( int i=0; i<readCount; i++ ) {
+      for (int i = 0; i < readCount; i++) {
         byte[] messageBytes = incomingFramer.assembleMessage(readBytes[i]);
         if (messageBytes != null)
           processMessage(readTime, messageBytes);
       }
-    } catch(Exception e) {
+    } catch (Exception e) {
       logError("Framing error.", e);
       reportProblem("Error assembling data.", e);
     }
   }
 
   /**
-   * Sends a message to the device.  Uses the {@link IFramer#toBytes(String)}
-   * method of the current <code>IFramer</code> to
-   * convert the String argument to bytes.  Adds framing bytes unless
-   * framing has been turned off using {@link #setOutgoingFramingEnabled(boolean)}.
+   * Sends a message to the device. Uses the {@link IFramer#toBytes(String)}
+   * method of the current <code>IFramer</code> to convert the String argument to
+   * bytes. Adds framing bytes unless framing has been turned off using
+   * {@link #setOutgoingFramingEnabled(boolean)}.
    *
-   * @param message  the message to send, formatted as a String.
-   * @see            #send(byte[])
+   * @param message the message to send, formatted as a String.
+   * @see #send(byte[])
    */
   @Override
   public final void send(final String message) throws IOException {
-    if (!isConnected()) return;
-    if (message == null) return;
+    if (!isConnected())
+      return;
+    if (message == null)
+      return;
     logInfo("Sending '" + message + "'");
     send(outgoingFramer.toBytes(message));
   }

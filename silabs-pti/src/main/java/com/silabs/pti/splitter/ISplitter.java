@@ -17,37 +17,36 @@ package com.silabs.pti.splitter;
 import com.silabs.pti.util.ICharacterListener;
 
 /**
- * Implementations of this interface are able to split data into multiple 
+ * Implementations of this interface are able to split data into multiple
  * buckets.
  * 
- * Created on Mar 5, 2013 
+ * Created on Mar 5, 2013
+ * 
  * @author timotej
  */
 public interface ISplitter extends ICharacterListener {
-  
+
   /**
    * Sets a character listener for a given bucket.
    * 
    *
    * @param bucket Bucket identifier.
-   * @param l listener
+   * @param l      listener
    */
   public void setCharacterListener(int bucket, ICharacterListener l);
-  
+
   /**
    * Returns the number of buckets that this splitter splits into.
    * 
    * @return int
    */
   public int bucketCount();
-  
-  
+
   /**
-   * When there is no more input, this method flushes the given state.
-   * The current state content goes to a best guess destination, but
-   * after the flush() there is no more state allowed within the class.
+   * When there is no more input, this method flushes the given state. The current
+   * state content goes to a best guess destination, but after the flush() there
+   * is no more state allowed within the class.
    * 
    */
   public void flush();
 }
-

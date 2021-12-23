@@ -12,6 +12,7 @@
  *
  ******************************************************************************/
 package com.silabs.pti.adapter;
+
 import java.nio.charset.Charset;
 
 import org.apache.mina.core.session.IoSession;
@@ -20,7 +21,7 @@ import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.demux.DemuxingProtocolCodecFactory;
 
 public class PtiCodecFactory extends DemuxingProtocolCodecFactory {
-  
+
   private ProtocolDecoder decoder;
   private ProtocolEncoder encoder;
 

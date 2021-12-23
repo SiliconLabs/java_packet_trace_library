@@ -27,17 +27,16 @@ import com.silabs.pti.util.MiscUtil;
 /**
  * Utilities for discovery.
  *
- * @author timotej
- * Created on Jan 8, 2019
+ * @author timotej Created on Jan 8, 2019
  */
 class DiscoveryUtil {
 
-  private static byte[] broadcast = { (byte)0xFF, (byte)0xFF,
-                                      (byte)0xFF, (byte)0xFF };
+  private static byte[] broadcast = { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
   private static byte[] msg = { '*' };
   private static int count = 0;
 
-  private DiscoveryUtil() {}
+  private DiscoveryUtil() {
+  }
 
   public static int runDiscovery() {
     try {
@@ -49,11 +48,10 @@ class DiscoveryUtil {
     }
   }
 
-  private static void discoverIndividualAddress(final InetAddress localAddress,
-                                                final int durationMs) {
+  private static void discoverIndividualAddress(final InetAddress localAddress, final int durationMs) {
     String log = localAddress.getHostName();
-    try(DatagramSocket socket = new DatagramSocket(0, localAddress)) {
-      socket.setSoTimeout(durationMs/10);
+    try (DatagramSocket socket = new DatagramSocket(0, localAddress)) {
+      socket.setSoTimeout(durationMs / 10);
       DatagramPacket dp = new DatagramPacket(msg, msg.length);
       dp.setAddress(InetAddress.getByAddress(broadcast));
       dp.setPort(4920);
@@ -77,7 +75,7 @@ class DiscoveryUtil {
         } catch (SocketTimeoutException ste) {
           // Not a big deal. Keep going.
         }
-      } while ( System.currentTimeMillis() - lastDiscoverTime < durationMs );
+      } while (System.currentTimeMillis() - lastDiscoverTime < durationMs);
     } catch (Exception e) {
       System.err.println(log + ": discovery failed.");
       e.printStackTrace();
@@ -88,12 +86,14 @@ class DiscoveryUtil {
     count = 0;
     List<Thread> threads = new ArrayList<>();
     List<InetAddress> allLocalAddresses = MiscUtil.getIpAddresses();
-    for ( InetAddress localAddress: allLocalAddresses ) {
+    for (InetAddress localAddress : allLocalAddresses) {
       Runnable r = () -> discoverIndividualAddress(localAddress, durationMs);
       threads.add(new Thread(r));
     }
-    for ( Thread t: threads ) t.start();
-    for ( Thread t: threads ) t.join();
+    for (Thread t : threads)
+      t.start();
+    for (Thread t : threads)
+      t.join();
   }
 
   private static synchronized void printReply(final int ordinal, final DatagramPacket in) {

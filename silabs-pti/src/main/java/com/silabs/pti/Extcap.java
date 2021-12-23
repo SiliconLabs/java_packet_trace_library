@@ -12,21 +12,28 @@
  *
  ******************************************************************************/
 
-package com.silabs.pti.util;
+package com.silabs.pti;
 
 /**
- * If you want an object that matches one or the other string, you can use this
- * interface.
+ * When this jar file is used within wireshark, the extcap wireshark
+ * functionality will pass 'extcap' as the first argument. If that happens then
+ * we end up here.
  * 
- * Created on Mar 6, 2013
- * 
- * @author Timotej Ecimovic
+ * @author timotej
+ *
  */
-public interface ICharacterMatcher {
+public class Extcap {
 
-  /** Returns true if character ch matches this object at index */
-  public boolean isByteAt(int index, byte ch);
+  /**
+   * Execute extcap function. Args will contain 'extcap' as the first argument.
+   * 
+   * @param args
+   * @return
+   */
+  public static final int run(String[] args) {
+    String extcapLocation = System.getenv("EXTCAP_LOC");
+    System.out.println("Extcap. Log location: " + (extcapLocation == null ? "unknown (using stdout)" : extcapLocation));
+    return 0;
+  }
 
-  /** Length of the matcher */
-  public int length();
 }

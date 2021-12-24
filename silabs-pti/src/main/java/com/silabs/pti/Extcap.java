@@ -14,6 +14,15 @@
 
 package com.silabs.pti;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 /**
  * When this jar file is used within wireshark, the extcap wireshark
  * functionality will pass 'extcap' as the first argument. If that happens then
@@ -24,6 +33,13 @@ package com.silabs.pti;
  */
 public class Extcap {
 
+  private static final String EC_INTERFACES = "--extcap-interfaces";
+  
+  private File logFile = null;
+  private PrintWriter logWriter;
+  private PrintStream extcapOut;
+  private List<String> extcapArgs = new ArrayList<String>();
+  
   /**
    * Execute extcap function. Args will contain 'extcap' as the first argument.
    * 
@@ -31,9 +47,54 @@ public class Extcap {
    * @return
    */
   public static final int run(String[] args) {
-    String extcapLocation = System.getenv("EXTCAP_LOC");
-    System.out.println("Extcap. Log location: " + (extcapLocation == null ? "unknown (using stdout)" : extcapLocation));
-    return 0;
+    return new Extcap(args).run();
   }
 
+  private Extcap(String[] args) {
+    String extcapLocation = System.getenv("EXTCAP_LOC");
+    if ( extcapLocation != null ) {
+      logFile = new File(extcapLocation, "silabs-pti.log");
+    }
+    extcapOut = System.out;
+    for ( int i = 0; i<args.length; i++ ) {
+      if ( i > 0 ) {
+        extcapArgs.add(args[i]);
+      }
+    }
+  }
+  
+  private void log(String s) {
+    String d = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
+    logWriter.println(d + ": " + s);
+  }
+  
+  private void extcapPrintln(String s) {
+    log("extcap <= " + s);
+    extcapOut.println(s);
+  }
+  
+  private int run() {
+    try (PrintWriter l = (logFile != null ? new PrintWriter(new FileWriter(logFile, true), true) : new PrintWriter(System.out))) {
+      logWriter = l;
+      StringBuilder sb = new StringBuilder("extcap => ");
+      for ( String s: extcapArgs ) sb.append(" ").append(s);
+      log(sb.toString());
+      if ( extcapArgs.size() > 0 ) {
+        switch(extcapArgs.get(0)) {
+        case EC_INTERFACES:
+          return extcapInterfaces();
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error: " + e.getMessage());
+      e.printStackTrace();
+    }
+    return 0;
+  }
+  
+  private int extcapInterfaces() {
+    extcapPrintln("extcap {version=1.0}{help=http://silabs.com}");
+    extcapPrintln("interface {value=wstk1}{display=Silabs 1 display}");
+    return 0;
+  }
 }

@@ -12,10 +12,11 @@
  *
  ******************************************************************************/
 
-package com.silabs.pti;
+package com.silabs.pti.extcap;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -199,7 +200,14 @@ public class Extcap {
     String fifo = extractValueFromArg(EC_FIFO);
     String filter = extractValueFromArg(EC_CAPTURE_FILTER);
     log("capture: from " + ifc + " into " + fifo + (filter == null ? " with no filter" : (" with filter " + filter)));
-    return 0;
+    ExtcapCapture capture = new ExtcapCapture(ifc, fifo, filter);
+    try {
+      capture.capture();
+      return 0;
+    } catch (IOException ioe) {
+      log("error during capture: " + ioe.getMessage());
+      return 1;      
+    }
   }
 
   /**

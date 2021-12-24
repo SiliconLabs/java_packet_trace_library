@@ -41,6 +41,7 @@ import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.extcap.Extcap;
 import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
 import com.silabs.pti.util.LineTerminator;
@@ -66,7 +67,7 @@ public class Main {
   private final CommandLine cli;
 
   public static void main(final String[] args) {
-    if ("extcap".equals(args[0])) {
+    if (args.length > 0 && "extcap".equals(args[0])) {
       int errorCode = Extcap.run(args);
       System.exit(errorCode);
     } else {

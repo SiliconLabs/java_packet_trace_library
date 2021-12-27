@@ -5,15 +5,6 @@ plugins {
   id 'java'
 }
 
-repositories {
-  mavenCentral()
-}
-
-java {
-  withJavadocJar()
-  withSourcesJar()
-}
-
 project.ext.set('archiveName', 'silabs-pti-lib')
 project.ext.set('fatArchiveName', 'silabs-pti')
 project.ext.set('silabsPtiVersion', file('VERSION').text.trim())
@@ -28,6 +19,26 @@ project.ext.set('manifestMap', [
       'Main-Class'     : project.mainClass
     ])
 project.ext.set('wsExtcapDir', '.config/wireshark/extcap')
+
+repositories {
+  mavenCentral()
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
+dependencies {
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+  implementation 'org.apache.mina:mina-core:2.1.4'
+  implementation 'org.slf4j:slf4j-simple:1.7.26'    
+  implementation files('../external/java-pcap-1.9.9.jar')
+}
+
+test {
+    useJUnitPlatform()
+}
 
 javadocJar {
   archiveBaseName = project.archiveName
@@ -50,9 +61,9 @@ jar {
 task createBuildStamp() {
   doLast {
     def gitOutput = 'git log -1 --format=hash=%H%ndate=%cI'.execute().text
-    file('src/main/resources/build.stamp').text = """version=${project.silabsPtiVersion}
+    file('src/main/resources/build_pti.stamp').text = """version=${project.silabsPtiVersion}
 ${gitOutput}"""
-    project.logger.lifecycle('Created build.stamp.')
+    project.logger.lifecycle('Created build_pti.stamp.')
   }
 }
 tasks.processResources.dependsOn << 'createBuildStamp'
@@ -70,20 +81,9 @@ task fatJar(type: Jar) {
   with jar
 }
 
-dependencies {
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
-  implementation 'org.apache.mina:mina-core:2.1.4'
-  implementation 'org.slf4j:slf4j-simple:1.7.26'    
-  implementation files('../external/java-pcap-1.0.0.jar')
-}
-
 
 application {
   mainClass = project.mainClass
-}
-
-tasks.named('test') {
-  useJUnitPlatform()
 }
 
 task all {

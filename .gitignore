@@ -5,7 +5,7 @@
 build
 
 # Ignore build stamp that is produced by gradle
-build.stamp
+build_pti.stamp
 
 # Ignore eclipse build dir
 bin

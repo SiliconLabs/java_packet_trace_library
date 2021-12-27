@@ -230,7 +230,7 @@ public class CommandLine implements IConnectivityLogger {
     String hash = "unknown";
     String version = "unknown";
 
-    URL u = getClass().getClassLoader().getResource("build.stamp");
+    URL u = getClass().getClassLoader().getResource("build_pti.stamp");
     if (u != null) {
       Properties p = new Properties();
       try {

@@ -81,7 +81,24 @@ public class DiscoveryUtil {
     }
   }
 
-  private Map<DiscoveryKey, String> parseDiscoveryMap(final String info) {
+  /**
+   * Given the incoming datagram packet, this uses the parseDiscoveryMap(String)
+   * to parse the payload of the packet.
+   * 
+   * @param packet
+   * @return map of discovery keys.
+   */
+  public static Map<DiscoveryKey, String> parseDiscoveryMap(DatagramPacket packet) {
+    return parseDiscoveryMap(new String(packet.getData()));
+  }
+  
+  /**
+   * Given the string text from the discovery, this parses the data into a map.
+   * 
+   * @param info
+   * @return map of discovery keys
+   */
+  public static Map<DiscoveryKey, String> parseDiscoveryMap(final String info) {
     Map<DiscoveryKey, String> map = new LinkedHashMap<>();
     String [] tokens = info.split("\\n");
     outer: for ( String token: tokens ) {

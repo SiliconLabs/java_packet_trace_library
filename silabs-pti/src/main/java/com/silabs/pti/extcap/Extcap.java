@@ -19,10 +19,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import com.silabs.pti.discovery.DiscoveryKey;
+import com.silabs.pti.discovery.DiscoveryUtil;
+import com.silabs.pti.discovery.IDiscoveryListener;
 
 /**
  * When this jar file is used within wireshark, the extcap wireshark
@@ -175,7 +181,23 @@ public class Extcap implements IExtcapInterface {
    */
   private int extcapInterfaces() {
     extcapPrintln("extcap {version=1.0}{help=http://silabs.com}");
-    extcapPrintln("interface {value=wstk1}{display=WSTK Silabs 1}");
+    DiscoveryUtil.runDiscovery(new IDiscoveryListener() {
+      @Override
+      public void discovered(DatagramPacket packet) {
+        Map<DiscoveryKey, String> data = DiscoveryUtil.parseDiscoveryMap(packet);
+        String name = "Silicon Labs WSTK adapter";
+        String ip = packet.getAddress().getHostAddress();
+        if ( data.containsKey(DiscoveryKey.ADAPTER_NETIF)) {
+          ip = data.get(DiscoveryKey.ADAPTER_NETIF);
+        }
+
+        if ( data.containsKey(DiscoveryKey.ADAPTER_NICKNAME)) {
+          name = data.get(DiscoveryKey.ADAPTER_NICKNAME) + " (Silicon Labs WSTK adapter)";
+        }
+        
+        extcapPrintln("interface {value=" + ip + "}{display=" + name + "}");
+      }
+    });
     return 0;
   }
 

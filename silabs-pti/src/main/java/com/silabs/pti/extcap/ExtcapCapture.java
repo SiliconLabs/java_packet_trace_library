@@ -9,6 +9,7 @@ import com.silabs.na.pcap.Pcap;
 
 /**
  * Class that facilitates the capturing from WSTK into a pcap file.
+ * 
  * @author timotej
  *
  */
@@ -21,14 +22,25 @@ public class ExtcapCapture {
     this.fifo = fifo;
     this.filter = filter;
   }
-  
-  public void capture() throws IOException {
+
+  public void capture(IExtcapInterface ec) throws IOException {
+    ec.log("capture: start");
     try (IPcapOutput output = Pcap.openForWriting(new File(fifo))) {
       output.writeInterfaceDescriptionBlock(LinkType.ETHERNET, Pcap.RESOLUTION_MICROSECONDS);
-      for ( int i=0; i<1000; i++ ) {
-        output.writeEnhancedPacketBlock(i, i, new byte[] {1,2,3,4,5,6,7,8,9,10});
-        try { Thread.sleep(200); } catch (Exception e) {}
+      for (int i = 0; i < 1000; i++) {
+        output.writeEnhancedPacketBlock(0, 10 * i, new byte[] { (byte) i, (byte) (i + 1) });
+        try {
+          Thread.sleep(200);
+        } catch (Exception e) {
+        }
       }
+    } catch (IOException e) {
+      String msg = e.getMessage();
+      if ( !msg.equals("Broken pipe")) {
+        ec.log("capture: exception in writing pcap file: " + e.getMessage());
+      }
+    } finally {
+      ec.log("capture: stop");
     }
   }
 }

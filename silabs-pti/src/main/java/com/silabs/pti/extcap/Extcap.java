@@ -32,7 +32,7 @@ import java.util.List;
  * @author timotej
  *
  */
-public class Extcap {
+public class Extcap implements IExtcapInterface {
 
   // Commands
   private static final String EC_INTERFACES = "--extcap-interfaces";
@@ -82,7 +82,7 @@ public class Extcap {
    * This method logs to the log file, unrelated to wireshark, so you can debug what's happening.
    * @param s
    */
-  private void log(String s) {
+  public void log(String s) {
     String d = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
     logWriter.println(d + ": " + s);
   }
@@ -91,7 +91,7 @@ public class Extcap {
    * This method prints output to the wireshark extcap communication protocol.
    * @param s
    */
-  private void extcapPrintln(String s) {
+  public void extcapPrintln(String s) {
     log("extcap <           " + s);
     extcapOut.println(s);
   }
@@ -202,7 +202,7 @@ public class Extcap {
     log("capture: from " + ifc + " into " + fifo + (filter == null ? " with no filter" : (" with filter " + filter)));
     ExtcapCapture capture = new ExtcapCapture(ifc, fifo, filter);
     try {
-      capture.capture();
+      capture.capture(this);
       return 0;
     } catch (IOException ioe) {
       log("error during capture: " + ioe.getMessage());

@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-package com.silabs.pti;
+package com.silabs.pti.discovery;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -21,7 +21,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.silabs.pti.discovery.DiscoveryProtocol;
 import com.silabs.pti.util.MiscUtil;
 
 /**
@@ -29,18 +28,17 @@ import com.silabs.pti.util.MiscUtil;
  *
  * @author timotej Created on Jan 8, 2019
  */
-class DiscoveryUtil {
+public class DiscoveryUtil {
 
   private static byte[] broadcast = { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
-  private static byte[] msg = { '*' };
   private static int count = 0;
 
   private DiscoveryUtil() {
   }
 
-  public static int runDiscovery() {
+  public static int runDiscovery(IDiscoveryListener listener) {
     try {
-      discover(500);
+      discover(500, listener);
       return 0;
     } catch (Exception e) {
       e.printStackTrace();
@@ -48,11 +46,11 @@ class DiscoveryUtil {
     }
   }
 
-  private static void discoverIndividualAddress(final InetAddress localAddress, final int durationMs) {
+  private static void discoverIndividualAddress(final InetAddress localAddress, final int durationMs, IDiscoveryListener listener) {
     String log = localAddress.getHostName();
     try (DatagramSocket socket = new DatagramSocket(0, localAddress)) {
       socket.setSoTimeout(durationMs / 10);
-      DatagramPacket dp = new DatagramPacket(msg, msg.length);
+      DatagramPacket dp = new DatagramPacket(DiscoveryProtocol.DISCOVERY_MESSAGE, DiscoveryProtocol.DISCOVERY_MESSAGE.length);
       dp.setAddress(InetAddress.getByAddress(broadcast));
       dp.setPort(4920);
       try {
@@ -71,7 +69,7 @@ class DiscoveryUtil {
           socket.receive(incoming);
           count++;
           lastDiscoverTime = System.currentTimeMillis();
-          printReply(count, incoming);
+          listener.discovery(count, incoming);
         } catch (SocketTimeoutException ste) {
           // Not a big deal. Keep going.
         }
@@ -82,12 +80,12 @@ class DiscoveryUtil {
     }
   }
 
-  private static void discover(final int durationMs) throws Exception {
+  private static void discover(final int durationMs, IDiscoveryListener listener) throws Exception {
     count = 0;
     List<Thread> threads = new ArrayList<>();
     List<InetAddress> allLocalAddresses = MiscUtil.getIpAddresses();
     for (InetAddress localAddress : allLocalAddresses) {
-      Runnable r = () -> discoverIndividualAddress(localAddress, durationMs);
+      Runnable r = () -> discoverIndividualAddress(localAddress, durationMs, listener);
       threads.add(new Thread(r));
     }
     for (Thread t : threads)
@@ -96,7 +94,4 @@ class DiscoveryUtil {
       t.join();
   }
 
-  private static synchronized void printReply(final int ordinal, final DatagramPacket in) {
-    System.out.println(ordinal + ": " + in.getAddress().getHostName() + " (" + in.getAddress().getHostAddress() + ")");
-  }
 }

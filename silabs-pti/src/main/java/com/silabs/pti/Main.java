@@ -41,6 +41,8 @@ import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.discovery.DiscoveryUtil;
+import com.silabs.pti.discovery.PrintingDiscoveryListener;
 import com.silabs.pti.extcap.Extcap;
 import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
@@ -102,7 +104,7 @@ public class Main {
       if (cli.isInteractive()) {
         return Interactive.runInteractive(cli, timeSync);
       } else if (cli.isDiscovery()) {
-        return DiscoveryUtil.runDiscovery();
+        return DiscoveryUtil.runDiscovery(new PrintingDiscoveryListener());
       } else {
         switch (cli.port()) {
         case TEST:

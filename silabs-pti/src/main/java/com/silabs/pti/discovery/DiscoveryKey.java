@@ -11,27 +11,38 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+
 package com.silabs.pti.discovery;
 
-import java.net.DatagramPacket;
-
 /**
- * Simplest implementation of discovery listener, that simply prints out the
- * data.
+ * Standard keys sent by the discovery.
  *
  * @author timotej
- *
+ * Created on Dec 28, 2021
  */
-public class PrintingDiscoveryListener implements IDiscoveryListener {
+public enum DiscoveryKey {
+  ADAPTER_TYPE("adapter type"),
+  ADAPTER_NICKNAME("adapter nick"),
+  ADAPTER_JLINK_SN("adapter jlinksn"),
+  ADAPTER_NETIF("adapter netif"),
+  BOARD("board"),
+  BOARD_LIST("board list"),
+  CONNECTION_STATUS("connection status"),
+  CONNECTION_ADDRESS("connection address"),
+  CONNECTION_TIME("connection time"),
+  DEBUG_MODE("debug mode"),
+  DISCOVERY_KEY("discovery key"),
+  FIRMWARE_TYPE("firmware type"),
+  FIRMWARE_VERSION("firmware version"),
+  NODE_TYPE("node type"),
+  NODE_EUI("node EUI");
 
-  private int ordinal = 0;
-
-  @Override
-  public void discovered(final DatagramPacket in) {
-    System.out.println("=== ADAPTER " + ordinal + " ===");
-    ordinal++;
-    byte[] data = in.getData();
-    System.out.println(new String(data));
+  private String key;
+  DiscoveryKey(final String key) {
+    this.key = key;
   }
 
+  public String key() {
+    return key;
+  }
 }

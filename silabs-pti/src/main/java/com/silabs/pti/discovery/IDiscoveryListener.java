@@ -18,15 +18,14 @@ import java.net.DatagramPacket;
 
 /**
  * Classes of this type can listen to discovery replies.
- * 
+ *
  * @author timotej
  */
 public interface IDiscoveryListener {
   /**
    * This method is called when discovery happens.
-   * 
-   * @param ordinal
-   * @param in
+   *
+   * @param packet Incoming datagram packet.
    */
-  public void discovery(int ordinal, DatagramPacket in);
+  public void discovered(DatagramPacket packet);
 }

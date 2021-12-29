@@ -40,6 +40,7 @@ import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.util.MiscUtil;
 import com.silabs.pti.util.LineTerminator;
 

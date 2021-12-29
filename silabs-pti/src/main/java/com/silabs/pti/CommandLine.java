@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
+import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.MiscUtil;
 
@@ -286,7 +287,7 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + ADMIN + " - connect to admin port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL0 + " - connect to serial0 port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
-    System.out.println("  " + FORMAT + "[" + FileFormat.formatsAsString() + "] - specify a format for output.");
+    System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION
@@ -297,7 +298,7 @@ public class CommandLine implements IConnectivityLogger {
         + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
     System.out.println("\nFile formats:\n");
     for (FileFormat ff : FileFormat.values()) {
-      System.out.println("  " + ff.name().toLowerCase() + " - " + ff.description());
+      System.out.println("  " + ff.name().toLowerCase() + " - " + ff.format().description());
     }
     System.out.println("\nExamples:\n");
     System.out.println("  'java -jar " + filename

@@ -22,8 +22,8 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -36,7 +36,6 @@ import com.silabs.pti.adapter.CharacterCollector;
 import com.silabs.pti.adapter.ConnectionSessionHandler;
 import com.silabs.pti.adapter.DebugChannelFramer;
 import com.silabs.pti.adapter.IConnection;
-import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
@@ -44,6 +43,7 @@ import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.discovery.DiscoveryUtil;
 import com.silabs.pti.discovery.PrintingDiscoveryListener;
 import com.silabs.pti.extcap.Extcap;
+import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
 import com.silabs.pti.util.LineTerminator;
@@ -274,7 +274,7 @@ public class Main {
    */
   private void configOutputFiles(final CommandLine cli,
                                  final String outFilename,
-                                 final HashMap<String, PrintStream> output) throws FileNotFoundException {
+                                 final Map<String, PrintStream> output) throws FileNotFoundException {
     if (outFilename != null && !outFilename.isEmpty()) {
       if (cli.testMode()) {
         for (Integer port : cli.testPort()) {
@@ -346,72 +346,5 @@ public class Main {
 
     c.close();
     return 0;
-  }
-}
-
-class SimpleConnectionListener implements IConnectionListener {
-  private final FileFormat ff;
-  private final String originator;
-  private volatile int nReceived = 0;
-  private final HashMap<String, PrintStream> output;
-  private long t0 = -1;
-  private boolean readAsText = true;
-  private final TimeSynchronizer timeSync;
-
-  // typically we capture from N devices and write to 1 single file.
-  // this ensures us to only write 1 header entry.
-  private static HashSet<PrintStream> writtenHeader = new HashSet<>();
-
-  public SimpleConnectionListener(final FileFormat ff,
-                                  final String originator,
-                                  final HashMap<String, PrintStream> output,
-                                  final boolean readText,
-                                  final TimeSynchronizer timeSynchronizer) {
-    this.ff = ff;
-    this.originator = originator;
-    this.output = output;
-    this.readAsText = readText;
-    this.timeSync = timeSynchronizer;
-
-    // write header
-    if (!readAsText) {
-      output.forEach((k, v) -> {
-        if (!writtenHeader.contains(v)) {
-          if (ff.header() != null) {
-            v.println(ff.header());
-          }
-          writtenHeader.add(v);
-        }
-      });
-    }
-  }
-
-  public int count() {
-    return nReceived;
-  }
-
-  @Override
-  public void messageReceived(final byte[] message, final long pcTime) {
-    PrintStream outputStream = output.get(originator);
-    if (!readAsText) {
-      long t;
-      if (t0 == -1) {
-        t0 = System.currentTimeMillis();
-        t = 0;
-      } else {
-        t = System.currentTimeMillis() - t0;
-      }
-      String formatted = ff.processDebugMsg(t, originator, message, timeSync);
-      if (formatted != null) {
-        outputStream.println(formatted);
-        nReceived++;
-      }
-    } else {
-      outputStream.println(new String(message));
-    }
-  }
-
-  @Override
-  public void connectionStateChanged(final boolean isConnected) {
   }
 }

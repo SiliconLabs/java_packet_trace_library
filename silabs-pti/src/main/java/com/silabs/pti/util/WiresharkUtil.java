@@ -14,7 +14,6 @@
 
 package com.silabs.pti.util;
 
-import com.silabs.pti.FileFormat;
 import com.silabs.pti.debugchannel.EventType;
 
 /**
@@ -33,7 +32,7 @@ public class WiresharkUtil {
    * @param data Data.
    */
   public static String printText2Pcap(final long time, final byte[] data) {
-    byte[] prefix = FileFormat.PCAP_DATA_PREFIX;
+    byte[] prefix = WiresharkUtil.PCAP_DATA_PREFIX;
     long useconds = time % 1000000;
     long seconds = (time / 1000000);
     long minutes = seconds / 60;
@@ -101,5 +100,8 @@ public class WiresharkUtil {
     }
     return drops;
   }
+
+  public static byte[] PCAP_DATA_PREFIX = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  (byte) 0x80, (byte) 0x9A };
 
 }

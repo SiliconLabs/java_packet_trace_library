@@ -41,6 +41,11 @@ public class LogFileFormat implements IPtiFileFormat {
   public boolean isUsingRawBytes() {
     return false;
   }
+  
+  @Override
+  public boolean isUsingDebugMessages() {
+    return true;
+  }
 
   @Override
   public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {

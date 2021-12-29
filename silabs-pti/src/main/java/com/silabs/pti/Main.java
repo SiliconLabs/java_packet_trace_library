@@ -40,12 +40,13 @@ import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.adapter.UnframedConnectionListener;
+import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.discovery.DiscoveryUtil;
 import com.silabs.pti.discovery.PrintingDiscoveryListener;
 import com.silabs.pti.extcap.Extcap;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiLog;
-import com.silabs.pti.util.ICharacterListener;
 import com.silabs.pti.util.LineTerminator;
 
 /**
@@ -126,41 +127,20 @@ public class Main {
     }
   }
 
-  private static class DumpListener implements ICharacterListener {
-    private final FileOutputStream fos;
-
-    public DumpListener(final File f) throws IOException {
-      fos = new FileOutputStream(f);
-    }
-
-    @Override
-    public void received(final byte[] ch, final int offset, final int len) {
-      try {
-        fos.write(ch, offset, len);
-      } catch (IOException ioe) {
-        PtiLog.error("Could not write data.", ioe);
-      }
-    }
-
-    public void close() throws IOException {
-      fos.close();
-    }
-  }
-
   private int runCapture(final CommandLine cli, final TimeSynchronizer timeSynchronizer) throws IOException {
     // inits
     final String outputFilename = cli.output();
-    DumpListener dl = null;
+    UnframedConnectionListener dl = null;
     HashMap<String, PrintStream> output = new HashMap<>();
     HashMap<String, List<IConnection>> connections = new HashMap<>();
 
     // connections / attaching listeners
-    if (cli.fileFormat() == FileFormat.DUMP) {
+    if (!cli.fileFormat().format().isUsingDebugMessages()) {
       if (outputFilename == null) {
         throw new IOException("Need to specify a file with DUMP file format.");
       }
 
-      dl = new DumpListener(new File(outputFilename));
+      dl = new UnframedConnectionListener(new File(outputFilename), cli.fileFormat().format());
 
       for (String host : cli.hostnames()) {
         IConnection c = Adapter.createConnection(connector, host, AdapterPort.DEBUG.defaultPort(), cli);
@@ -184,11 +164,11 @@ public class Main {
           IFramer asciiFramer = new AsciiFramer();
           testPortConnection.connect();
           testPortConnection.setFramers(asciiFramer, asciiFramer);
-          testPortConnection.addConnectionListener(new SimpleConnectionListener(cli.fileFormat(),
-                                                                                originator,
-                                                                                output,
-                                                                                true,
-                                                                                timeSynchronizer));
+          testPortConnection.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
+                                                                                      originator,
+                                                                                      output,
+                                                                                      true,
+                                                                                      timeSynchronizer));
           debugConnections.add(testPortConnection);
         }
       } else {
@@ -202,11 +182,11 @@ public class Main {
           IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.connect();
           debug.setFramers(debugChannelFramer, debugChannelFramer);
-          debug.addConnectionListener(new SimpleConnectionListener(cli.fileFormat(),
-                                                                   ip,
-                                                                   output,
-                                                                   false,
-                                                                   timeSynchronizer));
+          debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
+                                                                         ip,
+                                                                         output,
+                                                                         false,
+                                                                         timeSynchronizer));
           debugConnections.add(debug);
 
           // Admin connection / configure Time Server

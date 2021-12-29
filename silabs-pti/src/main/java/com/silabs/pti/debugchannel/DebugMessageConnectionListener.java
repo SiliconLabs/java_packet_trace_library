@@ -1,4 +1,17 @@
-package com.silabs.pti;
+/*******************************************************************************
+ * # License
+ * Copyright 2020 Silicon Laboratories Inc. www.silabs.com
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
+package com.silabs.pti.debugchannel;
 
 import java.io.PrintStream;
 import java.util.HashSet;
@@ -6,14 +19,18 @@ import java.util.Map;
 
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.TimeSynchronizer;
-import com.silabs.pti.debugchannel.DebugMessage;
-import com.silabs.pti.debugchannel.DebugMessageType;
-import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.format.IPtiFileFormat;
 
-class SimpleConnectionListener implements IConnectionListener {
-  private final FileFormat ff;
+/**
+ * Connection listener, responsible for forwarding the data into the appropriate
+ * formater.
+ * 
+ * @author timotej
+ *
+ */
+public class DebugMessageConnectionListener implements IConnectionListener {
+  private final IPtiFileFormat ptiFormat;
   private final String originator;
   private volatile int nReceived = 0;
   private final Map<String, PrintStream> output;
@@ -25,12 +42,12 @@ class SimpleConnectionListener implements IConnectionListener {
   // this ensures us to only write 1 header entry.
   private static HashSet<PrintStream> writtenHeader = new HashSet<>();
 
-  public SimpleConnectionListener(final FileFormat ff,
-                                  final String originator,
-                                  final Map<String, PrintStream> output,
-                                  final boolean readText,
-                                  final TimeSynchronizer timeSynchronizer) {
-    this.ff = ff;
+  public DebugMessageConnectionListener(final IPtiFileFormat format,
+                                        final String originator,
+                                        final Map<String, PrintStream> output,
+                                        final boolean readText,
+                                        final TimeSynchronizer timeSynchronizer) {
+    this.ptiFormat = format;
     this.originator = originator;
     this.output = output;
     this.readAsText = readText;
@@ -40,8 +57,8 @@ class SimpleConnectionListener implements IConnectionListener {
     if (!readAsText) {
       output.forEach((k, v) -> {
         if (!writtenHeader.contains(v)) {
-          if (ff.format().header() != null) {
-            v.println(ff.format().header());
+          if (ptiFormat.header() != null) {
+            v.println(ptiFormat.header());
           }
           writtenHeader.add(v);
         }
@@ -64,7 +81,7 @@ class SimpleConnectionListener implements IConnectionListener {
       } else {
         t = System.currentTimeMillis() - t0;
       }
-      String formatted = processDebugMsg(t, originator, message, timeSync, ff.format());
+      String formatted = processDebugMsg(t, originator, message, timeSync, ptiFormat);
       if (formatted != null) {
         outputStream.println(formatted);
         nReceived++;
@@ -100,7 +117,7 @@ class SimpleConnectionListener implements IConnectionListener {
     EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));
 
     // time correction
-    SimpleConnectionListener.timeCorrection(timeSync, dm);
+    DebugMessageConnectionListener.timeCorrection(timeSync, dm);
     return format.formatDebugMessage(originator, dm, type);
   }
 }

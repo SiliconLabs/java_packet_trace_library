@@ -44,6 +44,11 @@ public class TextFileFormat implements IPtiFileFormat {
   }
   
   @Override
+  public boolean isUsingDebugMessages() {
+    return true;
+  }
+  
+  @Override
   public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
     if (!type.isPacket())
       return null;

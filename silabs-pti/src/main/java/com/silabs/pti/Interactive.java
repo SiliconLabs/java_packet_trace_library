@@ -40,6 +40,7 @@ import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.util.MiscUtil;
 import com.silabs.pti.util.LineTerminator;
@@ -52,14 +53,14 @@ import com.silabs.pti.util.LineTerminator;
 public class Interactive {
 
   private String prompt = "$";
-  private FileFormat format = FileFormat.LOG;
+  private FileFormat formatType = FileFormat.LOG;
   private File out = new File("packet-trace.log");
   private IConnection debugConnection = null, cliConnection = null;
   private String host = null;
   private HashMap<String, PrintStream> cliOutStream = null;
   private HashMap<String, PrintStream> captureStream = null;
-  private SimpleConnectionListener connectionListener = null;
-  private SimpleConnectionListener cliConnectionListener = null;
+  private DebugMessageConnectionListener connectionListener = null;
+  private DebugMessageConnectionListener cliConnectionListener = null;
 
   private String setChannelCommand = "set_channel";
   private String radioOnCommand = "set_mac_idle_mode";
@@ -210,7 +211,7 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      cliConnectionListener = new SimpleConnectionListener(FileFormat.RAW, host, cliOutStream, true, timeSync);
+      cliConnectionListener = new DebugMessageConnectionListener(FileFormat.RAW.format(), host, cliOutStream, true, timeSync);
       cliConnection = Adapter.createConnection(host, cliPort, logger);
       cliConnection.connect();
       cliConnection.addConnectionListener(cliConnectionListener);
@@ -411,7 +412,7 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      connectionListener = new SimpleConnectionListener(format, host, captureStream, false, timeSync);
+      connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureStream, false, timeSync);
       debugConnection.addConnectionListener(connectionListener);
     } else {
       try {
@@ -430,14 +431,14 @@ public class Interactive {
   public void format(final String... s) {
     if (s.length > 0) {
       try {
-        format = FileFormat.valueOf(s[0].toUpperCase());
-        if (format == null)
+        formatType = FileFormat.valueOf(s[0].toUpperCase());
+        if (formatType == null)
           throw new Exception();
       } catch (Exception e) {
         System.err.println("Invalid file format: " + s[0]);
       }
     }
-    System.out.println("Current format: " + format.name());
+    System.out.println("Current format: " + formatType.name());
   }
 
 }

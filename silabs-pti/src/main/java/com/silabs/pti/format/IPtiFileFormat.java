@@ -40,9 +40,21 @@ public interface IPtiFileFormat {
    * Formatter returns true if the raw bytes are used, or false
    * if the debug message is used after time synchronization.
    * 
+   * Note that deframing still happens. Deframing is controlled
+   * via isUsingDebugMessages().
+   * 
    * @return true or false.
    */
   public boolean isUsingRawBytes();
+  
+  /**
+   * If this is set to false, then no deframing happens on the
+   * input data, and they are just passed to the formater as they come,
+   * simply a sequence of bytes.
+   * 
+   * @return true or false.
+   */
+  public boolean isUsingDebugMessages();
   
   /**
    * If isUsingRawBytes() return false, then this method is called

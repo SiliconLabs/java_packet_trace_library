@@ -40,6 +40,11 @@ public class DumpFileFormat implements IPtiFileFormat {
   }
   
   @Override
+  public boolean isUsingDebugMessages() {
+    return false;
+  }
+  
+  @Override
   public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
     return null;
   }

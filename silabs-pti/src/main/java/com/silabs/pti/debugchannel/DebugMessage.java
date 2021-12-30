@@ -15,7 +15,6 @@
 package com.silabs.pti.debugchannel;
 
 import com.silabs.na.pcap.util.ByteArrayUtil;
-import com.silabs.pti.util.MiscUtil;
 
 /**
  * A parsed Ember node debug message. Contains fields for the name of the host

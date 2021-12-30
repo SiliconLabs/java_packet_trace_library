@@ -15,7 +15,6 @@
 package com.silabs.pti.adapter;
 
 import com.silabs.na.pcap.util.ByteArrayUtil;
-import com.silabs.pti.util.MiscUtil;
 
 /**
  * Base class for binary framing schemes. Implements the string conversion

@@ -18,7 +18,6 @@ import java.io.IOException;
 import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
-import com.silabs.pti.util.MiscUtil;
 
 /**
  * Output a text file with raw debug messages, one per line, in a hex mode.

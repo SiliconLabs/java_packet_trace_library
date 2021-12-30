@@ -14,13 +14,13 @@
 package com.silabs.pti.debugchannel;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Map;
 
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.TimeSynchronizer;
-import com.silabs.pti.format.IPtiFileFormat;
+import com.silabs.pti.format.IDebugChannelExportFormat;
+import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.log.PtiLog;
 
 /**
@@ -31,20 +31,20 @@ import com.silabs.pti.log.PtiLog;
  *
  */
 public class DebugMessageConnectionListener implements IConnectionListener {
-  private final IPtiFileFormat ptiFormat;
+  private final IDebugChannelExportFormat ptiFormat;
   private final String originator;
   private volatile int nReceived = 0;
-  private final Map<String, PrintStream> output;
+  private final Map<String, IDebugChannelExportOutput> output;
   private long t0 = -1;
   private final TimeSynchronizer timeSync;
 
   // typically we capture from N devices and write to 1 single file.
   // this ensures us to only write 1 header entry.
-  private static HashSet<PrintStream> writtenHeader = new HashSet<>();
+  private static HashSet<IDebugChannelExportOutput> writtenHeader = new HashSet<>();
 
-  public DebugMessageConnectionListener(final IPtiFileFormat format,
+  public DebugMessageConnectionListener(final IDebugChannelExportFormat format,
                                         final String originator,
-                                        final Map<String, PrintStream> output,
+                                        final Map<String, IDebugChannelExportOutput> output,
                                         final TimeSynchronizer timeSynchronizer) {
     this.ptiFormat = format;
     this.originator = originator;
@@ -54,7 +54,11 @@ public class DebugMessageConnectionListener implements IConnectionListener {
     // write header
     output.forEach((k, v) -> {
       if (!writtenHeader.contains(v)) {
-        ptiFormat.writeHeader(v);
+        try {
+          ptiFormat.writeHeader(v);
+        } catch (final IOException ioe) {
+          PtiLog.error("Could not write header.", ioe);
+        }
         writtenHeader.add(v);
       }
     });
@@ -67,7 +71,7 @@ public class DebugMessageConnectionListener implements IConnectionListener {
 
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
-    final PrintStream outputStream = output.get(originator);
+    final IDebugChannelExportOutput outputStream = output.get(originator);
     long t;
     if (t0 == -1) {
       t0 = System.currentTimeMillis();
@@ -97,12 +101,12 @@ public class DebugMessageConnectionListener implements IConnectionListener {
    *
    * @return String
    */
-  private static boolean processDebugMsg(final PrintStream outputStream,
+  private static boolean processDebugMsg(final IDebugChannelExportOutput outputStream,
                                          final long timeMs,
                                          final String originator,
                                          final byte[] bytes,
                                          final TimeSynchronizer timeSync,
-                                         final IPtiFileFormat format) throws IOException {
+                                         final IDebugChannelExportFormat format) throws IOException {
     if (format.isUsingRawBytes()) {
       return format.formatRawBytes(outputStream, bytes, 0, bytes.length);
     } else {

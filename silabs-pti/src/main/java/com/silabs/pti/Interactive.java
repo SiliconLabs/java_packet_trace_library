@@ -15,10 +15,8 @@
 package com.silabs.pti;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,6 +42,10 @@ import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.format.FileFormat;
+import com.silabs.pti.format.FileOutput;
+import com.silabs.pti.format.IDebugChannelExportOutput;
+import com.silabs.pti.format.PrintStreamOutput;
+import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.LineTerminator;
 import com.silabs.pti.util.MiscUtil;
 
@@ -59,8 +61,8 @@ public class Interactive {
   private File out = new File("packet-trace.log");
   private IConnection debugConnection = null, cliConnection = null;
   private String host = null;
-  private HashMap<String, PrintStream> cliOutStream = null;
-  private HashMap<String, PrintStream> captureStream = null;
+  private HashMap<String, IDebugChannelExportOutput> cliOutStream = null;
+  private HashMap<String, IDebugChannelExportOutput> captureStream = null;
   private IConnectionListener connectionListener = null;
   private IConnectionListener cliConnectionListener = null;
 
@@ -94,15 +96,15 @@ public class Interactive {
    */
   public static int runInteractive(final CommandLine cli, final TimeSynchronizer timeSync) {
     @SuppressWarnings("resource")
-    Scanner scanner = new Scanner(new InputStreamReader(System.in));
+    final Scanner scanner = new Scanner(new InputStreamReader(System.in));
     System.out.println("Entering interactive mode. Use 'help' to get help.");
-    Interactive in = new Interactive(cli, timeSync);
+    final Interactive in = new Interactive(cli, timeSync);
     while (true) {
       in.printPompt();
       String cmd;
       try {
         cmd = scanner.nextLine();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         cmd = null;
       }
       if (cmd == null)
@@ -117,8 +119,8 @@ public class Interactive {
   }
 
   private List<Method> getCliMethods() {
-    List<Method> l = new ArrayList<>();
-    for (Method m : getClass().getMethods()) {
+    final List<Method> l = new ArrayList<>();
+    for (final Method m : getClass().getMethods()) {
       if (m.getAnnotation(Cli.class) != null)
         l.add(m);
     }
@@ -135,11 +137,11 @@ public class Interactive {
 
   // Returns true if quit
   private boolean runCommand(final String cmd) {
-    String[] cmdLine = cmd.split("\\s++");
+    final String[] cmdLine = cmd.split("\\s++");
     if (cmdLine.length == 0)
       return false;
 
-    for (Method m : getCliMethods()) {
+    for (final Method m : getCliMethods()) {
       if (cmdLine[0].equalsIgnoreCase(m.getName())) {
         Object[] args = null;
         if (cmdLine.length > 1) {
@@ -149,13 +151,13 @@ public class Interactive {
           if (m.isVarArgs() && args == null) {
             args = new Object[] { new String[0] };
           }
-          Object ret = m.invoke(this, args);
+          final Object ret = m.invoke(this, args);
           if (ret instanceof Boolean) {
             return ((Boolean) ret).booleanValue();
           } else {
             return false;
           }
-        } catch (Exception e) {
+        } catch (final Exception e) {
           System.out.println("Error executing: " + cmd);
           e.printStackTrace();
           return false;
@@ -174,10 +176,10 @@ public class Interactive {
   @Cli(help = "Prints out the available commands")
   public void help() {
     System.out.println("Valid commands:");
-    Map<String, String> cmdsHelp = new LinkedHashMap<>();
-    for (Method m : getCliMethods()) {
-      Cli c = m.getAnnotation(Cli.class);
-      StringBuilder help = new StringBuilder();
+    final Map<String, String> cmdsHelp = new LinkedHashMap<>();
+    for (final Method m : getCliMethods()) {
+      final Cli c = m.getAnnotation(Cli.class);
+      final StringBuilder help = new StringBuilder();
       help.append("  ");
       help.append(m.getName().toLowerCase());
       if (c.args() != null && c.args().length() > 0) {
@@ -187,14 +189,14 @@ public class Interactive {
     }
 
     int n = 0;
-    for (String key : cmdsHelp.keySet()) {
+    for (final String key : cmdsHelp.keySet()) {
       if (key.length() > n)
         n = key.length();
     }
-    for (String key : cmdsHelp.keySet()) {
+    for (final String key : cmdsHelp.keySet()) {
       System.out.print("  ");
       System.out.print(key);
-      String help = cmdsHelp.get(key);
+      final String help = cmdsHelp.get(key);
       if (help != null && help.length() > 0) {
         for (int i = 0; i < n - key.length(); i++)
           System.out.print(" ");
@@ -207,8 +209,8 @@ public class Interactive {
   private void cli(final String s) throws IOException {
     if (cliConnection == null || !cliConnection.isConnected()) {
       try {
-        cliOutStream.put(host, System.out);
-      } catch (Exception e) {
+        cliOutStream.put(host, new PrintStreamOutput(System.out));
+      } catch (final Exception e) {
         System.err.println("Could not open file: " + out.getAbsolutePath());
         e.printStackTrace();
         return;
@@ -224,7 +226,7 @@ public class Interactive {
   @Cli(help = "Turns the radio on or off", args = "{ on | off }")
   public void radio(final String... ch) {
     if (ch.length > 0) {
-      boolean on = ch[0].equalsIgnoreCase("on") || ch[0].equalsIgnoreCase("1");
+      final boolean on = ch[0].equalsIgnoreCase("on") || ch[0].equalsIgnoreCase("1");
       String cmd;
       if (on) {
         cmd = (radioOnCommand + " 1");
@@ -233,7 +235,7 @@ public class Interactive {
       }
       try {
         cli(cmd);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.out.println("ERROR: could not toggle radio: " + e.getMessage());
         e.printStackTrace();
       }
@@ -245,7 +247,7 @@ public class Interactive {
     if (ch.length > 0) {
       try {
         cli(setChannelCommand + " " + ch[0]);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.out.println("ERROR: could not set channel: " + e.getMessage());
         e.printStackTrace();
       }
@@ -261,7 +263,7 @@ public class Interactive {
           cliConnection.close();
           cliConnection = null;
         }
-      } catch (NumberFormatException nfe) {
+      } catch (final NumberFormatException nfe) {
         System.out.println("Invalid format: " + port[0]);
       }
     }
@@ -302,12 +304,12 @@ public class Interactive {
   public void send(final String... ch) {
     if (ch.length > 0) {
       String command = "";
-      for (String a : ch) {
+      for (final String a : ch) {
         command = command + a + " ";
       }
       try {
         cli(command);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.out.println("ERROR: could not send command: " + command);
         e.printStackTrace();
       }
@@ -327,7 +329,7 @@ public class Interactive {
     debugConnection = Adapter.createConnection(host, AdapterPort.DEBUG.defaultPort(), logger);
     try {
       debugConnection.connect();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.out.println("ERROR: could not connect: " + e.getMessage());
       e.printStackTrace();
     }
@@ -349,7 +351,7 @@ public class Interactive {
     debugConnection = Adapter.createConnection(host, AdapterPort.DEBUG.defaultPort(), logger);
     try {
       debugConnection.connect();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.out.println("ERROR: could not connect: " + e.getMessage());
       e.printStackTrace();
     }
@@ -363,7 +365,13 @@ public class Interactive {
         connectionListener = null;
       }
       if (captureStream != null) {
-        captureStream.forEach((k, v) -> v.close());
+        captureStream.forEach((k, v) -> {
+          try {
+            v.close();
+          } catch (final IOException ioe) {
+            PtiLog.error("Could not close output.", ioe);
+          }
+        });
         captureStream.clear();
         captureStream = null;
       }
@@ -405,11 +413,11 @@ public class Interactive {
         System.err.println("Already capturing.");
         return;
       }
-      IFramer f = new DebugChannelFramer(true);
+      final IFramer f = new DebugChannelFramer(true);
       debugConnection.setFramers(f, f);
       try {
-        captureStream.put(host, new PrintStream(new FileOutputStream(out, true)));
-      } catch (Exception e) {
+        captureStream.put(host, new FileOutput(out, true));
+      } catch (final Exception e) {
         System.err.println("Could not open file: " + out.getAbsolutePath());
         e.printStackTrace();
         return;
@@ -418,12 +426,18 @@ public class Interactive {
       debugConnection.addConnectionListener(connectionListener);
     } else {
       try {
-        captureStream.forEach((k, v) -> v.close());
+        captureStream.forEach((k, v) -> {
+          try {
+            v.close();
+          } catch (final IOException ioe) {
+            PtiLog.error("Error closing output.", ioe);
+          }
+        });
         captureStream.clear();
         captureStream = null;
         debugConnection.removeConnectionListener(connectionListener);
         connectionListener = null;
-      } catch (NullPointerException e) {
+      } catch (final NullPointerException e) {
         System.err.println("Stream already closed");
       }
     }
@@ -436,7 +450,7 @@ public class Interactive {
         formatType = FileFormat.valueOf(s[0].toUpperCase());
         if (formatType == null)
           throw new Exception();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.err.println("Invalid file format: " + s[0]);
       }
     }

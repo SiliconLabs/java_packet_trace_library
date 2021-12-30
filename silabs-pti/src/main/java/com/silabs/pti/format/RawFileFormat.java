@@ -14,9 +14,8 @@
 package com.silabs.pti.format;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
+import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.util.MiscUtil;
@@ -27,13 +26,13 @@ import com.silabs.pti.util.MiscUtil;
  * @author timotej
  *
  */
-public class RawFileFormat implements IPtiFileFormat {
+public class RawFileFormat implements IDebugChannelExportFormat {
 
   private static String RAW_PREFIX = "[ ";
   private static String RAW_SUFFIX = " ]";
 
   @Override
-  public void writeHeader(final PrintStream printStream) {
+  public void writeHeader(final IDebugChannelExportOutput out) {
   }
 
   @Override
@@ -52,7 +51,7 @@ public class RawFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final PrintStream printStream,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -60,15 +59,17 @@ public class RawFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public boolean
-         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
-    final String x = RAW_PREFIX + MiscUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
-    printStream.println(x);
+  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+                                final byte[] rawBytes,
+                                final int offset,
+                                final int length) throws IOException {
+    final String x = RAW_PREFIX + ByteArrayUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
+    out.println(x);
     return true;
   }
 
   @Override
-  public void writeRawUnframedData(final OutputStream out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

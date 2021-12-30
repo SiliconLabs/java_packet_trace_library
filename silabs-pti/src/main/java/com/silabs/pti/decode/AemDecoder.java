@@ -2,6 +2,7 @@
 
 package com.silabs.pti.decode;
 
+import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.util.MiscUtil;
 
 /**
@@ -25,7 +26,8 @@ public class AemDecoder {
 
   // Little endian int decoding.
   private int decode(final int length) {
-    int val = MiscUtil.byteArrayToInt(contents, index, length, false);
+    final int offset = index;
+    int val = ByteArrayUtil.byteArrayToInt(contents, offset, length, false);
     index += length;
     return val;
   }

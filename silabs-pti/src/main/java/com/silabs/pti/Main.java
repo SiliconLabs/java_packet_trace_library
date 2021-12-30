@@ -16,9 +16,7 @@ package com.silabs.pti;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +44,8 @@ import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.discovery.DiscoveryUtil;
 import com.silabs.pti.discovery.PrintingDiscoveryListener;
 import com.silabs.pti.extcap.Extcap;
+import com.silabs.pti.format.IDebugChannelExportOutput;
+import com.silabs.pti.format.PrintStreamOutput;
 import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.LineTerminator;
 
@@ -131,7 +131,7 @@ public class Main {
     // inits
     final String outputFilename = cli.output();
     UnframedConnectionListener dl = null;
-    HashMap<String, PrintStream> output = new HashMap<>();
+    HashMap<String, IDebugChannelExportOutput> output = new HashMap<>();
     final HashMap<String, List<IConnection>> connections = new HashMap<>();
 
     // connections / attaching listeners
@@ -231,7 +231,14 @@ public class Main {
     }
 
     if (output != null) {
-      output.forEach((k, v) -> v.close());
+      output.forEach((k, v) -> {
+        try {
+          v.close();
+        } catch (final IOException ioe) {
+          // Not much we can do...
+          PtiLog.error("Error closing stream.", ioe);
+        }
+      });
       output.clear();
       output = null;
     }
@@ -249,27 +256,27 @@ public class Main {
    */
   private void configOutputFiles(final CommandLine cli,
                                  final String outFilename,
-                                 final Map<String, PrintStream> output) throws FileNotFoundException {
+                                 final Map<String, IDebugChannelExportOutput> output) throws IOException {
     if (outFilename != null && !outFilename.isEmpty()) {
       if (cli.testMode()) {
         for (final Integer port : cli.testPort()) {
           final String f = makeCaptureFilenames(outFilename, port.toString());
-          output.put("localhost:" + port, new PrintStream(new FileOutputStream(new File(f))));
+          output.put("localhost:" + port, new PrintStreamOutput(new File(f)));
         }
       } else if (cli.discreteNodeCapture()) {
         for (final String ip : cli.hostnames()) {
           final String f = makeCaptureFilenames(outFilename, ip.toString());
-          output.put(ip, new PrintStream(new FileOutputStream(new File(f))));
+          output.put(ip, new PrintStreamOutput(new File(f)));
         }
       } else { // capture all node traffic into 1 file.
-        final PrintStream printStream = new PrintStream(new FileOutputStream(new File(cli.output())));
+        final IDebugChannelExportOutput printStream = new PrintStreamOutput(new File(cli.output()));
         for (final String ip : cli.hostnames()) {
           output.put(ip, printStream);
         }
       }
     } else {
       for (final String name : cli.hostnames()) {
-        output.put(name, System.out);
+        output.put(name, new PrintStreamOutput(System.out));
       }
     }
   }

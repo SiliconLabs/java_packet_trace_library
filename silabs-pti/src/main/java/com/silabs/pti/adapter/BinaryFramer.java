@@ -14,6 +14,7 @@
 
 package com.silabs.pti.adapter;
 
+import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.util.MiscUtil;
 
 /**
@@ -60,7 +61,8 @@ public class BinaryFramer implements IFramer {
 
   @Override
   public String toString(byte[] message) {
-    return MiscUtil.formatByteArray(message, true);
+    final byte[] raw = message;
+    return ByteArrayUtil.formatByteArray(raw, true);
   }
 
 }

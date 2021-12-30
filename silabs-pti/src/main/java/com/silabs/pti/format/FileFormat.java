@@ -28,9 +28,9 @@ public enum FileFormat {
   AEM(new AemFileFormat()),
   TEXT(new TextFileFormat());
 
-  private IPtiFileFormat format;
+  private IDebugChannelExportFormat format;
 
-  private FileFormat(final IPtiFileFormat format) {
+  private FileFormat(final IDebugChannelExportFormat format) {
     this.format = format;
   }
 
@@ -39,7 +39,7 @@ public enum FileFormat {
    * 
    * @return IPtiFileFormat implementation.
    */
-  public IPtiFileFormat format() {
+  public IDebugChannelExportFormat format() {
     return format;
   }
 

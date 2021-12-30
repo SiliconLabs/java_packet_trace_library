@@ -14,10 +14,11 @@
 package com.silabs.pti.adapter;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.silabs.pti.format.IPtiFileFormat;
+import com.silabs.pti.format.FileOutput;
+import com.silabs.pti.format.IDebugChannelExportFormat;
+import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
 
@@ -29,24 +30,24 @@ import com.silabs.pti.util.ICharacterListener;
  *
  */
 public class UnframedConnectionListener implements ICharacterListener {
-  private final FileOutputStream fos;
-  private final IPtiFileFormat fileFormat;
+  private final IDebugChannelExportOutput out;
+  private final IDebugChannelExportFormat fileFormat;
 
-  public UnframedConnectionListener(final File f, final IPtiFileFormat format) throws IOException {
-    fos = new FileOutputStream(f);
+  public UnframedConnectionListener(final File f, final IDebugChannelExportFormat format) throws IOException {
+    out = new FileOutput(f);
     this.fileFormat = format;
   }
 
   @Override
   public void received(final byte[] ch, final int offset, final int len) {
     try {
-      fileFormat.writeRawUnframedData(fos, ch, offset, len);
+      fileFormat.writeRawUnframedData(out, ch, offset, len);
     } catch (final IOException ioe) {
       PtiLog.error("Could not write data.", ioe);
     }
   }
 
   public void close() throws IOException {
-    fos.close();
+    out.close();
   }
 }

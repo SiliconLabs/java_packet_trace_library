@@ -14,8 +14,6 @@
 package com.silabs.pti.format;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -28,10 +26,10 @@ import com.silabs.pti.util.WiresharkUtil;
  * @author timotej
  *
  */
-public class TextFileFormat implements IPtiFileFormat {
+public class TextFileFormat implements IDebugChannelExportFormat {
 
   @Override
-  public void writeHeader(final PrintStream printStream) {
+  public void writeHeader(final IDebugChannelExportOutput out) {
   }
 
   @Override
@@ -50,10 +48,10 @@ public class TextFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final PrintStream printStream,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
                                     final String originator,
                                     final DebugMessage dm,
-                                    final EventType type) {
+                                    final EventType type) throws IOException {
     if (!type.isPacket())
       return false;
 
@@ -66,19 +64,20 @@ public class TextFileFormat implements IPtiFileFormat {
         return false; // Nothing we can do. There is no data left.
       contents = Arrays.copyOfRange(contents, drops[0], contents.length - drops[1]);
     }
-    final String x = WiresharkUtil.printText2Pcap(timeMs, contents);
-    printStream.println(x);
+    out.println(WiresharkUtil.printText2Pcap(timeMs, contents));
     return true;
   }
 
   @Override
-  public boolean
-         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+                                final byte[] rawBytes,
+                                final int offset,
+                                final int length) {
     return false;
   }
 
   @Override
-  public void writeRawUnframedData(final OutputStream out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

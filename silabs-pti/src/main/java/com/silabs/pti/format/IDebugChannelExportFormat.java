@@ -14,8 +14,6 @@
 package com.silabs.pti.format;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
@@ -26,7 +24,7 @@ import com.silabs.pti.debugchannel.EventType;
  * @author timotej
  *
  */
-public interface IPtiFileFormat {
+public interface IDebugChannelExportFormat {
 
   /**
    * Returns human readable description of this file format.
@@ -37,10 +35,8 @@ public interface IPtiFileFormat {
 
   /**
    * Returns the header that is put on the top of the text file.
-   * 
-   * @return
    */
-  public void writeHeader(PrintStream printStream);
+  public void writeHeader(IDebugChannelExportOutput out) throws IOException;
 
   /**
    * Formatter returns true if the raw bytes are used, or false if the debug
@@ -68,7 +64,7 @@ public interface IPtiFileFormat {
    * 
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatDebugMessage(PrintStream printStream,
+  public boolean formatDebugMessage(IDebugChannelExportOutput out,
                                     String originator,
                                     DebugMessage dm,
                                     EventType type) throws IOException;
@@ -79,7 +75,8 @@ public interface IPtiFileFormat {
    * 
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatRawBytes(PrintStream printStream, byte[] rawBytes, int offset, int length) throws IOException;
+  public boolean
+         formatRawBytes(IDebugChannelExportOutput out, byte[] rawBytes, int offset, int length) throws IOException;
 
   /**
    * If this format is NOT using debug messages, then this method is called for
@@ -91,5 +88,8 @@ public interface IPtiFileFormat {
    * @param length
    * @throws IOException
    */
-  public void writeRawUnframedData(OutputStream out, byte[] rawBytes, int offset, int length) throws IOException;
+  public void writeRawUnframedData(IDebugChannelExportOutput out,
+                                   byte[] rawBytes,
+                                   int offset,
+                                   int length) throws IOException;
 }

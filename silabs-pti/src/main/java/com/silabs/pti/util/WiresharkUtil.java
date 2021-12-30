@@ -14,6 +14,7 @@
 
 package com.silabs.pti.util;
 
+import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.EventType;
 
 /**
@@ -37,14 +38,15 @@ public class WiresharkUtil {
     long seconds = (time / 1000000);
     long minutes = seconds / 60;
     long hours = minutes / 60;
+    final byte[] raw = prefix;
 
     return String.format("%02d:%02d:%02d.%06d 000000 %s %s",
                          hours,
                          minutes % 60,
                          seconds % 60,
                          useconds,
-                         MiscUtil.formatByteArray(prefix),
-                         MiscUtil.formatByteArray(data));
+                         ByteArrayUtil.formatByteArray(raw),
+                         ByteArrayUtil.formatByteArray(data));
 
   }
 

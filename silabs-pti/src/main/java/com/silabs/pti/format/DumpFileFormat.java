@@ -14,8 +14,6 @@
 package com.silabs.pti.format;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
@@ -26,10 +24,10 @@ import com.silabs.pti.debugchannel.EventType;
  * @author timotej
  *
  */
-public class DumpFileFormat implements IPtiFileFormat {
+public class DumpFileFormat implements IDebugChannelExportFormat {
 
   @Override
-  public void writeHeader(final PrintStream printStream) {
+  public void writeHeader(final IDebugChannelExportOutput out) {
   }
 
   @Override
@@ -48,7 +46,7 @@ public class DumpFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public void writeRawUnframedData(final OutputStream out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {
@@ -56,7 +54,7 @@ public class DumpFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final PrintStream printStream,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -64,8 +62,10 @@ public class DumpFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public final boolean
-         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+  public final boolean formatRawBytes(final IDebugChannelExportOutput out,
+                                      final byte[] rawBytes,
+                                      final int offset,
+                                      final int length) {
     return false;
   }
 }

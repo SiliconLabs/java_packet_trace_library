@@ -14,6 +14,7 @@
 
 package com.silabs.pti.debugchannel;
 
+import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.util.MiscUtil;
 
 /**
@@ -255,13 +256,14 @@ public class DebugMessage {
    * is raw[startIndex + length - 1].
    */
   private static long bytesToLong(final byte[] raw, final int startIndex, final int length) {
-    return MiscUtil.byteArrayToLong(raw, startIndex, length, false);
+    return ByteArrayUtil.byteArrayToLong(raw, startIndex, length, false);
   }
 
   @Override
   public String toString() {
+    final byte[] raw = contents;
     return "[" + originatorId + " " + networkTime + " " + getTypeName(debugType) + "] ["
-        + MiscUtil.formatByteArray(contents, true) + "]";
+        + ByteArrayUtil.formatByteArray(raw, true) + "]";
   }
 
 }

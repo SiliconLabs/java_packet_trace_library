@@ -14,8 +14,6 @@
 package com.silabs.pti.format;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
@@ -27,11 +25,11 @@ import com.silabs.pti.decode.AemSample;
  * 
  * @author timotej
  */
-public class AemFileFormat implements IPtiFileFormat {
+public class AemFileFormat implements IDebugChannelExportFormat {
 
   @Override
-  public void writeHeader(final PrintStream printStream) {
-    printStream.println("#     Time    Voltage    Current");
+  public void writeHeader(final IDebugChannelExportOutput out) throws IOException {
+    out.println("#     Time    Voltage    Current");
   }
 
   @Override
@@ -50,10 +48,10 @@ public class AemFileFormat implements IPtiFileFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final PrintStream printStream,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
                                     final String originator,
                                     final DebugMessage dm,
-                                    final EventType type) {
+                                    final EventType type) throws IOException {
     if (!type.isAem())
       return false;
 
@@ -67,18 +65,20 @@ public class AemFileFormat implements IPtiFileFormat {
       sb.append(String.format("%s%10d %10f %10f", sep, as.timestamp(), as.voltage(), as.current()));
       sep = "\n";
     }
-    printStream.println(sb.toString());
+    out.println(sb.toString());
     return true;
   }
 
   @Override
-  public boolean
-         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+                                final byte[] rawBytes,
+                                final int offset,
+                                final int length) {
     return false;
   }
 
   @Override
-  public void writeRawUnframedData(final OutputStream out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

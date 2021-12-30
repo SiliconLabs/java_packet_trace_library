@@ -13,6 +13,10 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.debugchannel.PtiUtilities;
@@ -28,8 +32,8 @@ import com.silabs.pti.util.MiscUtil;
 public class LogFileFormat implements IPtiFileFormat {
 
   @Override
-  public String header() {
-    return PtiUtilities.ISD_LOG_HEADER;
+  public void writeHeader(final PrintStream printStream) {
+    printStream.println(PtiUtilities.ISD_LOG_HEADER);
   }
 
   @Override
@@ -41,33 +45,36 @@ public class LogFileFormat implements IPtiFileFormat {
   public boolean isUsingRawBytes() {
     return false;
   }
-  
+
   @Override
   public boolean isUsingDebugMessages() {
     return true;
   }
 
   @Override
-  public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
-    byte[] contents = dm.contents();
-    return "[" 
-           + dm.networkTime() 
-           + " " 
-           + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length) 
-           + " "
-           + type.value() 
-           + " " 
-           + type.name() 
-           + "] [" 
-           + originator 
-           + "] [" 
-           + MiscUtil.formatByteArray(dm.contents()) 
-           + "]";
-
+  public boolean formatDebugMessage(final PrintStream printStream,
+                                    final String originator,
+                                    final DebugMessage dm,
+                                    final EventType type) {
+    final byte[] contents = dm.contents();
+    final String x = "[" + dm.networkTime() + " " + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length)
+        + " " + type.value() + " " + type.name() + "] [" + originator + "] [" + MiscUtil.formatByteArray(dm.contents())
+        + "]";
+    printStream.println(x);
+    return true;
   }
 
   @Override
-  public String formatRawBytes(byte[] rawBytes, int offset, int length) {
-    return null;
+  public boolean
+         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+    return false;
   }
+
+  @Override
+  public void writeRawUnframedData(final OutputStream out,
+                                   final byte[] rawBytes,
+                                   final int offset,
+                                   final int length) throws IOException {
+  }
+
 }

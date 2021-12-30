@@ -13,6 +13,10 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.decode.AemDecoder;
@@ -26,10 +30,10 @@ import com.silabs.pti.decode.AemSample;
 public class AemFileFormat implements IPtiFileFormat {
 
   @Override
-  public String header() {
-    return "#     Time    Voltage    Current";
+  public void writeHeader(final PrintStream printStream) {
+    printStream.println("#     Time    Voltage    Current");
   }
-  
+
   @Override
   public String description() {
     return "All packets but AEM data are ignored, and AEM data is written as data file, with time, voltage and current in each line.";
@@ -39,32 +43,44 @@ public class AemFileFormat implements IPtiFileFormat {
   public boolean isUsingRawBytes() {
     return false;
   }
-  
+
   @Override
   public boolean isUsingDebugMessages() {
     return true;
   }
-  
-  @Override
-  public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
-    if (!type.isAem())
-      return null;
 
-    long microSecondTime = dm.networkTime();
-    byte[] contents = dm.contents();
-    AemDecoder ad = new AemDecoder(microSecondTime, contents);
+  @Override
+  public boolean formatDebugMessage(final PrintStream printStream,
+                                    final String originator,
+                                    final DebugMessage dm,
+                                    final EventType type) {
+    if (!type.isAem())
+      return false;
+
+    final long microSecondTime = dm.networkTime();
+    final byte[] contents = dm.contents();
+    final AemDecoder ad = new AemDecoder(microSecondTime, contents);
     AemSample as;
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     String sep = "";
     while ((as = ad.nextSample()) != null) {
       sb.append(String.format("%s%10d %10f %10f", sep, as.timestamp(), as.voltage(), as.current()));
       sep = "\n";
     }
-    return sb.toString();
+    printStream.println(sb.toString());
+    return true;
   }
-  
+
   @Override
-  public String formatRawBytes(byte[] rawBytes, int offset, int length) {
-    return null;
+  public boolean
+         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+    return false;
+  }
+
+  @Override
+  public void writeRawUnframedData(final OutputStream out,
+                                   final byte[] rawBytes,
+                                   final int offset,
+                                   final int length) throws IOException {
   }
 }

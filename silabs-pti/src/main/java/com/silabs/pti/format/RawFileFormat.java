@@ -13,6 +13,10 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.util.MiscUtil;
@@ -29,32 +33,45 @@ public class RawFileFormat implements IPtiFileFormat {
   private static String RAW_SUFFIX = " ]";
 
   @Override
-  public String header() {
-    return null;
+  public void writeHeader(final PrintStream printStream) {
   }
 
   @Override
   public String description() {
     return "Raw bytes of deframed debug messages, one message per line.";
   }
-  
+
   @Override
   public boolean isUsingRawBytes() {
     return true;
   }
-  
+
   @Override
   public boolean isUsingDebugMessages() {
     return true;
   }
-  
+
   @Override
-  public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
-    return null;
+  public boolean formatDebugMessage(final PrintStream printStream,
+                                    final String originator,
+                                    final DebugMessage dm,
+                                    final EventType type) {
+    return false;
   }
-  
+
   @Override
-  public String formatRawBytes(byte[] rawBytes, int offset, int length) {
-    return RAW_PREFIX + MiscUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
+  public boolean
+         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+    final String x = RAW_PREFIX + MiscUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
+    printStream.println(x);
+    return true;
   }
+
+  @Override
+  public void writeRawUnframedData(final OutputStream out,
+                                   final byte[] rawBytes,
+                                   final int offset,
+                                   final int length) throws IOException {
+  }
+
 }

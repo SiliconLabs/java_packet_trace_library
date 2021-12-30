@@ -37,13 +37,15 @@ import com.silabs.pti.adapter.Adapter;
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.DebugChannelFramer;
 import com.silabs.pti.adapter.IConnection;
+import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
+import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.format.FileFormat;
-import com.silabs.pti.util.MiscUtil;
 import com.silabs.pti.util.LineTerminator;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * Class that drives the command line.
@@ -59,8 +61,8 @@ public class Interactive {
   private String host = null;
   private HashMap<String, PrintStream> cliOutStream = null;
   private HashMap<String, PrintStream> captureStream = null;
-  private DebugMessageConnectionListener connectionListener = null;
-  private DebugMessageConnectionListener cliConnectionListener = null;
+  private IConnectionListener connectionListener = null;
+  private IConnectionListener cliConnectionListener = null;
 
   private String setChannelCommand = "set_channel";
   private String radioOnCommand = "set_mac_idle_mode";
@@ -211,7 +213,7 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      cliConnectionListener = new DebugMessageConnectionListener(FileFormat.RAW.format(), host, cliOutStream, true, timeSync);
+      cliConnectionListener = new TextConnectionListener(host, cliOutStream);
       cliConnection = Adapter.createConnection(host, cliPort, logger);
       cliConnection.connect();
       cliConnection.addConnectionListener(cliConnectionListener);
@@ -412,7 +414,7 @@ public class Interactive {
         e.printStackTrace();
         return;
       }
-      connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureStream, false, timeSync);
+      connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureStream, timeSync);
       debugConnection.addConnectionListener(connectionListener);
     } else {
       try {

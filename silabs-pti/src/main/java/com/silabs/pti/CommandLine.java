@@ -82,15 +82,15 @@ public class CommandLine implements IConnectivityLogger {
   private int exitCode = -1;
 
   public CommandLine(final String[] args) {
-    for (String arg : args) {
+    for (final String arg : args) {
       if ("-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg)) {
         usage(0);
         return;
       }
 
       if (arg.startsWith(IP)) {
-        String ipField = arg.substring(IP.length());
-        List<String> ipAddresses = getIpAddresses(ipField);
+        final String ipField = arg.substring(IP.length());
+        final List<String> ipAddresses = getIpAddresses(ipField);
 
         if (ipAddresses.size() > 0) {
           hostnames = ipAddresses;
@@ -104,14 +104,14 @@ public class CommandLine implements IConnectivityLogger {
       } else if (arg.startsWith(TIME_LIMIT)) {
         try {
           timeLimitMs = MiscUtil.parseInt(arg.substring(TIME_LIMIT.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
       } else if (arg.startsWith(DELAY)) {
         try {
           delayMs = MiscUtil.parseInt(arg.substring(DELAY.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
@@ -122,12 +122,12 @@ public class CommandLine implements IConnectivityLogger {
       } else if (arg.startsWith(SERIAL1)) {
         port = AdapterPort.SERIAL1;
       } else if (arg.startsWith(FORMAT)) {
-        String fmt = arg.substring(FORMAT.length());
+        final String fmt = arg.substring(FORMAT.length());
         try {
           fileFormat = FileFormat.valueOf(fmt.toUpperCase());
           if (fileFormat == null)
             throw new Exception();
-        } catch (Exception e) {
+        } catch (final Exception e) {
           System.err.println("Invalid file format: " + fmt);
           usage(1);
           return;
@@ -143,14 +143,14 @@ public class CommandLine implements IConnectivityLogger {
       } else if (arg.startsWith(DRIFT_CORRECTION_THRESHOLD)) {
         try {
           driftCorrectionThreshold = MiscUtil.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
       } else if (arg.startsWith(ZERO_TIME_THRESHOLD)) {
         try {
           zeroTimeThreshold = MiscUtil.parseInt(arg.substring(ZERO_TIME_THRESHOLD.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
@@ -160,10 +160,10 @@ public class CommandLine implements IConnectivityLogger {
         testMode = true;
         port = AdapterPort.TEST;
         try {
-          String argStr = arg.substring(TEST_PORT.length());
-          String[] ports = argStr.replaceAll(" ", "").split(",");
+          final String argStr = arg.substring(TEST_PORT.length());
+          final String[] ports = argStr.replaceAll(" ", "").split(",");
           testPort = Arrays.asList(ports).stream().map(x -> Integer.parseInt(x)).collect(Collectors.toList());
-        } catch (Exception e) {
+        } catch (final Exception e) {
           usage(1);
         }
       } else {
@@ -206,7 +206,7 @@ public class CommandLine implements IConnectivityLogger {
   }
 
   private List<String> getIpAddresses(final String path) {
-    List<String> ips = new ArrayList<>();
+    final List<String> ips = new ArrayList<>();
 
     try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
       String line = reader.readLine();
@@ -221,7 +221,7 @@ public class CommandLine implements IConnectivityLogger {
         line = reader.readLine();
       }
       reader.close();
-    } catch (IOException e) {
+    } catch (final IOException e) {
     }
     return ips;
   }
@@ -231,9 +231,9 @@ public class CommandLine implements IConnectivityLogger {
     String hash = "unknown";
     String version = "unknown";
 
-    URL u = getClass().getClassLoader().getResource("build_pti.stamp");
+    final URL u = getClass().getClassLoader().getResource("build_pti.stamp");
     if (u != null) {
-      Properties p = new Properties();
+      final Properties p = new Properties();
       try {
         try (InputStream is = u.openStream()) {
           p.load(is);
@@ -241,7 +241,7 @@ public class CommandLine implements IConnectivityLogger {
         date = p.getProperty("date");
         hash = p.getProperty("hash");
         version = p.getProperty("version");
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.err.println("Error reading build information.");
       }
     }
@@ -257,12 +257,12 @@ public class CommandLine implements IConnectivityLogger {
    */
   private String filename() {
     try {
-      URL location = Main.class.getProtectionDomain().getCodeSource().getLocation();
+      final URL location = Main.class.getProtectionDomain().getCodeSource().getLocation();
       String file = location.getFile();
       file = file.substring(0, file.lastIndexOf('!'));
-      String[] split = file.split("[//\\\\]");
+      final String[] split = file.split("[//\\\\]");
       return split[split.length - 1];
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return "";
     }
   }
@@ -271,7 +271,7 @@ public class CommandLine implements IConnectivityLogger {
    * Prints usage and exits with a given exit code.
    */
   public void usage(final int exitCode) {
-    String filename = filename();
+    final String filename = filename();
     System.out.println("Usage: java -jar " + filename + " [ARGUMENTS] [COMMANDS]");
     System.out.println("\nMandatory arguments:\n");
     System.out.println("  " + IP
@@ -297,7 +297,7 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + DISCRETE_NODE_CAPTURE
         + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
     System.out.println("\nFile formats:\n");
-    for (FileFormat ff : FileFormat.values()) {
+    for (final FileFormat ff : FileFormat.values()) {
       System.out.println("  " + ff.name().toLowerCase() + " - " + ff.format().description());
     }
     System.out.println("\nExamples:\n");
@@ -370,14 +370,14 @@ public class CommandLine implements IConnectivityLogger {
 
   public boolean discreteNodeCapture() {
     return discreteNodeCapture;
-  };
+  }
 
   public List<Integer> testPort() {
     return testPort;
-  };
+  }
 
   public boolean testMode() {
     return testMode;
-  };
+  }
 
 }

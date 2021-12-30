@@ -13,6 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -28,45 +31,57 @@ import com.silabs.pti.util.WiresharkUtil;
 public class TextFileFormat implements IPtiFileFormat {
 
   @Override
-  public String header() {
-    return null;
+  public void writeHeader(final PrintStream printStream) {
   }
 
   @Override
   public String description() {
-    // TODO Auto-generated method stub
     return "Text file format that can be used with wireshark by running through 'text2pcap -q -t %H:%M:%S. <FILENAME>'";
   }
-  
+
   @Override
   public boolean isUsingRawBytes() {
     return false;
   }
-  
+
   @Override
   public boolean isUsingDebugMessages() {
     return true;
   }
-  
+
   @Override
-  public String formatDebugMessage(String originator, DebugMessage dm, EventType type) {
+  public boolean formatDebugMessage(final PrintStream printStream,
+                                    final String originator,
+                                    final DebugMessage dm,
+                                    final EventType type) {
     if (!type.isPacket())
-      return null;
+      return false;
 
     // Text2pcap
-    long timeMs = dm.networkTime();
+    final long timeMs = dm.networkTime();
     byte[] contents = dm.contents();
-    int[] drops = WiresharkUtil.dropBytesFromBeginningEnd(type);
+    final int[] drops = WiresharkUtil.dropBytesFromBeginningEnd(type);
     if (drops[0] != 0 || drops[1] != 0) {
       if (drops[0] + drops[1] >= contents.length)
-        return null; // Nothing we can do. There is no data left.
+        return false; // Nothing we can do. There is no data left.
       contents = Arrays.copyOfRange(contents, drops[0], contents.length - drops[1]);
     }
-    return WiresharkUtil.printText2Pcap(timeMs, contents);
+    final String x = WiresharkUtil.printText2Pcap(timeMs, contents);
+    printStream.println(x);
+    return true;
   }
-  
+
   @Override
-  public String formatRawBytes(byte[] rawBytes, int offset, int length) {
-    return null;
+  public boolean
+         formatRawBytes(final PrintStream printStream, final byte[] rawBytes, final int offset, final int length) {
+    return false;
   }
+
+  @Override
+  public void writeRawUnframedData(final OutputStream out,
+                                   final byte[] rawBytes,
+                                   final int offset,
+                                   final int length) throws IOException {
+  }
+
 }

@@ -13,14 +13,15 @@
  ******************************************************************************/
 package com.silabs.pti.debugchannel;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Map;
 
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.TimeSynchronizer;
-import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.format.IPtiFileFormat;
+import com.silabs.pti.log.PtiLog;
 
 /**
  * Connection listener, responsible for forwarding the data into the appropriate
@@ -35,7 +36,6 @@ public class DebugMessageConnectionListener implements IConnectionListener {
   private volatile int nReceived = 0;
   private final Map<String, PrintStream> output;
   private long t0 = -1;
-  private boolean readAsText = true;
   private final TimeSynchronizer timeSync;
 
   // typically we capture from N devices and write to 1 single file.
@@ -45,49 +45,41 @@ public class DebugMessageConnectionListener implements IConnectionListener {
   public DebugMessageConnectionListener(final IPtiFileFormat format,
                                         final String originator,
                                         final Map<String, PrintStream> output,
-                                        final boolean readText,
                                         final TimeSynchronizer timeSynchronizer) {
     this.ptiFormat = format;
     this.originator = originator;
     this.output = output;
-    this.readAsText = readText;
     this.timeSync = timeSynchronizer;
 
     // write header
-    if (!readAsText) {
-      output.forEach((k, v) -> {
-        if (!writtenHeader.contains(v)) {
-          if (ptiFormat.header() != null) {
-            v.println(ptiFormat.header());
-          }
-          writtenHeader.add(v);
-        }
-      });
-    }
+    output.forEach((k, v) -> {
+      if (!writtenHeader.contains(v)) {
+        ptiFormat.writeHeader(v);
+        writtenHeader.add(v);
+      }
+    });
   }
 
+  @Override
   public int count() {
     return nReceived;
   }
 
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
-    PrintStream outputStream = output.get(originator);
-    if (!readAsText) {
-      long t;
-      if (t0 == -1) {
-        t0 = System.currentTimeMillis();
-        t = 0;
-      } else {
-        t = System.currentTimeMillis() - t0;
-      }
-      String formatted = processDebugMsg(t, originator, message, timeSync, ptiFormat);
-      if (formatted != null) {
-        outputStream.println(formatted);
-        nReceived++;
-      }
+    final PrintStream outputStream = output.get(originator);
+    long t;
+    if (t0 == -1) {
+      t0 = System.currentTimeMillis();
+      t = 0;
     } else {
-      outputStream.println(new String(message));
+      t = System.currentTimeMillis() - t0;
+    }
+    try {
+      if (processDebugMsg(outputStream, t, originator, message, timeSync, ptiFormat))
+        nReceived++;
+    } catch (final IOException ioe) {
+      PtiLog.error("Can't write output file", ioe);
     }
   }
 
@@ -96,7 +88,7 @@ public class DebugMessageConnectionListener implements IConnectionListener {
   }
 
   private static void timeCorrection(final TimeSynchronizer timeSync, final DebugMessage message) {
-    long actualTime = timeSync.synchronizedTime(message.originatorId(), message.networkTime());
+    final long actualTime = timeSync.synchronizedTime(message.originatorId(), message.networkTime());
     message.setNetworkTime(actualTime);
   }
 
@@ -105,19 +97,20 @@ public class DebugMessageConnectionListener implements IConnectionListener {
    *
    * @return String
    */
-  private static String processDebugMsg(final long timeMs,
-                                        final String originator,
-                                        final byte[] bytes,
-                                        final TimeSynchronizer timeSync,
-                                        IPtiFileFormat format) {
-    if (format.isUsingRawBytes())
-      return format.formatRawBytes(bytes, 0, bytes.length);
-
-    DebugMessage dm = DebugMessage.make("", bytes, timeMs);
-    EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));
-
-    // time correction
-    DebugMessageConnectionListener.timeCorrection(timeSync, dm);
-    return format.formatDebugMessage(originator, dm, type);
+  private static boolean processDebugMsg(final PrintStream outputStream,
+                                         final long timeMs,
+                                         final String originator,
+                                         final byte[] bytes,
+                                         final TimeSynchronizer timeSync,
+                                         final IPtiFileFormat format) throws IOException {
+    if (format.isUsingRawBytes()) {
+      return format.formatRawBytes(outputStream, bytes, 0, bytes.length);
+    } else {
+      final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
+      final EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));
+      // time correction
+      DebugMessageConnectionListener.timeCorrection(timeSync, dm);
+      return format.formatDebugMessage(outputStream, originator, dm, type);
+    }
   }
 }

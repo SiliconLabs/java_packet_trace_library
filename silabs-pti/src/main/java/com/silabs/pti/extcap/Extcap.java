@@ -88,6 +88,7 @@ public class Extcap implements IExtcapInterface {
    * This method logs to the log file, unrelated to wireshark, so you can debug what's happening.
    * @param s
    */
+  @Override
   public void log(String s) {
     String d = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
     logWriter.println(d + ": " + s);
@@ -97,6 +98,7 @@ public class Extcap implements IExtcapInterface {
    * This method prints output to the wireshark extcap communication protocol.
    * @param s
    */
+  @Override
   public void extcapPrintln(String s) {
     log("extcap <           " + s);
     extcapOut.println(s);

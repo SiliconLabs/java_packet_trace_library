@@ -30,10 +30,12 @@ public class PtiCodecFactory extends DemuxingProtocolCodecFactory {
     encoder = new PtiProtocolEncoder(charset);
   }
 
+  @Override
   public ProtocolEncoder getEncoder(IoSession ioSession) throws Exception {
     return encoder;
   }
 
+  @Override
   public ProtocolDecoder getDecoder(IoSession ioSession) throws Exception {
     return decoder;
   }

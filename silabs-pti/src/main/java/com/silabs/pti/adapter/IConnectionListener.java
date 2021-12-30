@@ -45,5 +45,11 @@ public interface IConnectionListener {
    *
    */
   public void connectionStateChanged(boolean isConnected);
+  
+  /**
+   * Total count of messages received.
+   * @return
+   */
+  public int count();
 
 }

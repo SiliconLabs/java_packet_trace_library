@@ -22,16 +22,17 @@ import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.ICharacterListener;
 
 /**
- * Simple character listener that simply writes out the bytes as they are received.
+ * Simple character listener that simply writes out the bytes as they are
+ * received.
  * 
  * @author timotej
  *
  */
 public class UnframedConnectionListener implements ICharacterListener {
   private final FileOutputStream fos;
-  private IPtiFileFormat fileFormat;
+  private final IPtiFileFormat fileFormat;
 
-  public UnframedConnectionListener(final File f, IPtiFileFormat format) throws IOException {
+  public UnframedConnectionListener(final File f, final IPtiFileFormat format) throws IOException {
     fos = new FileOutputStream(f);
     this.fileFormat = format;
   }
@@ -39,8 +40,8 @@ public class UnframedConnectionListener implements ICharacterListener {
   @Override
   public void received(final byte[] ch, final int offset, final int len) {
     try {
-      fos.write(ch, offset, len);
-    } catch (IOException ioe) {
+      fileFormat.writeRawUnframedData(fos, ch, offset, len);
+    } catch (final IOException ioe) {
       PtiLog.error("Could not write data.", ioe);
     }
   }

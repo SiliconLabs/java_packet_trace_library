@@ -82,7 +82,7 @@ public class ExpectConnection {
    * @see #expect(String, String)
    */
   public String expect(final String message, final String regex, final int timeout, final boolean collect) {
-    ExpectResponse r = expect(message, regex, timeout);
+    final ExpectResponse r = expect(message, regex, timeout);
     if (r.succeeded())
       if (collect)
         return r.collectedOutput();
@@ -117,9 +117,9 @@ public class ExpectConnection {
     }
 
     // Initialize.
-    IConnectionListener listener = new ExpectListener(this);
-    long startTime = System.currentTimeMillis();
-    int waitTime = timeout - (int) (System.currentTimeMillis() - startTime);
+    final IConnectionListener listener = new ExpectListener(this);
+    final long startTime = System.currentTimeMillis();
+    final int waitTime = timeout - (int) (System.currentTimeMillis() - startTime);
     if (regex != null)
       pattern = Pattern.compile("(?sm).*^(" + regex + ")$.*");
     else
@@ -135,9 +135,9 @@ public class ExpectConnection {
         connection.send(message);
         expectMonitor.wait(waitTime);
       }
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       // Hmmm? Why do we do nothing here?
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       // Hmmm? Why do we do nothing here?
     } finally {
       connection.removeConnectionListener(listener);
@@ -188,9 +188,11 @@ public class ExpectConnection {
 
 class ExpectListener implements IConnectionListener {
   private ExpectConnection expect = null;
+  private int count;
 
   public ExpectListener(final ExpectConnection expect) {
     this.expect = expect;
+    this.count = 0;
   }
 
   @Override
@@ -198,7 +200,13 @@ class ExpectListener implements IConnectionListener {
   }
 
   @Override
-  public void messageReceived(final byte[] message, long pcTime) {
+  public void messageReceived(final byte[] message, final long pcTime) {
+    count++;
     expect.receive(message);
+  }
+
+  @Override
+  public int count() {
+    return count;
   }
 }

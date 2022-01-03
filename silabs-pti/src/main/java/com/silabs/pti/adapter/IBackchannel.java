@@ -19,11 +19,10 @@ import java.io.IOException;
 /**
  * Abstraction of a backchannel connection to an adapter.
  *
- * This object manages multiple connections to the different ports
- * that the adapter supports.
+ * This object manages multiple connections to the different ports that the
+ * adapter supports.
  *
- * @author Timotej
- * Created on Mar 20, 2018
+ * @author Timotej Created on Mar 20, 2018
  */
 public interface IBackchannel {
   /**
@@ -47,6 +46,7 @@ public interface IBackchannel {
 
   /**
    * Returns a connection.
+   * 
    * @param port
    * @return connection
    */
@@ -91,6 +91,7 @@ public interface IBackchannel {
 
   /**
    * Returns the serial 0 connection. Shortcut to getConnectio(SERIAL0)
+   * 
    * @return
    */
   default public IConnection serial0() {
@@ -99,6 +100,7 @@ public interface IBackchannel {
 
   /**
    * Returns the serial 1 connection. Shortcut to getConnectio(SERIAL1)
+   * 
    * @return
    */
   default public IConnection serial1() {
@@ -121,6 +123,5 @@ public interface IBackchannel {
    * @return
    */
   public boolean disableDebugChannelCapture();
-
 
 }

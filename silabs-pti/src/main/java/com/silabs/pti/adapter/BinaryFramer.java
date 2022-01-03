@@ -14,16 +14,14 @@
 
 package com.silabs.pti.adapter;
 
-import com.silabs.pti.util.MiscUtil;
-
+import com.silabs.na.pcap.util.ByteArrayUtil;
 
 /**
- * Base class for binary framing schemes.  Implements the
- * string conversion methods of the {@link IFramer} interface
- * so that subclasses don't have to.  The string form of
- * messages is hex bytes separated by spaces.
+ * Base class for binary framing schemes. Implements the string conversion
+ * methods of the {@link IFramer} interface so that subclasses don't have to.
+ * The string form of messages is hex bytes separated by spaces.
  * 
- * @author  Matteo Neale Paris (matteo@ember.com)
+ * @author Matteo Neale Paris (matteo@ember.com)
  */
 public class BinaryFramer implements IFramer {
 
@@ -33,12 +31,12 @@ public class BinaryFramer implements IFramer {
     message[0] = nextByte;
     return message;
   }
-  
+
   @Override
   public byte[] flushMessage() {
     return null;
   }
-  
+
   @Override
   public byte[] frame(byte[] message) {
     return message;
@@ -50,10 +48,10 @@ public class BinaryFramer implements IFramer {
       return null;
     String[] tokens = message.split("\\s");
     byte[] result = new byte[tokens.length];
-    for(int i = 0; i < result.length; i++) {
-      try { 
+    for (int i = 0; i < result.length; i++) {
+      try {
         result[i] = Byte.parseByte(tokens[i], 16);
-      } catch(NumberFormatException e) {
+      } catch (NumberFormatException e) {
         return null;
       }
     }
@@ -62,7 +60,8 @@ public class BinaryFramer implements IFramer {
 
   @Override
   public String toString(byte[] message) {
-    return MiscUtil.formatByteArray(message, true);
+    final byte[] raw = message;
+    return ByteArrayUtil.formatByteArray(raw, true);
   }
 
 }

@@ -27,8 +27,8 @@ public class ConnectionSessionHandler extends IoHandlerAdapter {
   public void messageReceived(final IoSession session, final Object msg) throws Exception {
     Connection c = (Connection) session.getAttribute("connection");
 
-    if (c != null){
-      c.processIncomingData(System.currentTimeMillis(), ((byte[])msg).length, (byte[])msg);
+    if (c != null) {
+      c.processIncomingData(System.currentTimeMillis(), ((byte[]) msg).length, (byte[]) msg);
     }
   }
 }

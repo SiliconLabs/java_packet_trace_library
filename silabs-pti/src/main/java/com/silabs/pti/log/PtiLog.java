@@ -12,14 +12,14 @@
  *
  ******************************************************************************/
 
-
 package com.silabs.pti.log;
 
 /**
- * This class provides logging through eclipse loggers. All workbench
- * code should use it to log stuff.
+ * This class provides logging through eclipse loggers. All workbench code
+ * should use it to log stuff.
  *
  * Created on Jul 26, 2005
+ * 
  * @author Timotej (timotej@ember.com)
  * @since 4.6
  */
@@ -35,6 +35,7 @@ public class PtiLog {
   public static void setLogger(final IPtiLogger loggerInstance) {
     logger = loggerInstance;
   }
+
   /** Log simple informational message. */
   public static void info(final String message) {
     info(message, null);
@@ -49,9 +50,12 @@ public class PtiLog {
   public static void error(final String message) {
     error(message, null);
   }
-  
-  /** Log error 
-   * @since 5.0 */
+
+  /**
+   * Log error
+   * 
+   * @since 5.0
+   */
   public static void error(final Throwable throwable) {
     error(null, throwable);
   }
@@ -72,12 +76,11 @@ public class PtiLog {
   }
 
   /**
-   * Log message with full information.
-   * Calling this is identical to calling separate info(), error()
-   * and warning() methods.
+   * Log message with full information. Calling this is identical to calling
+   * separate info(), error() and warning() methods.
    */
   public static void message(final PtiSeverity severity, final String message, final Throwable t) {
-    switch(severity) {
+    switch (severity) {
     case ERROR:
     case INFO:
     case WARNING:

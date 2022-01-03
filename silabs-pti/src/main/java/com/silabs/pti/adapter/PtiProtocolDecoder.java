@@ -20,9 +20,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 public class PtiProtocolDecoder extends ProtocolDecoderAdapter {
   @Override
-  public void decode(IoSession session,
-                     IoBuffer in,
-                     ProtocolDecoderOutput out) throws Exception {
+  public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
     byte[] array = new byte[in.remaining()];
     in.get(array);
     out.write(array);

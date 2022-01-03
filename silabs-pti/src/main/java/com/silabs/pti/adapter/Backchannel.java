@@ -44,7 +44,6 @@ import com.silabs.pti.log.PtiSeverity;
  */
 public class Backchannel implements IBackchannel {
 
-
   private final IConnection[] connections = new IConnection[AdapterPort.values().length];
   private final IBackchannelPortMapper portMapper;
   private final IConnectionEnabler enabler;
@@ -52,13 +51,13 @@ public class Backchannel implements IBackchannel {
   private final IPtiLogger logger;
 
   private final DebugMessageCollector debugMessageCollector;
+
   /**
-   * Constructs a BackChannel object, but does not attempt to connect the
-   * sockets. A portmapper is passed as an argumnet
+   * Constructs a BackChannel object, but does not attempt to connect the sockets.
+   * A portmapper is passed as an argumnet
    *
-   * @param host
-   *          the host name of the backchannel board to connect to. For example:
-   *          <code>"test070", "test070.hq.ember.com", or
+   * @param host the host name of the backchannel board to connect to. For
+   *             example: <code>"test070", "test070.hq.ember.com", or
    *              "192.168.170.70"</code>.
    */
   Backchannel(final String originatorId,
@@ -71,21 +70,21 @@ public class Backchannel implements IBackchannel {
     this.enabler = enabler;
     this.logger = logger;
     this.debugMessageCollector = new DebugMessageCollector(originatorId);
-    for ( AdapterPort p: AdapterPort.values() ) {
+    for (AdapterPort p : AdapterPort.values()) {
       int port = portMapper.port(p);
-      if ( port == -1 ) {
+      if (port == -1) {
         connections[p.ordinal()] = null;
       } else {
         IConnection con;
 
-        if ( p == AdapterPort.DEBUG ) {
-          con = Adapter.createConnection(debugConnectionType, host, port, logger );
+        if (p == AdapterPort.DEBUG) {
+          con = Adapter.createConnection(debugConnectionType, host, port, logger);
         } else {
-          con = Adapter.createConnection(host, port, logger );
+          con = Adapter.createConnection(host, port, logger);
         }
 
         connections[p.ordinal()] = con;
-        if ( enabler != null )
+        if (enabler != null)
           connections[p.ordinal()].setConnectionEnabler(enabler);
       }
     }
@@ -111,12 +110,11 @@ public class Backchannel implements IBackchannel {
     return enabler;
   }
 
-
   /** Closes the sockets to the three backchannel ports. */
   @Override
   public void close() {
-    for ( AdapterPort p: AdapterPort.values() ) {
-      if ( connections[p.ordinal()] != null )
+    for (AdapterPort p : AdapterPort.values()) {
+      if (connections[p.ordinal()] != null)
         connections[p.ordinal()].close();
     }
   }
@@ -134,8 +132,8 @@ public class Backchannel implements IBackchannel {
   @Override
   public IDebugConnection debugConnection() {
     IConnection con = connections[AdapterPort.DEBUG.ordinal()];
-    if ( con instanceof IDebugConnection )
-      return (IDebugConnection)con;
+    if (con instanceof IDebugConnection)
+      return (IDebugConnection) con;
     else
       return null;
   }
@@ -143,7 +141,7 @@ public class Backchannel implements IBackchannel {
   @Override
   public boolean disableDebugChannelCapture() {
     IDebugConnection debugConn = debugConnection();
-    if ( debugConn == null )
+    if (debugConn == null)
       throw new IllegalArgumentException("Debug connection not found.");
 
     // Turn off debugging
@@ -158,7 +156,7 @@ public class Backchannel implements IBackchannel {
   public boolean enableDebugChannelCapture(final IDebugMessageListener debugMessageListener,
                                            final IConnectionProblemListener problemListener) {
     IDebugConnection debugConn = debugConnection();
-    if ( debugConn == null )
+    if (debugConn == null)
       throw new IllegalArgumentException("Debug connection not found.");
 
     if (!debugConn.isConnected()) {
@@ -189,14 +187,13 @@ public class Backchannel implements IBackchannel {
       debugMessageCollector.setDebugMessageListener(debugMessageListener);
       debugConn.addConnectionListener(debugMessageCollector);
     }
-    if ( problemListener != null )
+    if (problemListener != null)
       debugConn.setConnectionProblemListener(problemListener);
 
     logger.log(PtiSeverity.INFO, "Enable capture.", null);
 
     return true;
   }
-
 
   /**
    * Gets the Connection for the specified port.
@@ -206,7 +203,8 @@ public class Backchannel implements IBackchannel {
    */
   @Override
   public IConnection getConnection(final AdapterPort port) {
-    if ( port == null ) return null;
+    if (port == null)
+      return null;
     return connections[port.ordinal()];
   }
 

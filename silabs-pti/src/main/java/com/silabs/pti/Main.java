@@ -16,13 +16,10 @@ package com.silabs.pti;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.mina.core.service.IoConnector;
@@ -36,26 +33,33 @@ import com.silabs.pti.adapter.CharacterCollector;
 import com.silabs.pti.adapter.ConnectionSessionHandler;
 import com.silabs.pti.adapter.DebugChannelFramer;
 import com.silabs.pti.adapter.IConnection;
-import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.PtiCodecFactory;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
+import com.silabs.pti.adapter.UnframedConnectionListener;
+import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
+import com.silabs.pti.debugchannel.TextConnectionListener;
+import com.silabs.pti.discovery.DiscoveryUtil;
+import com.silabs.pti.discovery.PrintingDiscoveryListener;
+import com.silabs.pti.extcap.Extcap;
+import com.silabs.pti.format.IDebugChannelExportFormat;
+import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.log.PtiLog;
-import com.silabs.pti.util.ICharacterListener;
 import com.silabs.pti.util.LineTerminator;
 
 /**
  * Main entry point to the standalone PTI functionality.
  *
  * Created on Feb 9, 2017
+ * 
  * @author timotej
  */
 public class Main {
   /**
    * The <code>timeout</code> field is used for timing out socket connection
-   * requests and waiting for message responses.  Units are milliseconds.
-   * Default is 2000.
+   * requests and waiting for message responses. Units are milliseconds. Default
+   * is 2000.
    */
   private static final int framingTimeout = 2000;
 
@@ -65,41 +69,47 @@ public class Main {
   private final CommandLine cli;
 
   public static void main(final String[] args) {
-    Main m = new Main(args);
-    if ( m.cli.shouldExit() )
-      System.exit(m.cli.exitCode());
+    if (args.length > 0 && "extcap".equals(args[0])) {
+      final int errorCode = Extcap.run(args);
+      System.exit(errorCode);
+    } else {
+      final Main m = new Main(args);
+      if (m.cli.shouldExit())
+        System.exit(m.cli.exitCode());
 
-    int code = m.run(m.cli);
-    m.closeConnections();
-    System.exit(code);
+      final int code = m.run(m.cli);
+      m.closeConnections();
+      System.exit(code);
+    }
   }
 
-  public Main(final String [] args) {
+  public Main(final String[] args) {
     cli = new CommandLine(args);
     timeSync = new TimeSynchronizer(TimeSynchronizer.DEFAULT_PC_TIME_SUPPLIER,
                                     cli.driftCorrection(),
                                     cli.driftCorrectionThreshold(),
                                     cli.zeroTimeThreshold());
 
-
     connector.setConnectTimeoutMillis(framingTimeout);
     connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new PtiCodecFactory(Charset.forName("UTF-8"))));
     connector.setHandler(new ConnectionSessionHandler());
   }
 
-  public CommandLine cli() { return cli; }
+  public CommandLine cli() {
+    return cli;
+  }
 
   public int run(final CommandLine cli) {
     try {
-      if ( cli.isInteractive() ) {
+      if (cli.isInteractive()) {
         return Interactive.runInteractive(cli, timeSync);
-      } else if ( cli.isDiscovery() ) {
-        return DiscoveryUtil.runDiscovery();
+      } else if (cli.isDiscovery()) {
+        return DiscoveryUtil.runDiscovery(new PrintingDiscoveryListener());
       } else {
         switch (cli.port()) {
         case TEST:
         case DEBUG:
-          return runCapture(cli, timeSync);
+          return runCapture(cli.fileFormat().format(), cli, timeSync);
         case ADMIN:
         case SERIAL0:
         case SERIAL1:
@@ -110,119 +120,83 @@ public class Main {
           return 1;
         }
       }
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       PtiLog.error("Failed to communicate to adapters: " + String.join(", ", cli.hostnames()), ioe);
       return 1;
     }
   }
 
-  private static class DumpListener implements ICharacterListener {
-    private final FileOutputStream fos;
-
-    public DumpListener(final File f) throws IOException {
-      fos = new FileOutputStream(f);
-    }
-
-    @Override
-    public void received(final byte[] ch, final int offset, final int len) {
-      try {
-        fos.write(ch, offset, len);
-      } catch (IOException ioe) {
-        PtiLog.error("Could not write data.", ioe);
-      }
-    }
-
-    public void close() throws IOException {
-      fos.close();
-    }
-  }
-
-  private int runCapture(final CommandLine cli, final TimeSynchronizer timeSynchronizer) throws IOException {
+  private <T> int runCapture(final IDebugChannelExportFormat<T> format,
+                             final CommandLine cli,
+                             final TimeSynchronizer timeSynchronizer) throws IOException {
     // inits
     final String outputFilename = cli.output();
-    DumpListener dl = null;
-    HashMap<String, PrintStream> output = new HashMap<>();
-    HashMap<String, List<IConnection>> connections = new HashMap<>();
+    UnframedConnectionListener dl = null;
+    final HashMap<String, List<IConnection>> connections = new HashMap<>();
+
+    OutputMap<T> output = null;
 
     // connections / attaching listeners
-    if (cli.fileFormat() == FileFormat.DUMP) {
+    if (!cli.fileFormat().format().isUsingDebugMessages()) {
       if (outputFilename == null) {
         throw new IOException("Need to specify a file with DUMP file format.");
       }
 
-      dl = new DumpListener(new File(outputFilename));
+      dl = new UnframedConnectionListener(new File(outputFilename), cli.fileFormat().format());
 
-      for (String host : cli.hostnames()) {
-        IConnection c = Adapter.createConnection(connector,
-                                                 host,
-                                                 AdapterPort.DEBUG.defaultPort(),
-                                                 cli);
+      for (final String host : cli.hostnames()) {
+        final IConnection c = Adapter.createConnection(connector, host, AdapterPort.DEBUG.defaultPort(), cli);
         c.connect();
         c.addCharacterListener(dl);
       }
     } else {
-      configOutputFiles(cli, outputFilename, output);
+      output = configOutputFiles(cli, format, outputFilename);
 
       String timeServer = null;
       List<IConnection> adminConnections = new ArrayList<>();
 
       if (cli.testMode()) {
-        for (Integer port : cli.testPort()) {
-          String originator = "localhost:" + port;
-          List<IConnection> debugConnections = new ArrayList<>();
+        for (final Integer port : cli.testPort()) {
+          final String originator = "localhost:" + port;
+          final List<IConnection> debugConnections = new ArrayList<>();
           connections.put(originator, debugConnections);
 
           // Debug connection
-          IConnection testPortConnection = Adapter
-              .createConnection(connector, "localhost", port, cli);
-          IFramer asciiFramer = new AsciiFramer();
+          final IConnection testPortConnection = Adapter.createConnection(connector, "localhost", port, cli);
+          final IFramer asciiFramer = new AsciiFramer();
           testPortConnection.connect();
           testPortConnection.setFramers(asciiFramer, asciiFramer);
-          testPortConnection
-              .addConnectionListener(new SimpleConnectionListener(cli
-                  .fileFormat(), originator, output, true, timeSynchronizer));
+          testPortConnection.addConnectionListener(new TextConnectionListener(originator, output));
           debugConnections.add(testPortConnection);
         }
       } else {
         for (int i = 0; i < cli.hostnames().length; i++) {
-          String ip = cli.hostnames()[i];
-          List<IConnection> debugConnections = new ArrayList<>();
+          final String ip = cli.hostnames()[i];
+          final List<IConnection> debugConnections = new ArrayList<>();
           connections.put(ip, debugConnections);
 
           // Debug connection
-          IConnection debug = Adapter.createConnection(connector,
-                                                       ip,
-                                                       AdapterPort.DEBUG
-                                                           .defaultPort(),
-                                                       cli);
-          IFramer debugChannelFramer = new DebugChannelFramer(true);
+          final IConnection debug = Adapter.createConnection(connector, ip, AdapterPort.DEBUG.defaultPort(), cli);
+          final IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.connect();
           debug.setFramers(debugChannelFramer, debugChannelFramer);
-          debug.addConnectionListener(new SimpleConnectionListener(cli
-              .fileFormat(), ip, output, false, timeSynchronizer));
+          debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
+                                                                         ip,
+                                                                         output,
+                                                                         timeSynchronizer));
           debugConnections.add(debug);
 
           // Admin connection / configure Time Server
-          if (!cli.testMode() && cli.discreteNodeCapture() == false
-              && cli.hostnames().length > 1) {
-            IConnection admin = Adapter.createConnection(connector,
-                                                         ip,
-                                                         AdapterPort.ADMIN
-                                                             .defaultPort(),
-                                                         cli);
-            IFramer asciiFramer = new AsciiFramer();
+          if (!cli.testMode() && cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
+            final IConnection admin = Adapter.createConnection(connector, ip, AdapterPort.ADMIN.defaultPort(), cli);
+            final IFramer asciiFramer = new AsciiFramer();
             admin.connect();
             admin.setFramers(asciiFramer, asciiFramer);
             TimeSync.synchronizeTime(admin,
                                      debug.isConnected(),
                                      ip,
-                                     ".*switched to mode: server.*", // "borrowed"
-                                                                     // from
-                                                                     // wstk.java.
-                                                                     // shoudln't
-                                                                     // be
-                                                                     // hardcoded..
-                                     true, // assume time sync is possible.
+                                     ".*switched to mode: server.*",
+                                     true,
                                      timeServer != null,
                                      timeServer);
             adminConnections.add(admin);
@@ -235,7 +209,7 @@ public class Main {
       }
 
       // do not maintain open ADMIN port connections.
-      for (IConnection c : adminConnections) {
+      for (final IConnection c : adminConnections) {
         c.close();
       }
       adminConnections.clear();
@@ -250,7 +224,7 @@ public class Main {
         // Sit for a year
         Thread.sleep(1000 * 60 * 60 * 24 * 365);
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
     }
 
     // close handles
@@ -259,9 +233,7 @@ public class Main {
     }
 
     if (output != null) {
-      output.forEach((k, v) -> v.close());
-      output.clear();
-      output = null;
+      output.closeAndClear();
     }
     closeConnections(connections);
     return 0;
@@ -275,37 +247,38 @@ public class Main {
    * @param output
    * @throws FileNotFoundException
    */
-  private void configOutputFiles(final CommandLine cli,
-                                 final String outFilename,
-                                 final HashMap<String, PrintStream> output) throws FileNotFoundException {
+  private <T> OutputMap<T> configOutputFiles(final CommandLine cli,
+                                             final IDebugChannelExportFormat<T> format,
+                                             final String outFilename) throws IOException {
+    final OutputMap<T> output = new OutputMap<T>();
     if (outFilename != null && !outFilename.isEmpty()) {
+      // We have a file specified.
       if (cli.testMode()) {
-        for (Integer port : cli.testPort()) {
-          String f = makeCaptureFilenames(outFilename, port.toString());
-          output
-              .put("localhost:" + port,
-                   new PrintStream(new FileOutputStream(new File(f))));
+        for (final Integer port : cli.testPort()) {
+          final String f = makeCaptureFilenames(outFilename, port.toString());
+          output.put("localhost:" + port, format.createOutput(new File(f), false));
         }
       } else if (cli.discreteNodeCapture()) {
-        for (String ip : cli.hostnames()) {
-          String f = makeCaptureFilenames(outFilename, ip.toString());
-          output.put(ip, new PrintStream(new FileOutputStream(new File(f))));
+        for (final String ip : cli.hostnames()) {
+          final String f = makeCaptureFilenames(outFilename, ip.toString());
+          output.put(ip, format.createOutput(new File(f), false));
         }
       } else { // capture all node traffic into 1 file.
-        PrintStream printStream = new PrintStream(new FileOutputStream(new File(cli
-            .output())));
-        for (String ip : cli.hostnames()) {
+        final IDebugChannelExportOutput<T> printStream = format.createOutput(new File(cli.output()), false);
+        for (final String ip : cli.hostnames()) {
           output.put(ip, printStream);
         }
       }
     } else {
-      for (String name : cli.hostnames()) {
-        output.put(name, System.out);
+      // No file specified, we print to stdout.
+      for (final String name : cli.hostnames()) {
+        output.put(name, format.createStdoutOutput());
       }
     }
+    return output;
   }
 
-  public String makeCaptureFilenames(String filename, String filename_suffix) {
+  public String makeCaptureFilenames(final String filename, final String filename_suffix) {
     String out = filename.substring(0, filename.lastIndexOf("."));
     out += "_";
     out += filename_suffix;
@@ -319,98 +292,38 @@ public class Main {
 
   public void closeConnections(final HashMap<String, List<IConnection>> connections) {
     if (connections != null) {
-      for (String ip : connections.keySet()) {
-        List<IConnection> list = connections.get(ip);
-        for (IConnection c: list) {
+      for (final String ip : connections.keySet()) {
+        final List<IConnection> list = connections.get(ip);
+        for (final IConnection c : list) {
           c.close();
         }
         list.clear();
       }
     }
-    if (connector != null) {connector.dispose();}
+    if (connector != null) {
+      connector.dispose();
+    }
   }
 
   private int runCommandSequence(final CommandLine cli) throws IOException {
-    String hostname = cli.hostnames()[0];
-    IConnection c = Adapter.createConnection(hostname, cli.port().defaultPort(), cli);
+    final String hostname = cli.hostnames()[0];
+    final IConnection c = Adapter.createConnection(hostname, cli.port().defaultPort(), cli);
     c.connect();
 
-    CharacterCollector cc = new CharacterCollector();
+    final CharacterCollector cc = new CharacterCollector();
     c.addCharacterListener(cc);
 
-    for ( String cmd: cli.commands() ) {
+    for (final String cmd : cli.commands()) {
       c.send(cmd + LineTerminator.CRLF);
       System.out.println(cmd);
-      try { Thread.sleep(cli.delayMs()); } catch(Exception e) {}
+      try {
+        Thread.sleep(cli.delayMs());
+      } catch (final Exception e) {
+      }
       System.out.println(cc.textAndClean());
     }
 
     c.close();
     return 0;
-  }
-}
-
-class SimpleConnectionListener implements IConnectionListener {
-  private final FileFormat ff;
-  private final String originator;
-  private volatile int nReceived = 0;
-  private final HashMap<String, PrintStream> output;
-  private long t0 = -1;
-  private boolean readAsText = true;
-  private final TimeSynchronizer timeSync;
-
-  // typically we capture from N devices and write to 1 single file.
-  // this ensures us to only write 1 header entry.
-  private static HashSet<PrintStream> writtenHeader = new HashSet<>();
-
-  public SimpleConnectionListener(final FileFormat ff,
-		  						  final String originator,
-		  						  final HashMap<String, PrintStream> output,
-		  						  final boolean readText,
-		  						  final TimeSynchronizer timeSynchronizer) {
-    this.ff = ff;
-    this.originator = originator;
-    this.output = output;
-    this.readAsText = readText;
-    this.timeSync = timeSynchronizer;
-
-    // write header
-    if (!readAsText) {
-      output.forEach((k, v) -> {
-        if (!writtenHeader.contains(v)) {
-          if (ff.header() != null) {
-            v.println(ff.header());
-          }
-          writtenHeader.add(v);
-        }
-      });
-    }
-  }
-
-  public int count() { return nReceived; }
-
-  @Override
-  public void messageReceived(final byte[] message, final long pcTime) {
-    PrintStream outputStream = output.get(originator);
-    if (!readAsText) {
-      long t;
-      if (t0 == -1) {
-        t0 = System.currentTimeMillis();
-        t = 0;
-      } else {
-        t = System.currentTimeMillis() - t0;
-      }
-      String formatted = ff.processDebugMsg(t, originator, message, timeSync);
-      if (formatted != null) {
-        outputStream.println(formatted);
-        nReceived++;
-      }
-    } else {
-      outputStream.println(new String(message));
-    }
-  }
-
-  @Override
-  public void connectionStateChanged(final boolean isConnected) {
   }
 }

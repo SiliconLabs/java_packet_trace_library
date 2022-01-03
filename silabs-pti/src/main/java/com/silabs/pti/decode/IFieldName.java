@@ -6,6 +6,7 @@ package com.silabs.pti.decode;
  * All the field names need to ultimately implement this interface.
  *
  * Created on Apr 3, 2012
+ * 
  * @author timotej
  */
 public interface IFieldName {

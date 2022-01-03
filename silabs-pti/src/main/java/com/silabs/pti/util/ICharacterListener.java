@@ -18,6 +18,7 @@ package com.silabs.pti.util;
  * Simple listener that can be notified of a sequence of bytes received.
  *
  * Created on Jun 12, 2008
+ * 
  * @author Timotej (timotej@ember.com)
  * @since 4.6
  */

@@ -22,10 +22,11 @@ import com.silabs.pti.splitter.ISplitter;
 import com.silabs.pti.util.ICharacterListener;
 
 /**
- * This class takes one connection and splits it into multiple connections
- * based on a splitter implementation.
+ * This class takes one connection and splits it into multiple connections based
+ * on a splitter implementation.
  *
  * Created on Mar 5, 2013
+ * 
  * @author timotej
  */
 public class ConnectionSplit {
@@ -35,12 +36,12 @@ public class ConnectionSplit {
   private final IConnection connection;
 
   public ConnectionSplit(final IConnection connection, final ISplitter splitter) {
-    if ( splitter == null )
+    if (splitter == null)
       throw new IllegalArgumentException("Null not allowed");
     this.splitter = splitter;
     this.connection = connection;
     connections = new SplitConnection[splitter.bucketCount()];
-    for ( int i=0; i<splitter.bucketCount(); i++ ) {
+    for (int i = 0; i < splitter.bucketCount(); i++) {
       connections[i] = new SplitConnection();
       splitter.setCharacterListener(i, connections[i]);
     }
@@ -53,7 +54,7 @@ public class ConnectionSplit {
   }
 
   public IConnection connection(final int n) {
-    if ( n < 0 || n >= connections.length ) {
+    if (n < 0 || n >= connections.length) {
       throw new IllegalArgumentException("Connection count out of bounds: " + n);
     }
     return connections[n];
@@ -61,19 +62,18 @@ public class ConnectionSplit {
 
   private class SplitConnection implements IConnection, ICharacterListener {
 
-    private final List<ICharacterListener> charListeners
-      = new ArrayList<>();
+    private final List<ICharacterListener> charListeners = new ArrayList<>();
 
     @Override
     public void received(final byte[] ch, final int offset, final int len) {
-      for ( ICharacterListener l: charListeners ) {
+      for (ICharacterListener l : charListeners) {
         l.received(ch, offset, len);
       }
     }
 
     @Override
     public void addCharacterListener(final ICharacterListener listener) {
-      if ( !charListeners.contains(listener) )
+      if (!charListeners.contains(listener))
         charListeners.add(listener);
     }
 
@@ -148,4 +148,3 @@ public class ConnectionSplit {
   }
 
 }
-

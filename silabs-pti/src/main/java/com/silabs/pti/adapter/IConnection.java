@@ -18,12 +18,10 @@ import java.io.IOException;
 
 import com.silabs.pti.util.ICharacterListener;
 
-
-
 /**
  * Interface describing the adapter connection.
  *
- * @author  Matteo Neale Paris (matteo@ember.com)
+ * @author Matteo Neale Paris (matteo@ember.com)
  */
 public interface IConnection {
 
@@ -40,15 +38,18 @@ public interface IConnection {
   public void setOutgoingFramingEnabled(boolean on);
 
   /**
-   * Adds a character listener, that is triggered on each character,
-   * regardless of framing
+   * Adds a character listener, that is triggered on each character, regardless of
+   * framing
    */
   public void addCharacterListener(ICharacterListener listener);
 
   /** Removes a character listener */
   public void removeCharacterListener(ICharacterListener listener);
 
-  /** Adds a connection listener that considers framing and report connection status */
+  /**
+   * Adds a connection listener that considers framing and report connection
+   * status
+   */
   public void addConnectionListener(IConnectionListener listener);
 
   /** Removes a connection listener */
@@ -61,12 +62,10 @@ public interface IConnection {
   public void setConnectionEnabler(final IConnectionEnabler enabler);
 
   /**
-   * Ensures this connection is connected, reconnecting the underlying
-   * IP socket if needed. If socket is already connected, the method may do
-   * nothing.
+   * Ensures this connection is connected, reconnecting the underlying IP socket
+   * if needed. If socket is already connected, the method may do nothing.
    *
-   * If method does not throe IOException, then socket
-   * is connected.
+   * If method does not throe IOException, then socket is connected.
    */
   public void connect() throws IOException;
 
@@ -74,8 +73,8 @@ public interface IConnection {
   public void close();
 
   /**
-   * If this connection knows how to repair itself, this will attempt to repair it.
-   * Might do nothing.
+   * If this connection knows how to repair itself, this will attempt to repair
+   * it. Might do nothing.
    *
    * @throws IOException
    */
@@ -89,6 +88,5 @@ public interface IConnection {
 
   /** Returns true if this connection is connected */
   public boolean isConnected();
-
 
 }

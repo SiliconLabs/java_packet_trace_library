@@ -20,16 +20,15 @@ import java.util.function.LongSupplier;
 
 /**
  * Time synchronizer will be receiving input events tracking microsecond times
- * from multiple, potentially unsynchronized sources, and
- * will use drift and PC clock to correct those times.
+ * from multiple, potentially unsynchronized sources, and will use drift and PC
+ * clock to correct those times.
  *
- * This class is NOT THREAD SAFE. TimeShift method should always be called either from
- * a single thread, or synchronized externally.
+ * This class is NOT THREAD SAFE. TimeShift method should always be called
+ * either from a single thread, or synchronized externally.
  *
- * @author Timotej
- * Created on Dec 5, 2017
- * (This logic exists since 2006, but in 2017 it has been moved out of the
- *  LiveDataSource into this separate class to make things clearer and simpler.)
+ * @author Timotej Created on Dec 5, 2017 (This logic exists since 2006, but in
+ *         2017 it has been moved out of the LiveDataSource into this separate
+ *         class to make things clearer and simpler.)
  */
 public class TimeSynchronizer {
 
@@ -42,13 +41,18 @@ public class TimeSynchronizer {
     ZERO_OFFSET_WITH_CORRECTION(true);
 
     private boolean correction;
+
     Op(final boolean performedCorrection) {
       this.correction = performedCorrection;
     }
-    public boolean performedCorrection() { return correction; }
+
+    public boolean performedCorrection() {
+      return correction;
+    }
   }
 
-  // Default PC time supplier supplies millisecond time from System.currentTimeMillis();
+  // Default PC time supplier supplies millisecond time from
+  // System.currentTimeMillis();
   public static LongSupplier DEFAULT_PC_TIME_SUPPLIER = () -> System.currentTimeMillis();
 
   private final LongSupplier millisecondTimeSupplier;
@@ -75,6 +79,7 @@ public class TimeSynchronizer {
 
   /**
    * Returns time zero for the given originator, or Long
+   * 
    * @param originator
    * @return timezero or null if not set yet.
    */
@@ -88,17 +93,22 @@ public class TimeSynchronizer {
 
   /**
    * Returns the last operation performed by the timeShift.
+   * 
    * @return
    */
-  public Op lastOp() { return lastOp; }
+  public Op lastOp() {
+    return lastOp;
+  }
 
   /**
-   * Returns the value of time adjust the last time drift correction kicked
-   * in. Returns null if there was no drift correction.
+   * Returns the value of time adjust the last time drift correction kicked in.
+   * Returns null if there was no drift correction.
    *
    * @return Long
    */
-  public Long lastCorrection() { return lastCorrection; }
+  public Long lastCorrection() {
+    return lastCorrection;
+  }
 
   /**
    * This method receives the event from a given originator, with a given
@@ -108,21 +118,20 @@ public class TimeSynchronizer {
    * This is time-zeroed, meaning that the first event will be called time zero
    * and a returned value will be 0.
    *
-   * This method will call getAsLong() on a time supplier EXACTLY once per
-   * each invocation.
+   * This method will call getAsLong() on a time supplier EXACTLY once per each
+   * invocation.
    *
    * @param originatorId
    * @param timeInMicroseconds
    * @return
    */
-  public long synchronizedTime(final String originatorId,
-                               final long timeInMicroseconds) {
+  public long synchronizedTime(final String originatorId, final long timeInMicroseconds) {
     long tMillis = millisecondTimeSupplier.getAsLong();
     Long tZero = timeZero(originatorId);
     Op op;
-    if ( tZero == null ) {
+    if (tZero == null) {
       // First event from this originator. Calculate tZero.
-      if ( tZeroMap.isEmpty() ) {
+      if (tZeroMap.isEmpty()) {
         // Wow, first event ever!
         tZero = timeInMicroseconds;
         masterPcTimeZero = tMillis;
@@ -131,9 +140,9 @@ public class TimeSynchronizer {
       } else {
         // Not the first ever. Match this against the millisecond supplier
         Long usableT0 = findUsableTimeZero(tMillis, timeInMicroseconds);
-        if ( usableT0 == null ) {
+        if (usableT0 == null) {
           // Nope, not synchronized. Needs to correct,
-          long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero)*1000;
+          long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero) * 1000;
           tZero = timeInMicroseconds - expectedRealMicrosecondTime;
           op = Op.ORIGINATOR_ZERO_WITH_CORRECTION;
           lastCorrection = tZero;
@@ -146,11 +155,10 @@ public class TimeSynchronizer {
       }
     } else {
       // We have a tZero already. Let's just check for drift.
-      if ( performDriftCorrection ) {
-        long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero)*1000;
+      if (performDriftCorrection) {
+        long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero) * 1000;
         long microsecondTime = timeInMicroseconds - tZero;
-        if ( isDriftTooLarge(microsecondTime,
-                             expectedRealMicrosecondTime) ) {
+        if (isDriftTooLarge(microsecondTime, expectedRealMicrosecondTime)) {
           // We need to adjust shift.
 
           long newTZero = timeInMicroseconds - expectedRealMicrosecondTime;
@@ -171,20 +179,20 @@ public class TimeSynchronizer {
 
   // Returns true if the times are within treshold.
   private boolean isDriftTooLarge(final long micros1, final long micros2) {
-    return Math.abs(micros1-micros2) >= driftThreshold;
+    return Math.abs(micros1 - micros2) >= driftThreshold;
   }
 
   private Long findUsableTimeZero(final long tMillis, final long micros) {
-    long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero)*1000;
-    for ( Long t0: tZeroMap.values() ) {
+    long expectedRealMicrosecondTime = (tMillis - masterPcTimeZero) * 1000;
+    for (Long t0 : tZeroMap.values()) {
       long expectedEventMicrosecondTime = t0 + expectedRealMicrosecondTime;
-      if ( isZeroTimeWithinThreshold(expectedEventMicrosecondTime, micros))
+      if (isZeroTimeWithinThreshold(expectedEventMicrosecondTime, micros))
         return t0;
     }
     return null;
   }
 
   private boolean isZeroTimeWithinThreshold(final long micros1, final long micros2) {
-    return Math.abs(micros1-micros2) < zeroTimeDifferenceThreshold;
+    return Math.abs(micros1 - micros2) < zeroTimeDifferenceThreshold;
   }
 }

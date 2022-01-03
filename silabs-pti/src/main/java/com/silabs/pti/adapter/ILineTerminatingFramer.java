@@ -19,8 +19,7 @@ import com.silabs.pti.util.LineTerminator;
 /**
  * Framer that is sensitive to line terminator characters.
  *
- * @author Timotej
- * Created on Mar 22, 2018
+ * @author Timotej Created on Mar 22, 2018
  */
 public interface ILineTerminatingFramer extends IFramer {
 

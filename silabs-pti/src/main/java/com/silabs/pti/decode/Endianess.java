@@ -6,9 +6,9 @@ package com.silabs.pti.decode;
  * Endianess.
  *
  * Created on Sep 20, 2016
+ * 
  * @author tecimovic
  */
 public enum Endianess {
-  LITTLE,
-  BIG;
+  LITTLE, BIG;
 }

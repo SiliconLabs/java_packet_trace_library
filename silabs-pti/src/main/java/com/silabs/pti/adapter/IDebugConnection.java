@@ -18,6 +18,7 @@ package com.silabs.pti.adapter;
  * Extends the basic IConnection with debug channel functionality.
  *
  * Created on Feb 13, 2017
+ * 
  * @author timotej
  */
 public interface IDebugConnection extends IConnection {

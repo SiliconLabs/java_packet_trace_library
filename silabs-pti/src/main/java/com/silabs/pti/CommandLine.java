@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
+import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.MiscUtil;
 
@@ -34,6 +35,7 @@ import com.silabs.pti.util.MiscUtil;
  * Command line parsing for the standalone PTI.
  *
  * Created on Feb 11, 2017
+ * 
  * @author timotej
  */
 public class CommandLine implements IConnectivityLogger {
@@ -61,7 +63,6 @@ public class CommandLine implements IConnectivityLogger {
 
   private FileFormat fileFormat = FileFormat.RAW;
 
-
   private AdapterPort port = AdapterPort.DEBUG;
   private final List<String> commands = new ArrayList<>();
 
@@ -81,74 +82,75 @@ public class CommandLine implements IConnectivityLogger {
   private int exitCode = -1;
 
   public CommandLine(final String[] args) {
-    for ( String arg: args ) {
-      if ( "-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg) ) {
+    for (final String arg : args) {
+      if ("-?".equals(arg) || "--?".equals(arg) || "-help".equals(arg) || "--help".equals(arg)) {
         usage(0);
         return;
       }
 
-      if ( arg.startsWith(IP) ) {
-        String ipField = arg.substring(IP.length());
-        List<String> ipAddresses = getIpAddresses(ipField);
+      if (arg.startsWith(IP)) {
+        final String ipField = arg.substring(IP.length());
+        final List<String> ipAddresses = getIpAddresses(ipField);
 
         if (ipAddresses.size() > 0) {
           hostnames = ipAddresses;
         } else {
           hostnames = new ArrayList<>(Arrays.asList(ipField.replaceAll(" ", "").split(",")));
         }
-      } else if ( arg.startsWith(SN)) {
+      } else if (arg.startsWith(SN)) {
         hostnames.add("127.0.0.1");
-      } else if ( arg.startsWith(OUT) ) {
+      } else if (arg.startsWith(OUT)) {
         output = arg.substring(OUT.length());
-      } else if ( arg.startsWith(TIME_LIMIT)) {
+      } else if (arg.startsWith(TIME_LIMIT)) {
         try {
           timeLimitMs = MiscUtil.parseInt(arg.substring(TIME_LIMIT.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
-      } else if ( arg.startsWith(DELAY)) {
+      } else if (arg.startsWith(DELAY)) {
         try {
           delayMs = MiscUtil.parseInt(arg.substring(DELAY.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
-      } else if ( arg.startsWith(ADMIN) ) {
+      } else if (arg.startsWith(ADMIN)) {
         port = AdapterPort.ADMIN;
-      } else if ( arg.startsWith(SERIAL0) ) {
+      } else if (arg.startsWith(SERIAL0)) {
         port = AdapterPort.SERIAL0;
-      } else if ( arg.startsWith(SERIAL1) ) {
+      } else if (arg.startsWith(SERIAL1)) {
         port = AdapterPort.SERIAL1;
-      } else if ( arg.startsWith(FORMAT) ) {
-        String fmt = arg.substring(FORMAT.length());
+      } else if (arg.startsWith(FORMAT)) {
+        final String fmt = arg.substring(FORMAT.length());
         try {
           fileFormat = FileFormat.valueOf(fmt.toUpperCase());
-          if ( fileFormat == null ) throw new Exception();
-        } catch (Exception e) {
+          if (fileFormat == null)
+            throw new Exception();
+        } catch (final Exception e) {
           System.err.println("Invalid file format: " + fmt);
           usage(1);
           return;
         }
-      } else if ( arg.equals(INTERACTIVE) ) {
+      } else if (arg.equals(INTERACTIVE)) {
         interactive = true;
-      } else if ( arg.equals(VERSION) ) {
+      } else if (arg.equals(VERSION)) {
         printVersionAndExit();
-      } else if ( arg.equals(DISCOVER) ) {
+      } else if (arg.equals(DISCOVER)) {
         discovery = true;
       } else if (arg.startsWith(DRIFT_CORRECTION)) {
         driftCorrection = arg.substring(FORMAT.length()).toLowerCase().indexOf("enable") == -1;
       } else if (arg.startsWith(DRIFT_CORRECTION_THRESHOLD)) {
         try {
           driftCorrectionThreshold = MiscUtil.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
       } else if (arg.startsWith(ZERO_TIME_THRESHOLD)) {
         try {
           zeroTimeThreshold = MiscUtil.parseInt(arg.substring(ZERO_TIME_THRESHOLD.length()));
-        } catch (NumberFormatException pe) {
+        } catch (final NumberFormatException pe) {
           usage(1);
           return;
         }
@@ -158,15 +160,14 @@ public class CommandLine implements IConnectivityLogger {
         testMode = true;
         port = AdapterPort.TEST;
         try {
-          String argStr = arg.substring(TEST_PORT.length());
-          String[] ports = argStr.replaceAll(" ", "").split(",");
-          testPort = Arrays.asList(ports).stream().map(x -> Integer.parseInt(x))
-              .collect(Collectors.toList());
-        } catch (Exception e) {
+          final String argStr = arg.substring(TEST_PORT.length());
+          final String[] ports = argStr.replaceAll(" ", "").split(",");
+          testPort = Arrays.asList(ports).stream().map(x -> Integer.parseInt(x)).collect(Collectors.toList());
+        } catch (final Exception e) {
           usage(1);
         }
       } else {
-        if ( port != AdapterPort.DEBUG ) {
+        if (port != AdapterPort.DEBUG) {
           commands.add(arg);
         }
       }
@@ -182,12 +183,17 @@ public class CommandLine implements IConnectivityLogger {
   @Override
   public void log(final PtiSeverity severity, final String message, final Throwable throwable) {
     System.out.println(severity.name() + ": " + message);
-    if ( throwable != null )
+    if (throwable != null)
       throwable.printStackTrace(System.out);
   }
 
-  public boolean shouldExit() { return shouldExit; }
-  public int exitCode() { return exitCode; }
+  public boolean shouldExit() {
+    return shouldExit;
+  }
+
+  public int exitCode() {
+    return exitCode;
+  }
 
   @Override
   public int bpsRecordPeriodMs() {
@@ -200,7 +206,7 @@ public class CommandLine implements IConnectivityLogger {
   }
 
   private List<String> getIpAddresses(final String path) {
-    List<String> ips = new ArrayList<>();
+    final List<String> ips = new ArrayList<>();
 
     try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
       String line = reader.readLine();
@@ -215,7 +221,8 @@ public class CommandLine implements IConnectivityLogger {
         line = reader.readLine();
       }
       reader.close();
-    } catch (IOException e) { }
+    } catch (final IOException e) {
+    }
     return ips;
   }
 
@@ -223,18 +230,18 @@ public class CommandLine implements IConnectivityLogger {
     String date = "unknown";
     String hash = "unknown";
     String version = "unknown";
-    
-    URL u = getClass().getClassLoader().getResource("build.stamp");
-    if ( u != null ) {
-      Properties p = new Properties();
+
+    final URL u = getClass().getClassLoader().getResource("build_pti.stamp");
+    if (u != null) {
+      final Properties p = new Properties();
       try {
-        try (InputStream is = u.openStream() ) {
+        try (InputStream is = u.openStream()) {
           p.load(is);
         }
         date = p.getProperty("date");
         hash = p.getProperty("hash");
         version = p.getProperty("version");
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.err.println("Error reading build information.");
       }
     }
@@ -250,13 +257,12 @@ public class CommandLine implements IConnectivityLogger {
    */
   private String filename() {
     try {
-      URL location = Main.class.getProtectionDomain().getCodeSource()
-          .getLocation();
+      final URL location = Main.class.getProtectionDomain().getCodeSource().getLocation();
       String file = location.getFile();
       file = file.substring(0, file.lastIndexOf('!'));
-      String[] split = file.split("[//\\\\]");
+      final String[] split = file.split("[//\\\\]");
       return split[split.length - 1];
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return "";
     }
   }
@@ -265,56 +271,113 @@ public class CommandLine implements IConnectivityLogger {
    * Prints usage and exits with a given exit code.
    */
   public void usage(final int exitCode) {
-    String filename = filename();
+    final String filename = filename();
     System.out.println("Usage: java -jar " + filename + " [ARGUMENTS] [COMMANDS]");
     System.out.println("\nMandatory arguments:\n");
-    System.out.println("  " + IP + "<HOSTNAMES> - specify adapter names or IP addresses to connect to (may be ommited in case of -discover).");
+    System.out.println("  " + IP
+        + "<HOSTNAMES> - specify adapter names or IP addresses to connect to (may be ommited in case of -discover).");
     System.out.println("\nOptional arguments:\n");
-    System.out.println("  " + INTERACTIVE + " - drop into interactive mode after connecting to adapter. Type 'help' once in interactive mode.");
-    System.out.println("  " + TIME_LIMIT + "<TIME_IN_MS> - how long to capture, before connection is closed and program shuts down. Default is 1 year.");
-    System.out.println("  " + DELAY + "<TIME_IN_MS> - how much delay is put after each command when running commands over admin port. Default is 2 seconds.");
+    System.out.println("  " + INTERACTIVE
+        + " - drop into interactive mode after connecting to adapter. Type 'help' once in interactive mode.");
+    System.out.println("  " + TIME_LIMIT
+        + "<TIME_IN_MS> - how long to capture, before connection is closed and program shuts down. Default is 1 year.");
+    System.out.println("  " + DELAY
+        + "<TIME_IN_MS> - how much delay is put after each command when running commands over admin port. Default is 2 seconds.");
     System.out.println("  " + OUT + "<FILENAME> - specify filename where to capture to.");
     System.out.println("  " + ADMIN + " - connect to admin port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL0 + " - connect to serial0 port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
-    System.out.println("  " + FORMAT + "[" + FileFormat.formatsAsString() + "] - specify a format for output.");
+    System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
-    System.out.println("  " + DRIFT_CORRECTION + "[enable, disable] - perform drift time correction for incoming packets. Default is enabled.");
+    System.out.println("  " + DRIFT_CORRECTION
+        + "[enable, disable] - perform drift time correction for incoming packets. Default is enabled.");
     System.out.println("  " + DRIFT_CORRECTION_THRESHOLD + " - drift time correction threshold (micro-sec).");
     System.out.println("  " + ZERO_TIME_THRESHOLD + " - zero time threshold (micro-sec).");
-    System.out.println("  " + DISCRETE_NODE_CAPTURE + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
+    System.out.println("  " + DISCRETE_NODE_CAPTURE
+        + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
     System.out.println("\nFile formats:\n");
-    for ( FileFormat ff: FileFormat.values() ) {
-      System.out.println("  " + ff.name().toLowerCase() + " - " + ff.description());
+    for (final FileFormat ff : FileFormat.values()) {
+      System.out.println("  " + ff.name().toLowerCase() + " - " + ff.format().description());
     }
     System.out.println("\nExamples:\n");
-    System.out.println("  'java -jar " + filename + " -ip=10.4.186.138'                                                     => capture from given device and print raw events to stdout.");
-    System.out.println("  'java -jar " + filename + " -ip=10.4.186.138,10.4.186.139'                                        => capture from given devices and print raw events to stdout.");
-    System.out.println("  'java -jar " + filename + " -ip=10.4.186.138,10.4.186.139 -discreteNodeCapture -out=capture.log'  => capture from given devices and stream events are captured in");
+    System.out.println("  'java -jar " + filename
+        + " -ip=10.4.186.138'                                                     => capture from given device and print raw events to stdout.");
+    System.out.println("  'java -jar " + filename
+        + " -ip=10.4.186.138,10.4.186.139'                                        => capture from given devices and print raw events to stdout.");
+    System.out.println("  'java -jar " + filename
+        + " -ip=10.4.186.138,10.4.186.139 -discreteNodeCapture -out=capture.log'  => capture from given devices and stream events are captured in");
     System.out.println("                                                                                                     capture_10.4.186.138.log, capture_10.4.186.139.log.");
-    System.out.println("  'java -jar " + filename + " -ip=10.4.186.138 -admin discovery'                                    => connect to admin port and print discovery information.");
-    System.out.println("  'java -jar " + filename + " -ip=10.4.186.138 -format=log -time=5000 -out=capture.log'             => capture for 5 seconds into capture.log, using network analyzer format.");
+    System.out.println("  'java -jar " + filename
+        + " -ip=10.4.186.138 -admin discovery'                                    => connect to admin port and print discovery information.");
+    System.out.println("  'java -jar " + filename
+        + " -ip=10.4.186.138 -format=log -time=5000 -out=capture.log'             => capture for 5 seconds into capture.log, using network analyzer format.");
     this.shouldExit = true;
     this.exitCode = exitCode;
   }
 
-  public boolean hasTimeLimit() { return timeLimitMs != Integer.MIN_VALUE; }
-  public int timeLimitMs() { return timeLimitMs; }
-  public int delayMs() { return delayMs; }
-  public String[] hostnames() { return hostnames.toArray(new String[0]); }
-  public String output() { return output; }
-  public AdapterPort port() { return port; }
-  public List<String> commands() { return commands; }
-  public FileFormat fileFormat() { return fileFormat; }
-  public boolean isInteractive() { return interactive; }
-  public boolean isDiscovery() { return discovery; }
-  public boolean driftCorrection () { return driftCorrection; }
-  public int driftCorrectionThreshold () { return driftCorrectionThreshold; }
-  public int zeroTimeThreshold () { return zeroTimeThreshold; }
-  public boolean discreteNodeCapture() { return discreteNodeCapture; };
-  public List<Integer> testPort() { return testPort; };
-  public boolean testMode() { return testMode; };
+  public boolean hasTimeLimit() {
+    return timeLimitMs != Integer.MIN_VALUE;
+  }
+
+  public int timeLimitMs() {
+    return timeLimitMs;
+  }
+
+  public int delayMs() {
+    return delayMs;
+  }
+
+  public String[] hostnames() {
+    return hostnames.toArray(new String[0]);
+  }
+
+  public String output() {
+    return output;
+  }
+
+  public AdapterPort port() {
+    return port;
+  }
+
+  public List<String> commands() {
+    return commands;
+  }
+
+  public FileFormat fileFormat() {
+    return fileFormat;
+  }
+
+  public boolean isInteractive() {
+    return interactive;
+  }
+
+  public boolean isDiscovery() {
+    return discovery;
+  }
+
+  public boolean driftCorrection() {
+    return driftCorrection;
+  }
+
+  public int driftCorrectionThreshold() {
+    return driftCorrectionThreshold;
+  }
+
+  public int zeroTimeThreshold() {
+    return zeroTimeThreshold;
+  }
+
+  public boolean discreteNodeCapture() {
+    return discreteNodeCapture;
+  }
+
+  public List<Integer> testPort() {
+    return testPort;
+  }
+
+  public boolean testMode() {
+    return testMode;
+  }
 
 }
-

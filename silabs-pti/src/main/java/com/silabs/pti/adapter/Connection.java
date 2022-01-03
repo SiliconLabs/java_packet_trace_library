@@ -26,16 +26,15 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
-
 /**
- * The connection that wraps a basic socket connection, using a
- * standard blocking IO.
+ * The connection that wraps a basic socket connection, using a standard
+ * blocking IO.
  *
- * This class was written originally in 2003 and then
- * completely turned inside out several times.
+ * This class was written originally in 2003 and then completely turned inside
+ * out several times.
  *
- * @author  Matteo Neale Paris (matteo@ember.com)
- * @author  Timotej Ecimovic
+ * @author Matteo Neale Paris (matteo@ember.com)
+ * @author Timotej Ecimovic
  */
 public class Connection extends BaseConnection {
 
@@ -45,8 +44,8 @@ public class Connection extends BaseConnection {
 
   /**
    * The <code>timeout</code> field is used for timing out socket connection
-   * requests and waiting for message responses.  Units are milliseconds.
-   * Default is 2000.
+   * requests and waiting for message responses. Units are milliseconds. Default
+   * is 2000.
    */
   private final int framingTimeout = 2000;
 
@@ -57,31 +56,25 @@ public class Connection extends BaseConnection {
   private IoHandler handler;
 
   /**
-   * Constructs a Connection object that will use a socket.
-   * Does not open the socket.
+   * Constructs a Connection object that will use a socket. Does not open the
+   * socket.
    *
-   * @param host  the host to connect to.
-   * @param port  the port to connect to.
+   * @param host the host to connect to.
+   * @param port the port to connect to.
    */
-  Connection(final IoConnector connector,
-             final String host,
-             final int port,
-             final IConnectivityLogger logger) {
+  Connection(final IoConnector connector, final String host, final int port, final IConnectivityLogger logger) {
     super(host, port, logger);
     this.connector = connector;
     this.handler = connector.getHandler();
   }
 
-
-  Connection(final String host,
-             final int port,
-             final IConnectivityLogger logger) {
+  Connection(final String host, final int port, final IConnectivityLogger logger) {
     super(host, port, logger);
   }
 
   /**
-   * Opens a socket to this Connection's host and port.  Starts a thread
-   * to listen to the inbound messages.
+   * Opens a socket to this Connection's host and port. Starts a thread to listen
+   * to the inbound messages.
    *
    */
   @Override
@@ -135,20 +128,20 @@ public class Connection extends BaseConnection {
     // clean up
     session = null;
 
-    if ( connectionEnabler != null )
+    if (connectionEnabler != null)
       connectionEnabler.releaseConnection(host + ":" + port);
     informListenersOfState(false);
   }
 
   /**
-   * Sends a message to the device.  Uses the {@link IFramer#frame(byte[])}
-   * method of the current <code>IFramer</code> to add framing, unless it
-   * has been turned off with {@link #setOutgoingFramingEnabled(boolean)}.  If a
-   * log has been started, prints the unframed message to the log
-   * after formatting it as a String using {@link IFramer#toString(byte[])}.
+   * Sends a message to the device. Uses the {@link IFramer#frame(byte[])} method
+   * of the current <code>IFramer</code> to add framing, unless it has been turned
+   * off with {@link #setOutgoingFramingEnabled(boolean)}. If a log has been
+   * started, prints the unframed message to the log after formatting it as a
+   * String using {@link IFramer#toString(byte[])}.
    *
-   * @param message  the message to send, as an array of ints.
-   * @see            #send(String)
+   * @param message the message to send, as an array of ints.
+   * @see #send(String)
    */
   @Override
   public void send(final byte[] message) throws IOException {
@@ -173,7 +166,7 @@ public class Connection extends BaseConnection {
   /**
    * Checks the socket to see if it is connected.
    *
-   * @return  true  if and only if the socket is connected and not closed.
+   * @return true if and only if the socket is connected and not closed.
    */
   @Override
   public boolean isConnected() {
@@ -203,23 +196,22 @@ public class Connection extends BaseConnection {
   }
 
   /**
-   * Start the listen thread, which processes incoming messages.
-   * Called automatically by the {@link #connect} method.
+   * Start the listen thread, which processes incoming messages. Called
+   * automatically by the {@link #connect} method.
    */
   public void initFramers() {
     if (incomingFramer == null) {
-      incomingFramer = new AsciiFramer();  // default framing is Ascii
+      incomingFramer = new AsciiFramer(); // default framing is Ascii
     }
     if (outgoingFramer == null) {
-      outgoingFramer = new AsciiFramer();  // default framing is Ascii
+      outgoingFramer = new AsciiFramer(); // default framing is Ascii
     }
   }
 
   @Override
   public void repair() throws IOException {
-    if ( connectionEnabler != null ) {
+    if (connectionEnabler != null) {
       connectionEnabler.repairConnection(host + ":" + port);
     }
   }
 }
-

@@ -19,12 +19,12 @@ import org.apache.mina.core.service.IoConnector;
 /**
  * Static utilities.
  *
- * @author Timotej
- * Created on Mar 20, 2018
+ * @author Timotej Created on Mar 20, 2018
  */
 public class Adapter {
 
-  private Adapter() {}
+  private Adapter() {
+  }
 
   /**
    * Creates instance of IConnection object.
@@ -41,9 +41,7 @@ public class Adapter {
     return new Connection(connector, host, port, logger);
   }
 
-  public static IConnection createConnection(final String host,
-                                             final int port,
-                                             final IConnectivityLogger logger) {
+  public static IConnection createConnection(final String host, final int port, final IConnectivityLogger logger) {
     return createConnection(ConnectionType.CLASSIC, host, port, logger);
   }
 
@@ -59,7 +57,7 @@ public class Adapter {
                                              final String host,
                                              final int port,
                                              final IConnectivityLogger logger) {
-    switch(type) {
+    switch (type) {
     case CLASSIC:
       return new Connection(host, port, logger);
     case BUFFERED_NIO:
@@ -85,12 +83,7 @@ public class Adapter {
                                                final IConnectionEnabler enabler,
                                                final IConnectivityLogger logger,
                                                final ConnectionType debugConnectionType) {
-    return new Backchannel(originatorId,
-                           host,
-                           portmapper,
-                           enabler,
-                           logger,
-                           debugConnectionType);
+    return new Backchannel(originatorId, host, portmapper, enabler, logger, debugConnectionType);
   }
 
 }

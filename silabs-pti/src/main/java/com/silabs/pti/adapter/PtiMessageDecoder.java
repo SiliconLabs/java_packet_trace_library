@@ -27,9 +27,7 @@ public class PtiMessageDecoder extends MessageDecoderAdapter {
   }
 
   @Override
-  public MessageDecoderResult decode(IoSession session,
-                                     IoBuffer in,
-                                     ProtocolDecoderOutput out) throws Exception {
+  public MessageDecoderResult decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
     byte[] array = new byte[in.remaining()];
     in.get(array);
     out.write(array);

@@ -21,10 +21,10 @@ import java.util.List;
 import com.silabs.pti.util.LineTerminator;
 
 /**
- * Treats incoming messages as US-ASCII framed by newlines (any variety).
- * Uses "\r\n" to frame new messages.
+ * Treats incoming messages as US-ASCII framed by newlines (any variety). Uses
+ * "\r\n" to frame new messages.
  *
- * @author  Matteo Neale Paris (matteo@ember.com)
+ * @author Matteo Neale Paris (matteo@ember.com)
  */
 public class AsciiFramer implements ILineTerminatingFramer {
 
@@ -60,7 +60,7 @@ public class AsciiFramer implements ILineTerminatingFramer {
     // but that seems like an excessive amount of extra work.
     if (nextByte == '\r' || nextByte == '\n') {
       byte[] ints = new byte[message.size()];
-      for(int i = 0; i < ints.length; i++)
+      for (int i = 0; i < ints.length; i++)
         ints[i] = message.get(i);
       message.clear();
       return ints;
@@ -76,7 +76,7 @@ public class AsciiFramer implements ILineTerminatingFramer {
       return null;
     }
     byte[] ints = new byte[message.size()];
-    for(int i = 0; i < ints.length; i++)
+    for (int i = 0; i < ints.length; i++)
       ints[i] = message.get(i);
     message.clear();
     return ints;
@@ -105,7 +105,9 @@ public class AsciiFramer implements ILineTerminatingFramer {
 
   /** Returns the line terminator that is used in output framing. */
   @Override
-  public LineTerminator lineTerminator() { return lineTerminator; }
+  public LineTerminator lineTerminator() {
+    return lineTerminator;
+  }
 
   /** Sets the line terminator that is used in output framing. */
   @Override

@@ -13,12 +13,11 @@
  ******************************************************************************/
 package com.silabs.pti.debugchannel;
 
-import java.io.IOException;
-import java.util.Map;
+import java.io.PrintStream;
 
+import com.silabs.pti.OutputMap;
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.format.IDebugChannelExportOutput;
-import com.silabs.pti.log.PtiLog;
 
 /**
  * Connection listener, responsible for forwarding the data into the appropriate
@@ -30,9 +29,9 @@ import com.silabs.pti.log.PtiLog;
 public class TextConnectionListener implements IConnectionListener {
   private final String originator;
   private volatile int nReceived = 0;
-  private final Map<String, IDebugChannelExportOutput> output;
+  private final OutputMap<?> output;
 
-  public TextConnectionListener(final String originator, final Map<String, IDebugChannelExportOutput> output) {
+  public TextConnectionListener(final String originator, final OutputMap<?> output) {
     this.originator = originator;
     this.output = output;
   }
@@ -44,12 +43,9 @@ public class TextConnectionListener implements IConnectionListener {
 
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
-    try {
-      final IDebugChannelExportOutput out = output.get(originator);
-      out.println(new String(message));
-    } catch (final IOException ioe) {
-      PtiLog.error("Could not output a message.", ioe);
-    }
+    final IDebugChannelExportOutput<?> out = output.output(originator);
+    if (out.writer() instanceof PrintStream)
+      ((PrintStream) out.writer()).println(new String(message));
   }
 
   @Override

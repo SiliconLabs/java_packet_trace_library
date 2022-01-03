@@ -13,7 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -27,11 +29,21 @@ import com.silabs.pti.debugchannel.RadioConfiguration;
  * @author timotej
  *
  */
-public class LogFileFormat implements IDebugChannelExportFormat {
+public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput out) throws IOException {
-    out.println(PtiUtilities.ISD_LOG_HEADER);
+  public IDebugChannelExportOutput<PrintStream> createOutput(final File f, final boolean append) throws IOException {
+    return new PrintStreamOutput(f, append);
+  }
+
+  @Override
+  public IDebugChannelExportOutput<PrintStream> createStdoutOutput() {
+    return new PrintStreamOutput(System.out);
+  }
+
+  @Override
+  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) throws IOException {
+    out.writer().println(PtiUtilities.ISD_LOG_HEADER);
   }
 
   @Override
@@ -50,7 +62,7 @@ public class LogFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -58,12 +70,12 @@ public class LogFileFormat implements IDebugChannelExportFormat {
     final String x = "[" + dm.networkTime() + " " + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length)
         + " " + type.value() + " " + type.name() + "] [" + originator + "] ["
         + ByteArrayUtil.formatByteArray(dm.contents()) + "]";
-    out.println(x);
+    out.writer().println(x);
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) {
@@ -71,7 +83,7 @@ public class LogFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

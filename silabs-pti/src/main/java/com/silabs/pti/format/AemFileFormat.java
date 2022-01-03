@@ -13,7 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
@@ -25,11 +27,21 @@ import com.silabs.pti.decode.AemSample;
  * 
  * @author timotej
  */
-public class AemFileFormat implements IDebugChannelExportFormat {
+public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput out) throws IOException {
-    out.println("#     Time    Voltage    Current");
+  public IDebugChannelExportOutput<PrintStream> createOutput(final File f, final boolean append) throws IOException {
+    return new PrintStreamOutput(f, append);
+  }
+
+  @Override
+  public IDebugChannelExportOutput<PrintStream> createStdoutOutput() {
+    return new PrintStreamOutput(System.out);
+  }
+
+  @Override
+  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) throws IOException {
+    out.writer().println("#     Time    Voltage    Current");
   }
 
   @Override
@@ -48,7 +60,7 @@ public class AemFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -65,12 +77,12 @@ public class AemFileFormat implements IDebugChannelExportFormat {
       sb.append(String.format("%s%10d %10f %10f", sep, as.timestamp(), as.voltage(), as.current()));
       sep = "\n";
     }
-    out.println(sb.toString());
+    out.writer().println(sb.toString());
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) {
@@ -78,7 +90,7 @@ public class AemFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

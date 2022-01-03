@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +41,7 @@ import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.format.FileFormat;
-import com.silabs.pti.format.FileOutput;
 import com.silabs.pti.format.IDebugChannelExportOutput;
-import com.silabs.pti.format.PrintStreamOutput;
-import com.silabs.pti.log.PtiLog;
 import com.silabs.pti.util.LineTerminator;
 import com.silabs.pti.util.MiscUtil;
 
@@ -61,8 +57,8 @@ public class Interactive {
   private File out = new File("packet-trace.log");
   private IConnection debugConnection = null, cliConnection = null;
   private String host = null;
-  private HashMap<String, IDebugChannelExportOutput> cliOutStream = null;
-  private HashMap<String, IDebugChannelExportOutput> captureStream = null;
+  private OutputMap<?> cliOutputMap = null;
+  private OutputMap<?> captureOutputMap = null;
   private IConnectionListener connectionListener = null;
   private IConnectionListener cliConnectionListener = null;
 
@@ -87,8 +83,8 @@ public class Interactive {
       host = cli.hostnames()[0];
     this.logger = cli;
     this.timeSync = timeSync;
-    this.cliOutStream = new HashMap<>();
-    this.captureStream = new HashMap<>();
+    this.cliOutputMap = new OutputMap<Object>();
+    this.captureOutputMap = new OutputMap<Object>();
   }
 
   /**
@@ -209,13 +205,13 @@ public class Interactive {
   private void cli(final String s) throws IOException {
     if (cliConnection == null || !cliConnection.isConnected()) {
       try {
-        cliOutStream.put(host, new PrintStreamOutput(System.out));
+        cliOutputMap.put(host, (IDebugChannelExportOutput) FileFormat.TEXT.format().createStdoutOutput());
       } catch (final Exception e) {
         System.err.println("Could not open file: " + out.getAbsolutePath());
         e.printStackTrace();
         return;
       }
-      cliConnectionListener = new TextConnectionListener(host, cliOutStream);
+      cliConnectionListener = new TextConnectionListener(host, cliOutputMap);
       cliConnection = Adapter.createConnection(host, cliPort, logger);
       cliConnection.connect();
       cliConnection.addConnectionListener(cliConnectionListener);
@@ -364,16 +360,9 @@ public class Interactive {
         debugConnection.removeConnectionListener(connectionListener);
         connectionListener = null;
       }
-      if (captureStream != null) {
-        captureStream.forEach((k, v) -> {
-          try {
-            v.close();
-          } catch (final IOException ioe) {
-            PtiLog.error("Could not close output.", ioe);
-          }
-        });
-        captureStream.clear();
-        captureStream = null;
+      if (captureOutputMap != null) {
+        captureOutputMap.closeAndClear();
+        captureOutputMap = null;
       }
       debugConnection.close();
       debugConnection = null;
@@ -409,32 +398,25 @@ public class Interactive {
     }
 
     if (isStart) {
-      if (captureStream != null) {
+      if (captureOutputMap != null) {
         System.err.println("Already capturing.");
         return;
       }
       final IFramer f = new DebugChannelFramer(true);
       debugConnection.setFramers(f, f);
       try {
-        captureStream.put(host, new FileOutput(out, true));
+        captureOutputMap.put(host, (IDebugChannelExportOutput) formatType.format().createOutput(out, true));
       } catch (final Exception e) {
         System.err.println("Could not open file: " + out.getAbsolutePath());
         e.printStackTrace();
         return;
       }
-      connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureStream, timeSync);
+      connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureOutputMap, timeSync);
       debugConnection.addConnectionListener(connectionListener);
     } else {
       try {
-        captureStream.forEach((k, v) -> {
-          try {
-            v.close();
-          } catch (final IOException ioe) {
-            PtiLog.error("Error closing output.", ioe);
-          }
-        });
-        captureStream.clear();
-        captureStream = null;
+        captureOutputMap.closeAndClear();
+        captureOutputMap = null;
         debugConnection.removeConnectionListener(connectionListener);
         connectionListener = null;
       } catch (final NullPointerException e) {

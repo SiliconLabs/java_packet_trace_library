@@ -22,23 +22,14 @@ import java.io.IOException;
  * @author timotej
  *
  */
-public interface IDebugChannelExportOutput extends Closeable {
+public interface IDebugChannelExportOutput<T> extends Closeable {
 
   /**
-   * Output a string.
+   * Returns the underlying implementation of the output.
    * 
-   * @param x
+   * @return
    */
-  void println(String x) throws IOException;
-
-  /**
-   * Output raw bytes.
-   * 
-   * @param bytes
-   * @param offset
-   * @param length
-   */
-  void write(byte[] bytes, int offset, int length) throws IOException;
+  T writer();
 
   /**
    * Closes the output for writing.

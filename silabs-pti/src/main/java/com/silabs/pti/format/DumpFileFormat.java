@@ -13,7 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
@@ -24,10 +26,20 @@ import com.silabs.pti.debugchannel.EventType;
  * @author timotej
  *
  */
-public class DumpFileFormat implements IDebugChannelExportFormat {
+public class DumpFileFormat implements IDebugChannelExportFormat<OutputStream> {
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput out) {
+  public OutputStreamOutput createOutput(final File f, final boolean append) throws IOException {
+    return new OutputStreamOutput(f, append);
+  }
+
+  @Override
+  public OutputStreamOutput createStdoutOutput() {
+    return new OutputStreamOutput();
+  }
+
+  @Override
+  public void writeHeader(final IDebugChannelExportOutput<OutputStream> out) {
   }
 
   @Override
@@ -46,15 +58,15 @@ public class DumpFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput<OutputStream> out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {
-    out.write(rawBytes, offset, length);
+    out.writer().write(rawBytes, offset, length);
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput<OutputStream> out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -62,7 +74,7 @@ public class DumpFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public final boolean formatRawBytes(final IDebugChannelExportOutput out,
+  public final boolean formatRawBytes(final IDebugChannelExportOutput<OutputStream> out,
                                       final byte[] rawBytes,
                                       final int offset,
                                       final int length) {

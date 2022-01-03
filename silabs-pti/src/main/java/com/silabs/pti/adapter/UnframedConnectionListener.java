@@ -16,7 +16,6 @@ package com.silabs.pti.adapter;
 import java.io.File;
 import java.io.IOException;
 
-import com.silabs.pti.format.FileOutput;
 import com.silabs.pti.format.IDebugChannelExportFormat;
 import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.log.PtiLog;
@@ -29,12 +28,12 @@ import com.silabs.pti.util.ICharacterListener;
  * @author timotej
  *
  */
-public class UnframedConnectionListener implements ICharacterListener {
-  private final IDebugChannelExportOutput out;
-  private final IDebugChannelExportFormat fileFormat;
+public class UnframedConnectionListener<T> implements ICharacterListener {
+  private final IDebugChannelExportOutput<T> out;
+  private final IDebugChannelExportFormat<T> fileFormat;
 
-  public UnframedConnectionListener(final File f, final IDebugChannelExportFormat format) throws IOException {
-    out = new FileOutput(f);
+  public UnframedConnectionListener(final File f, final IDebugChannelExportFormat<T> format) throws IOException {
+    this.out = format.createOutput(f, false);
     this.fileFormat = format;
   }
 

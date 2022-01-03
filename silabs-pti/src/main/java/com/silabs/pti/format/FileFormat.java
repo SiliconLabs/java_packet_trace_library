@@ -28,9 +28,9 @@ public enum FileFormat {
   AEM(new AemFileFormat()),
   TEXT(new TextFileFormat());
 
-  private IDebugChannelExportFormat format;
+  private IDebugChannelExportFormat<?> format;
 
-  private FileFormat(final IDebugChannelExportFormat format) {
+  private FileFormat(final IDebugChannelExportFormat<?> format) {
     this.format = format;
   }
 
@@ -39,7 +39,7 @@ public enum FileFormat {
    * 
    * @return IPtiFileFormat implementation.
    */
-  public IDebugChannelExportFormat format() {
+  public IDebugChannelExportFormat<?> format() {
     return format;
   }
 
@@ -49,9 +49,9 @@ public enum FileFormat {
    * @return
    */
   public static String displayOptionsAsString() {
-    StringBuilder formats = new StringBuilder();
+    final StringBuilder formats = new StringBuilder();
     String sep = "";
-    for (FileFormat ff : FileFormat.values()) {
+    for (final FileFormat ff : FileFormat.values()) {
       formats.append(sep).append(ff.name().toLowerCase());
       sep = "|";
     }

@@ -13,7 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -25,13 +27,23 @@ import com.silabs.pti.debugchannel.EventType;
  * @author timotej
  *
  */
-public class RawFileFormat implements IDebugChannelExportFormat {
+public class RawFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
   private static String RAW_PREFIX = "[ ";
   private static String RAW_SUFFIX = " ]";
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput out) {
+  public IDebugChannelExportOutput<PrintStream> createOutput(final File f, final boolean append) throws IOException {
+    return new PrintStreamOutput(f, append);
+  }
+
+  @Override
+  public IDebugChannelExportOutput<PrintStream> createStdoutOutput() {
+    return new PrintStreamOutput(System.out);
+  }
+
+  @Override
+  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) {
   }
 
   @Override
@@ -50,7 +62,7 @@ public class RawFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -58,17 +70,17 @@ public class RawFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) throws IOException {
     final String x = RAW_PREFIX + ByteArrayUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
-    out.println(x);
+    out.writer().println(x);
     return true;
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

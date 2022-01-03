@@ -18,34 +18,27 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import com.silabs.na.pcap.util.ByteArrayUtil;
-
 /**
  * Implementation of the export output that simply wraps print stream.
  * 
  * @author timotej
  *
  */
-public class PrintStreamOutput implements IDebugChannelExportOutput {
+class PrintStreamOutput implements IDebugChannelExportOutput<PrintStream> {
 
   private final PrintStream printStream;
 
-  public PrintStreamOutput(final File f) throws IOException {
-    this.printStream = new PrintStream(new FileOutputStream(f));
+  @Override
+  public PrintStream writer() {
+    return printStream;
+  }
+
+  public PrintStreamOutput(final File f, final boolean append) throws IOException {
+    this.printStream = new PrintStream(new FileOutputStream(f, append));
   }
 
   public PrintStreamOutput(final PrintStream printStream) {
     this.printStream = printStream;
-  }
-
-  @Override
-  public void println(final String x) {
-    printStream.println(x);
-  }
-
-  @Override
-  public void write(final byte[] bytes, final int offset, final int length) {
-    printStream.println(ByteArrayUtil.formatByteArray(bytes, offset, length, true, true));
   }
 
   @Override

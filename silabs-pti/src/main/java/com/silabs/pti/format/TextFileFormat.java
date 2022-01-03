@@ -13,7 +13,9 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -26,10 +28,20 @@ import com.silabs.pti.util.WiresharkUtil;
  * @author timotej
  *
  */
-public class TextFileFormat implements IDebugChannelExportFormat {
+public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput out) {
+  public IDebugChannelExportOutput<PrintStream> createOutput(final File f, final boolean append) throws IOException {
+    return new PrintStreamOutput(f, append);
+  }
+
+  @Override
+  public IDebugChannelExportOutput<PrintStream> createStdoutOutput() {
+    return new PrintStreamOutput(System.out);
+  }
+
+  @Override
+  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) {
   }
 
   @Override
@@ -48,7 +60,7 @@ public class TextFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -64,12 +76,12 @@ public class TextFileFormat implements IDebugChannelExportFormat {
         return false; // Nothing we can do. There is no data left.
       contents = Arrays.copyOfRange(contents, drops[0], contents.length - drops[1]);
     }
-    out.println(WiresharkUtil.printText2Pcap(timeMs, contents));
+    out.writer().println(WiresharkUtil.printText2Pcap(timeMs, contents));
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput out,
+  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) {
@@ -77,7 +89,7 @@ public class TextFileFormat implements IDebugChannelExportFormat {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput out,
+  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

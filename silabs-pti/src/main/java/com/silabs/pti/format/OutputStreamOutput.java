@@ -16,6 +16,7 @@ package com.silabs.pti.format;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Export output based on FileOutputStream
@@ -23,26 +24,25 @@ import java.io.IOException;
  * @author timotej
  *
  */
-public class FileOutput implements IDebugChannelExportOutput {
+class OutputStreamOutput implements IDebugChannelExportOutput<OutputStream> {
 
-  private final FileOutputStream fos;
+  private final OutputStream fos;
 
-  public FileOutput(final File f) throws IOException {
+  @Override
+  public OutputStream writer() {
+    return fos;
+  }
+
+  public OutputStreamOutput(final File f) throws IOException {
     this.fos = new FileOutputStream(f);
   }
 
-  public FileOutput(final File f, final boolean append) throws IOException {
+  public OutputStreamOutput(final File f, final boolean append) throws IOException {
     this.fos = new FileOutputStream(f, append);
   }
 
-  @Override
-  public void println(final String x) throws IOException {
-    fos.write(x.getBytes());
-  }
-
-  @Override
-  public void write(final byte[] bytes, final int offset, final int length) throws IOException {
-    fos.write(bytes, offset, length);
+  public OutputStreamOutput() {
+    this.fos = System.out;
   }
 
   @Override

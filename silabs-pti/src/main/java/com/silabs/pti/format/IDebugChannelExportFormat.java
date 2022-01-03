@@ -13,6 +13,7 @@
  ******************************************************************************/
 package com.silabs.pti.format;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.silabs.pti.debugchannel.DebugMessage;
@@ -24,7 +25,11 @@ import com.silabs.pti.debugchannel.EventType;
  * @author timotej
  *
  */
-public interface IDebugChannelExportFormat {
+public interface IDebugChannelExportFormat<T> {
+
+  public IDebugChannelExportOutput<T> createStdoutOutput() throws IOException;
+
+  public IDebugChannelExportOutput<T> createOutput(File f, boolean append) throws IOException;
 
   /**
    * Returns human readable description of this file format.
@@ -36,7 +41,7 @@ public interface IDebugChannelExportFormat {
   /**
    * Returns the header that is put on the top of the text file.
    */
-  public void writeHeader(IDebugChannelExportOutput out) throws IOException;
+  public void writeHeader(IDebugChannelExportOutput<T> out) throws IOException;
 
   /**
    * Formatter returns true if the raw bytes are used, or false if the debug
@@ -64,7 +69,7 @@ public interface IDebugChannelExportFormat {
    * 
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatDebugMessage(IDebugChannelExportOutput out,
+  public boolean formatDebugMessage(IDebugChannelExportOutput<T> out,
                                     String originator,
                                     DebugMessage dm,
                                     EventType type) throws IOException;
@@ -76,7 +81,7 @@ public interface IDebugChannelExportFormat {
    * @return true if message was written out, false if it was filtered.
    */
   public boolean
-         formatRawBytes(IDebugChannelExportOutput out, byte[] rawBytes, int offset, int length) throws IOException;
+         formatRawBytes(IDebugChannelExportOutput<T> out, byte[] rawBytes, int offset, int length) throws IOException;
 
   /**
    * If this format is NOT using debug messages, then this method is called for
@@ -88,7 +93,7 @@ public interface IDebugChannelExportFormat {
    * @param length
    * @throws IOException
    */
-  public void writeRawUnframedData(IDebugChannelExportOutput out,
+  public void writeRawUnframedData(IDebugChannelExportOutput<T> out,
                                    byte[] rawBytes,
                                    int offset,
                                    int length) throws IOException;

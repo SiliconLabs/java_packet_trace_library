@@ -50,7 +50,7 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
     c.addConnectionListener(this);
     while (!isFinished) {
       try {
-        Thread.sleep(1000);
+        Thread.sleep(200);
       } catch (final InterruptedException ie) {
         break;
       }

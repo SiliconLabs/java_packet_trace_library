@@ -14,8 +14,6 @@
 
 package com.silabs.pti.adapter;
 
-import org.apache.mina.core.service.IoConnector;
-
 /**
  * Static utilities.
  *
@@ -24,21 +22,6 @@ import org.apache.mina.core.service.IoConnector;
 public class Adapter {
 
   private Adapter() {
-  }
-
-  /**
-   * Creates instance of IConnection object.
-   *
-   * @param host
-   * @param port
-   * @param logger
-   * @return IConnection
-   */
-  public static IConnection createConnection(final IoConnector connector,
-                                             final String host,
-                                             final int port,
-                                             final IConnectivityLogger logger) {
-    return new Connection(connector, host, port, logger);
   }
 
   public static IConnection createConnection(final String host, final int port, final IConnectivityLogger logger) {

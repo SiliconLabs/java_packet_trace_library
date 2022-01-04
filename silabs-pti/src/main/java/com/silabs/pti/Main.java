@@ -17,24 +17,18 @@ package com.silabs.pti;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import org.apache.mina.core.service.IoConnector;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import com.silabs.pti.adapter.Adapter;
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.AsciiFramer;
 import com.silabs.pti.adapter.CharacterCollector;
-import com.silabs.pti.adapter.ConnectionSessionHandler;
 import com.silabs.pti.adapter.DebugChannelFramer;
 import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IFramer;
-import com.silabs.pti.adapter.PtiCodecFactory;
+import com.silabs.pti.adapter.AdapterSocketConnector;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.adapter.UnframedConnectionListener;
@@ -56,14 +50,8 @@ import com.silabs.pti.util.LineTerminator;
  * @author timotej
  */
 public class Main {
-  /**
-   * The <code>timeout</code> field is used for timing out socket connection
-   * requests and waiting for message responses. Units are milliseconds. Default
-   * is 2000.
-   */
-  private static final int framingTimeout = 2000;
 
-  private final IoConnector connector = new NioSocketConnector();
+  private final AdapterSocketConnector adapterConnector;
   private final TimeSynchronizer timeSync;
 
   private final CommandLine cli;
@@ -89,10 +77,7 @@ public class Main {
                                     cli.driftCorrection(),
                                     cli.driftCorrectionThreshold(),
                                     cli.zeroTimeThreshold());
-
-    connector.setConnectTimeoutMillis(framingTimeout);
-    connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new PtiCodecFactory(Charset.forName("UTF-8"))));
-    connector.setHandler(new ConnectionSessionHandler());
+    adapterConnector = new AdapterSocketConnector();
   }
 
   public CommandLine cli() {
@@ -145,9 +130,9 @@ public class Main {
       dl = new UnframedConnectionListener(new File(outputFilename), cli.fileFormat().format());
 
       for (final String host : cli.hostnames()) {
-        final IConnection c = Adapter.createConnection(connector, host, AdapterPort.DEBUG.defaultPort(), cli);
-        c.connect();
+        final IConnection c = adapterConnector.createConnection(host, AdapterPort.DEBUG.defaultPort(), cli);
         c.addCharacterListener(dl);
+        c.connect();
       }
     } else {
       output = configOutputFiles(cli, format, outputFilename);
@@ -162,7 +147,7 @@ public class Main {
           connections.put(originator, debugConnections);
 
           // Debug connection
-          final IConnection testPortConnection = Adapter.createConnection(connector, "localhost", port, cli);
+          final IConnection testPortConnection = adapterConnector.createConnection("localhost", port, cli);
           final IFramer asciiFramer = new AsciiFramer();
           testPortConnection.connect();
           testPortConnection.setFramers(asciiFramer, asciiFramer);
@@ -176,22 +161,22 @@ public class Main {
           connections.put(ip, debugConnections);
 
           // Debug connection
-          final IConnection debug = Adapter.createConnection(connector, ip, AdapterPort.DEBUG.defaultPort(), cli);
+          final IConnection debug = adapterConnector.createConnection(ip, AdapterPort.DEBUG.defaultPort(), cli);
           final IFramer debugChannelFramer = new DebugChannelFramer(true);
-          debug.connect();
           debug.setFramers(debugChannelFramer, debugChannelFramer);
           debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
                                                                          ip,
                                                                          output,
                                                                          timeSynchronizer));
+          debug.connect();
           debugConnections.add(debug);
 
           // Admin connection / configure Time Server
           if (!cli.testMode() && cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
-            final IConnection admin = Adapter.createConnection(connector, ip, AdapterPort.ADMIN.defaultPort(), cli);
+            final IConnection admin = adapterConnector.createConnection(ip, AdapterPort.ADMIN.defaultPort(), cli);
             final IFramer asciiFramer = new AsciiFramer();
-            admin.connect();
             admin.setFramers(asciiFramer, asciiFramer);
+            admin.connect();
             TimeSync.synchronizeTime(admin,
                                      debug.isConnected(),
                                      ip,
@@ -300,8 +285,8 @@ public class Main {
         list.clear();
       }
     }
-    if (connector != null) {
-      connector.dispose();
+    if (adapterConnector != null) {
+      adapterConnector.dispose();
     }
   }
 

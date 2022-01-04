@@ -26,7 +26,8 @@ public enum FileFormat {
   RAW(new RawFileFormat()),
   LOG(new LogFileFormat()),
   AEM(new AemFileFormat()),
-  TEXT(new TextFileFormat());
+  TEXT(new TextFileFormat()),
+  PCAPNG(new PcapngFormat());
 
   private IDebugChannelExportFormat<?> format;
 

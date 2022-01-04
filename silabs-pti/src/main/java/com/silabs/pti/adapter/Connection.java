@@ -62,10 +62,10 @@ public class Connection extends BaseConnection {
    * @param host the host to connect to.
    * @param port the port to connect to.
    */
-  Connection(final IoConnector connector, final String host, final int port, final IConnectivityLogger logger) {
+  Connection(final AdapterSocketConnector connector, final String host, final int port, final IConnectivityLogger logger) {
     super(host, port, logger);
-    this.connector = connector;
-    this.handler = connector.getHandler();
+    this.connector = connector.ioConnector();
+    this.handler = connector.ioConnector().getHandler();
   }
 
   Connection(final String host, final int port, final IConnectivityLogger logger) {
@@ -99,7 +99,7 @@ public class Connection extends BaseConnection {
       connector.setHandler(handler);
     }
 
-    ConnectFuture future = connector.connect(new InetSocketAddress(this.host, this.port));
+    final ConnectFuture future = connector.connect(new InetSocketAddress(this.host, this.port));
     future.awaitUninterruptibly();
     session = future.getSession();
     session.setAttribute(CONNECTION, this);
@@ -119,7 +119,7 @@ public class Connection extends BaseConnection {
       try {
         logInfo("Disconnect.");
         session.closeNow();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         reportProblem("Close socket.", e);
         logError("Disconnect error.", e);
       }
@@ -145,18 +145,18 @@ public class Connection extends BaseConnection {
    */
   @Override
   public void send(final byte[] message) throws IOException {
-    IoSession out = getOutputSession();
-    Charset charset = (Charset) out.getAttribute(CHARSET);
+    final IoSession out = getOutputSession();
+    final Charset charset = (Charset) out.getAttribute(CHARSET);
 
     if (out == null || message == null || charset == null)
       return;
 
-    byte[] outgoing = frameOutgoing ? outgoingFramer.frame(message) : message;
+    final byte[] outgoing = frameOutgoing ? outgoingFramer.frame(message) : message;
     if (outgoing == null) {
       return;
     }
 
-    IoBuffer buf = IoBuffer.allocate(outgoing.length).setAutoExpand(true);
+    final IoBuffer buf = IoBuffer.allocate(outgoing.length).setAutoExpand(true);
     buf.put(outgoing);
     buf.flip();
     out.write(buf);

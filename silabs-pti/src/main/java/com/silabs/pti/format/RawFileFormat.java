@@ -23,14 +23,14 @@ import com.silabs.pti.debugchannel.EventType;
 
 /**
  * Output a text file with raw debug messages, one per line, in a hex mode.
- * 
+ *
  * @author timotej
  *
  */
 public class RawFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
-  private static String RAW_PREFIX = "[ ";
-  private static String RAW_SUFFIX = " ]";
+  public static String RAW_PREFIX = "[ ";
+  public static String RAW_SUFFIX = " ]";
 
   @Override
   public IDebugChannelExportOutput<PrintStream> createOutput(final File f, final boolean append) throws IOException {

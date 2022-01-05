@@ -2,8 +2,8 @@
 
 ## Framing
 
-Debug channel data is a stream of data. Data is framed into individual "debug messages".
-The overall format includes the framing information, in a following way.
+Debug channel data is a stream of data. The Data is framed into individual "debug messages".
+The overall format includes the framing information, in the following way.
 
 ```
 Byte        Description
@@ -18,11 +18,11 @@ Byte        Description
 All tooling that deals with the discrete debug messages is expected to remove the framing, so what is left is individual 
 debug messages, without the framing and the length bytes.
 
-In case of errors (such as the `]` not being present after the length bytes) the recovery is typically accomplished by
+In case of errors (such as the `]` not being present after the length bytes) recovery is typically accomplished by
 the deframing state engine reading forward until a next `[` is found, and then attempting to resume the deframing.
-This case can be detected, because the payload of individual message contains the sequence number.
+This case can be detected, because the payload of each individual message contains a sequence number.
 
-Following two chapters describe the format of individual debug messages, after the framing bytes are removed.
+The following two chapters describe the format of individual debug messages, after the framing bytes are removed.
 
 ## Debug Message Version 1.0
 
@@ -30,7 +30,7 @@ Deprecated since 2005. Does not exist any more in any implementations.
 
 ## Debug Message Version 2.0
 
-Used in Silicon Labs WSTK adapters as default version for Packet Captures (as of 2021).
+Used in Silicon Labs WSTK adapters as the default version for Packet Captures (as of 2021).
 
 ```
 Byte        Description
@@ -51,7 +51,7 @@ Byte        Description
 
 ## Debug Message Version 3.0
 
-Used in Silicon Labs WSTK adapters as an optional format, can be turned on as a default in the admin console. 
+Debug Message Version 3. 0 is used in Silicon Labs WSTK adapters as an optional format. It can be turned on as a default in the admin console. 
 The only difference from 2.0 is, that it introduces nanosecond precision, 2-byte sequencing and few bytes of
 future-proofing flags.
 
@@ -81,12 +81,12 @@ Byte        Description
 
 ## Type-specific debug message payload
 
-Debug message type specific payload can really be anything, as long as its length fits into a 2-byte length size restriction.
+Debug message type specific payloads can really be anything, as long as their length fits into a 2-byte length size restriction.
 
 Most typical debug message types are RX and TX packets for various
 radio implementations, assertions, stack traces and other debugging
 messages, advanced energy measurement data points, and similar.
 
-Debug message types can be added over time, but once established, they don't change any more.
+Debug message types can be added over time, but once established, they cannot change.
 
 The types supported are listed [in this file](../silabs-pti/src/main/java/com/silabs/pti/debugchannel/DebugMessageType.java).

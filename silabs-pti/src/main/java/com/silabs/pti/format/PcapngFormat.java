@@ -30,6 +30,23 @@ import com.silabs.pti.debugchannel.EventType;
  */
 public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
+  /**
+   * Common method that actually writes out the raw unframed bytes into the pcap
+   * stream.
+   * 
+   * @param pcapOut
+   * @param interfaceIndex
+   * @param pcTime
+   * @param rawBytes
+   * @throws IOException
+   */
+  public static final void writeRawUnframedDebugMessage(final IPcapOutput pcapOut,
+                                                        final int interfaceIndex,
+                                                        final long pcTime,
+                                                        final byte[] rawBytes) throws IOException {
+    pcapOut.writeEnhancedPacketBlock(interfaceIndex, pcTime, rawBytes);
+  }
+
   @Override
   public IDebugChannelExportOutput<IPcapOutput> createOutput(final File f, final boolean append) throws IOException {
     if (append)
@@ -63,10 +80,12 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public boolean formatRawBytes(final IDebugChannelExportOutput<IPcapOutput> out,
+                                final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) throws IOException {
-    throw new IOException("PCAP NG does not support raw data writing.");
+    writeRawUnframedDebugMessage(out.writer(), 0, pcTimeMs, rawBytes);
+    return true;
   }
 
   @Override
@@ -84,6 +103,6 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public boolean isUsingRawBytes() {
-    return false;
+    return true;
   }
 }

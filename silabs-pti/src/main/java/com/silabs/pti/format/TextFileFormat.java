@@ -82,6 +82,7 @@ public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
 
   @Override
   public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
+                                final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) {

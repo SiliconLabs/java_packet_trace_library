@@ -80,8 +80,11 @@ public interface IDebugChannelExportFormat<T> {
    * 
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean
-         formatRawBytes(IDebugChannelExportOutput<T> out, byte[] rawBytes, int offset, int length) throws IOException;
+  public boolean formatRawBytes(IDebugChannelExportOutput<T> out,
+                                long pcTimeMs,
+                                byte[] rawBytes,
+                                int offset,
+                                int length) throws IOException;
 
   /**
    * If this format is NOT using debug messages, then this method is called for

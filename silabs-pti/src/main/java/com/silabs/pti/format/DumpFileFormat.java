@@ -75,6 +75,7 @@ public class DumpFileFormat implements IDebugChannelExportFormat<OutputStream> {
 
   @Override
   public final boolean formatRawBytes(final IDebugChannelExportOutput<OutputStream> out,
+                                      final long pcTimeMs,
                                       final byte[] rawBytes,
                                       final int offset,
                                       final int length) {

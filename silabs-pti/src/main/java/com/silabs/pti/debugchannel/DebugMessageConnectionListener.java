@@ -107,7 +107,7 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
                                              final TimeSynchronizer timeSync,
                                              final IDebugChannelExportFormat<T> format) throws IOException {
     if (format.isUsingRawBytes()) {
-      return format.formatRawBytes(outputStream, bytes, 0, bytes.length);
+      return format.formatRawBytes(outputStream, timeMs, bytes, 0, bytes.length);
     } else {
       final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
       final EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));

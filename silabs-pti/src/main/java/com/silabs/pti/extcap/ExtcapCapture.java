@@ -13,7 +13,7 @@ import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
-import com.silabs.pti.debugchannel.DebugMessage;
+import com.silabs.pti.format.PcapngFormat;
 import com.silabs.pti.log.PtiSeverity;
 
 /**
@@ -88,9 +88,8 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
     messageCount++;
-    final DebugMessage dm = DebugMessage.make("", message, pcTime);
     try {
-      output.writeEnhancedPacketBlock(0, dm.networkTime(), dm.contents());
+      PcapngFormat.writeRawUnframedDebugMessage(output, 0, pcTime, message);
     } catch (final IOException ioe) {
       if (!isFinished)
         ec.log("capture error: could not write PCAP file any more [" + ioe.getMessage() + "]");

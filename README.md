@@ -2,11 +2,11 @@
 
 # What is this?
 
-Silabs-pti is a java based client side library, to communicate with Silicon Labs ISA3 or WSTK adapters and stream debug channel messages to a file.
-That includes energy consumption data, network packet data or any other data available over the debug channel.
+Silabs-pti is a java based client side library, used to communicate with Silicon Labs ISA3 or WSTK adapters and stream debug channel messages to a file.
+This includes energy consumption data, network packet data or any other data available over the debug channel.
 Data can be saved in a PCAPNG format to be consumed by wireshark, Silicon Labs Network Analyzer, or as plain text or binary files.
 
-It is also suitable for direct integration with Wireshark extcap interface, so you can capture directly from Wireshark.
+It is also suitable for direct integration with the Wireshark extcap interface, so you can capture directly from Wireshark.
 
 
 # How do I build this library?

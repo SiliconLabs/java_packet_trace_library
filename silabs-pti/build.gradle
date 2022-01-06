@@ -33,7 +33,7 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
   implementation 'org.apache.mina:mina-core:2.1.4'
   implementation 'org.slf4j:slf4j-simple:1.7.26'    
-  implementation files('../external/java-pcap-1.9.9.jar')
+  implementation files('../external/java-pcap.jar')
 }
 
 test {

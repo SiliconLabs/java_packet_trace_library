@@ -47,6 +47,16 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
     pcapOut.writeEnhancedPacketBlock(interfaceIndex, pcTime, rawBytes);
   }
 
+  /**
+   * Common method that writes out an initial interface description block.
+   * 
+   * @param pcapOut
+   * @throws IOException
+   */
+  public static final void writeInterfaceDescriptionBlock(final IPcapOutput pcapOut) throws IOException {
+    pcapOut.writeInterfaceDescriptionBlock(LinkType.USER12, Pcap.RESOLUTION_MICROSECONDS);
+  }
+
   @Override
   public IDebugChannelExportOutput<IPcapOutput> createOutput(final File f, final boolean append) throws IOException {
     if (append)
@@ -66,7 +76,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public void writeHeader(final IDebugChannelExportOutput<IPcapOutput> out) throws IOException {
-    out.writer().writeInterfaceDescriptionBlock(LinkType.NETANALYZER, Pcap.RESOLUTION_MICROSECONDS);
+    writeInterfaceDescriptionBlock(out.writer());
   }
 
   @Override

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import com.silabs.na.pcap.IPcapOutput;
-import com.silabs.na.pcap.LinkType;
 import com.silabs.na.pcap.Pcap;
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.AdapterSocketConnector;
@@ -42,7 +41,7 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
     ec.log("capture: start capturing on adapter '" + ifc + "'");
     adapterConnector = new AdapterSocketConnector();
     output = Pcap.openForWriting(new File(fifo));
-    output.writeInterfaceDescriptionBlock(LinkType.NETANALYZER, Pcap.RESOLUTION_MICROSECONDS);
+    PcapngFormat.writeInterfaceDescriptionBlock(output);
     final IConnection c = adapterConnector.createConnection(ifc, AdapterPort.DEBUG.defaultPort(), this);
     final IFramer debugChannelFramer = new DebugChannelFramer(true);
     c.setFramers(debugChannelFramer, debugChannelFramer);

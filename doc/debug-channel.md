@@ -15,12 +15,8 @@ Byte        Description
  N          End framing:  ']'
 ```
 
-All tooling that deals with the discrete debug messages is expected to remove the framing, so what is left is individual 
-debug messages, without the framing and the length bytes.
-
-In case of errors (such as the `]` not being present after the length bytes) recovery is typically accomplished by
-the deframing state engine reading forward until a next `[` is found, and then attempting to resume the deframing.
-This case can be detected, because the payload of each individual message contains a sequence number.
+All tooling that deals with the discrete debug messages is expected to remove the stream framing, so what is left is individual 
+debug messages, without the framing and the length bytes. Therefore, any discrete per-event file formats, such as PCAP or PCAPNG, are expected to hold just the individual debug messages, without the stripped `[`, `]` characters, or the two length bytes.
 
 The following two chapters describe the format of individual debug messages, after the framing bytes are removed.
 
@@ -70,7 +66,7 @@ Byte        Description
  9   Timestamp byte 7  / MSB
 10   Debug Message Type \ LSB (coresponds to single byte message type.
 11   Debug Message Type / MSB
-12   Flags \  LSB
+12   Flags \  LSB  (Reserved for future use, contains arbitrary values.)
 13   Flags |
 14   Flags |
 15   Flags /  MSB

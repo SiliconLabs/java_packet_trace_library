@@ -58,6 +58,122 @@ jar {
   }
 }
 
+task createDebugMessageTypes() {
+  doLast {
+    // First we read json
+    def slurper = new groovy.json.JsonSlurper()
+    def json = slurper.parseText(file("debug-message-type.json").text)
+    project.logger.lifecycle("Processing debug messages, feature level ${json.featureLevel}, date ${json.date}")
+    
+    // Now we output generated files
+    def javaprops = file("src/main/resources/debugMessageType.properties")
+    def javaenum = file("src/main/java/com/silabs/pti/debugchannel/DebugMessageType.java")
+    
+    // Sort the types
+    def sortedTypes = json.types.sort { a,b -> a.getValue().code <=> b.getValue().code }
+    
+    // Write props
+    project.logger.lifecycle("Write ${javaprops}")
+    def text = "# !!!! This file is generated via 'gradle createDebugMessageTypes' command. Please do not edit manually!!!!!\n\n"
+    sortedTypes.each {
+      t ->
+        text += "${t.getKey()}.long=${t.getValue().longDescription}\n"
+        text += "${t.getKey()}=${t.getValue().shortDescription}\n"
+    }
+    javaprops.text = text
+    
+    // Write enum
+    text = """/*******************************************************************************
+ * # License
+ * Copyright 2022 Silicon Laboratories Inc. www.silabs.com
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
+    
+    """
+    text = text + "\n// !!!! This file is generated via 'gradle createDebugMessageTypes' command. Please do not edit manually!!!!!\n\n"
+    text = text + """
+package com.silabs.pti.debugchannel;
+
+import java.util.ResourceBundle;
+
+public enum DebugMessageType {
+"""
+    sortedTypes.each {
+      t ->
+        text += "  ${t.getKey()}(${t.getValue().code}),\n"
+    }
+    text = text + """
+  INVALID(-1);
+
+  private final int value;
+  private static final String BUNDLE_NAME = "debugMessageType";
+  private static final ResourceBundle names = ResourceBundle.getBundle(BUNDLE_NAME);
+
+  private DebugMessageType(final int value) {
+    this.value = value;
+  }
+
+  /** Returns the integer value of this debug message type */
+  public int value() {
+    return value;
+  }
+
+  /** Returns human-readable description of the debug message type, 10 char max */
+  public String description() {
+    try {
+      return names.getString(name());
+    } catch (Exception e) {
+      return name().toLowerCase();
+    }
+  }
+
+  /** Returns human-readable long description of the debug message type */
+  public String longDescription() {
+    try {
+      return names.getString(name() + ".long");
+    } catch (Exception e) {
+      return description();
+    }
+  }
+
+  /**
+   * Finds the debug message type that matches value or INVALID if the value is
+   * not valid debug message type.
+   */
+  public static DebugMessageType get(final int value) {
+    DebugMessageType[] values = values();
+    int low = 0;
+    int high = values.length - 1;
+    while (low <= high) {
+      int mid = (low + high) >>> 1;
+      DebugMessageType dmt = values[mid];
+      if (dmt.value() == value) {
+        return dmt;
+      } else if (dmt.value() > value) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return DebugMessageType.INVALID;
+  } 
+"""
+    text = text + "\n  public static int featureLevel() { return ${json.featureLevel}; }\n"
+    text = text + "\n  public static String featureDate() { return \"${json.featureDate}\"; }\n"
+    text = text + "\n}"
+    project.logger.lifecycle("Write ${javaenum}")
+    javaenum.text = text
+  }
+}
+
 task createBuildStamp() {
   doLast {
     def gitOutput = 'git log -1 --format=hash=%H%ndate=%cI'.execute().text
@@ -88,7 +204,7 @@ application {
 
 task all {
   description 'Toplevel task that creates everything.'
-  dependsOn createBuildStamp,jar,javadocJar,sourcesJar,fatJar
+  dependsOn createBuildStamp,createDebugMessageTypes,jar,javadocJar,sourcesJar,fatJar
 }
 
 task wireshark {

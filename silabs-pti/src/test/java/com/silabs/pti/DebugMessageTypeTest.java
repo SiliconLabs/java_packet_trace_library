@@ -32,6 +32,20 @@ public class DebugMessageTypeTest {
     }
   }
 
+  @Test
+  public void testDebugMessageTypeSorting() {
+    int lastCode = -1;
+    for (final DebugMessageType t : DebugMessageType.values()) {
+      if (t == DebugMessageType.INVALID)
+        continue;
+      if (t.value() > lastCode) {
+        lastCode = t.value();
+      } else {
+        fail("Debug message types must be sorted incrementally: " + t.value());
+      }
+    }
+  }
+
   public void createJsonOutOfEnum() throws IOException {
     try (PrintWriter pw = new PrintWriter(new File("debug-message-type.json"))) {
       int i = 0;

@@ -70,7 +70,7 @@ task createDebugMessageTypes() {
     def javaenum = file("src/main/java/com/silabs/pti/debugchannel/DebugMessageType.java")
     
     // Sort the types
-    def sortedTypes = json.types
+    def sortedTypes = json.types.sort { a,b -> a.getValue().code <=> b.getValue().code }
     
     // Write props
     project.logger.lifecycle("Write ${javaprops}")

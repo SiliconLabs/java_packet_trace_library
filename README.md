@@ -31,7 +31,8 @@ This library was developed by Silicon Labs and is covered by a [standard Silicon
 # Other documents
 
 - [User guide](doc/user-guide.md)
-- [Wireshark integration](doc/../doc/wireshark.md)
-- [Debug channel format](doc/../doc/debug-channel.md)
+- [Wireshark integration](doc/wireshark.md)
+- [Debug channel format](doc/debug-channel.md)
+- [Debug message types](doc/debug-message-types.md)
 
 

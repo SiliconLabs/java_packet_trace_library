@@ -1,6 +1,6 @@
 /*******************************************************************************
  * # License
- * Copyright 2020 Silicon Laboratories Inc. www.silabs.com
+ * Copyright 2022 Silicon Laboratories Inc. www.silabs.com
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -11,10 +11,11 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-// (c) Silicon Labs, 2017.
-//
-// This file is generated! Please do not modify manually.
-//
+    
+    
+// !!!! This file is generated via 'gradle createDebugMessageTypes' command. Please do not edit manually!!!!!
+
+
 package com.silabs.pti.debugchannel;
 
 import java.util.ResourceBundle;
@@ -85,6 +86,7 @@ public enum DebugMessageType {
   CPU_USAGE(0x0070),
   USER_COMMAND(0xFFFE),
   USER_RESPONSE(0xFFFF),
+
   INVALID(-1);
 
   private final int value;
@@ -140,3 +142,4 @@ public enum DebugMessageType {
     return DebugMessageType.INVALID;
   }
 }
+    

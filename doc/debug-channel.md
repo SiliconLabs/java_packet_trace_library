@@ -85,4 +85,4 @@ messages, advanced energy measurement data points, and similar.
 
 Debug message types can be added over time, but once established, they cannot change.
 
-The types supported are listed [in this file](../silabs-pti/debug-message-type.json).
+The types are described [here](debug-message-types.md).

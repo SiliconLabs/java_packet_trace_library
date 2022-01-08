@@ -140,6 +140,10 @@ public enum DebugMessageType {
       }
     }
     return DebugMessageType.INVALID;
-  }
+  } 
+
+  public static int featureLevel() { return 22; }
+
+  public static String featureDate() { return "2022.1.8"; }
+
 }
-    

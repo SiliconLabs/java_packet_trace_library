@@ -1,7 +1,7 @@
 {
   "description": "This file contains the valid debug message type codes for the Silicon Labs Debug Message protocol.",
   "featureLevel": "22",
-  "date": "2022.1.8",
+  "featureDate": "2022.1.8",
   "types": {
     "TIME_SYNC": {
       "code": "0x0000",

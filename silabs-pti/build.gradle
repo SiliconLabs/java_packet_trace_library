@@ -164,10 +164,11 @@ public enum DebugMessageType {
       }
     }
     return DebugMessageType.INVALID;
-  }
-}
-    
+  } 
 """
+    text = text + "\n  public static int featureLevel() { return ${json.featureLevel}; }\n"
+    text = text + "\n  public static String featureDate() { return \"${json.featureDate}\"; }\n"
+    text = text + "\n}"
     project.logger.lifecycle("Write ${javaenum}")
     javaenum.text = text
   }
@@ -203,7 +204,7 @@ application {
 
 task all {
   description 'Toplevel task that creates everything.'
-  dependsOn createBuildStamp,jar,javadocJar,sourcesJar,fatJar
+  dependsOn createBuildStamp,createDebugMessageTypes,jar,javadocJar,sourcesJar,fatJar
 }
 
 task wireshark {

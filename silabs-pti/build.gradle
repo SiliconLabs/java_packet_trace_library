@@ -68,6 +68,7 @@ task createDebugMessageTypes() {
     // Now we output generated files
     def javaprops = file("src/main/resources/debugMessageType.properties")
     def javaenum = file("src/main/java/com/silabs/pti/debugchannel/DebugMessageType.java")
+    def cenum = file("debug-message-type-gen.h")
     
     // Sort the types
     def sortedTypes = json.types.sort { a,b -> a.getValue().code <=> b.getValue().code }
@@ -171,6 +172,50 @@ public enum DebugMessageType {
     text = text + "\n}"
     project.logger.lifecycle("Write ${javaenum}")
     javaenum.text = text
+
+    // Write C enum
+    project.logger.lifecycle("Write ${cenum}")
+    text = """// (c) Silicon Laboratories, Inc., 2012, 2022
+//
+// !!!! This file is generated via 'gradle createDebugMessageTypes' command inside 
+// the public repo https://github.com/SiliconLabs/java_packet_trace_library
+//
+// Please do not edit manually!!!!!\n
+#ifndef __SL_DEBUG_MESSAGE_TYPES__
+#define __SL_DEBUG_MESSAGE_TYPES__
+#include <stdint.h>
+
+// Enum of all known debug message types.
+enum {
+"""
+    // Generate properly named enums.
+    sortedTypes.each {
+      t ->
+        def prefix = "SL_DEBUG_MESSAGE_TYPE"
+        text += "  ${prefix}_${t.getKey()} = ${t.getValue().code.startsWith("0xF")?"(int16_t)":""}${t.getValue().code},\n"
+    }
+    
+    text = text + """
+};
+
+// Enum with legacy names for the same type, for backwards compatibility.
+enum {
+"""
+    // these are for backwards compatibility, with the EM_ prefix.
+    sortedTypes.each {
+      t ->
+        def prefix = "EM_DEBUG"
+        if ( t.getKey().startsWith("PACKET_TRACE_") ||  t.getKey().startsWith("FLASH_") 
+             ||  t.getKey().startsWith("EEPROM_") ||  t.getKey().startsWith("RAM_")
+             ||  t.getKey().startsWith("SIMULATED_") ||  t.getKey().startsWith("AEM_")||  t.getKey().startsWith("CPU_")) {
+          prefix = "EM"
+        }
+        text += "  ${prefix}_${t.getKey()}=${t.getValue().code.startsWith("0xF")?"(int16_t)":""}${t.getValue().code},\n"
+    }
+
+    text = text + "};\n\n#define SL_DEBUG_MESSAGE_TYPE_FEATURE_LEVEL (${json.featureLevel})\n\n#endif // SL_DEBUG_MESSAGE_TYPES\n"
+    cenum.text = text
+
   }
 }
 

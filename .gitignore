@@ -9,3 +9,6 @@ build_pti.stamp
 
 # Ignore eclipse build dir
 bin
+
+# Ignore some generated files
+silabs-pti/debug-message-type-gen.h

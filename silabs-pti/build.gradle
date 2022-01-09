@@ -68,6 +68,7 @@ task createDebugMessageTypes() {
     // Now we output generated files
     def javaprops = file("src/main/resources/debugMessageType.properties")
     def javaenum = file("src/main/java/com/silabs/pti/debugchannel/DebugMessageType.java")
+    def cenum = file("debug-message-type-gen.h")
     
     // Sort the types
     def sortedTypes = json.types.sort { a,b -> a.getValue().code <=> b.getValue().code }
@@ -171,6 +172,28 @@ public enum DebugMessageType {
     text = text + "\n}"
     project.logger.lifecycle("Write ${javaenum}")
     javaenum.text = text
+
+    // Write C enum
+    project.logger.lifecycle("Write ${cenum}")
+    text = """// (c) Silicon Laboratories, Inc., 2012, 2022
+//
+// !!!! This file is generated via 'gradle createDebugMessageTypes' command inside 
+// the public repo https://github.com/SiliconLabs/java_packet_trace_library
+//
+// Please do not edit manually!!!!!\n
+#ifndef __SL_DEBUG_MESSAGE_TYPES__
+#define __SL_DEBUG_MESSAGE_TYPES__
+#include <stdint.h>
+
+enum {
+"""
+    sortedTypes.each {
+      t ->
+        text += "  EM_DEBUG_${t.getKey()} = ${t.getValue().code.startsWith("0xF")?"(int16_t)":""}${t.getValue().code},\n"
+    }
+    text = text + "\n};\n\n#define SL_DEBUG_MESSAGE_TYPE_FEATURE_LEVEL (${json.featureLevel})\n\n#endif // SL_DEBUG_MESSAGE_TYPES\n"
+    cenum.text = text
+
   }
 }
 

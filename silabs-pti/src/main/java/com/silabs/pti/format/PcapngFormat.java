@@ -24,7 +24,7 @@ import com.silabs.pti.debugchannel.EventType;
 
 /**
  * Format for PCAPNG writer.
- * 
+ *
  * @author timotej
  *
  */
@@ -33,7 +33,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
   /**
    * Common method that actually writes out the raw unframed bytes into the pcap
    * stream.
-   * 
+   *
    * @param pcapOut
    * @param interfaceIndex
    * @param pcTime
@@ -49,7 +49,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   /**
    * Common method that writes out an initial interface description block.
-   * 
+   *
    * @param pcapOut
    * @throws IOException
    */
@@ -71,7 +71,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public String description() {
-    return "PCAPNG forma as used by Wireshark and many other utilities.";
+    return "PCAPNG format as used by Wireshark and many other utilities.";
   }
 
   @Override

@@ -26,6 +26,31 @@ import com.silabs.pti.debugchannel.EventType;
  */
 public class WiresharkUtil {
 
+  public enum PcapngExportMode {
+    NOFCS("nofcs"),
+    WISUN_AUTO("wisun-auto"),
+    WISUN_RAIL_WISUN("wisun"),
+    WISUN_RAIL_CUSTOM("wisun-custom");
+    private final String id;
+    PcapngExportMode(final String id) {
+      this.id = id;
+    }
+    public static PcapngExportMode resolve(final String s) {
+      for ( PcapngExportMode m: values() ) {
+        if ( m.id.equals(s) ) return m;
+      }
+      return defaultMode();
+    }
+  
+    public static PcapngExportMode defaultMode() {
+      return NOFCS;
+    }
+  
+    public String id() { return id; }
+  
+    public boolean isWisun() { return id.startsWith("wisun"); }
+  }
+
   /**
    * Prints out the content in a format where text2pcap can consume it.
    * 

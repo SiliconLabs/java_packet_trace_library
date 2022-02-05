@@ -149,6 +149,7 @@ public class MiscUtil {
     return (byte) ((Integer.reverse(x) >> 16) & 0x0000FFFF);
   }
 
+
   /**
    * Useful method that returns a new array with reversed order of bytes. Original
    * array remains unchanged.
@@ -191,6 +192,21 @@ public class MiscUtil {
     default:
       throw new IllegalArgumentException("Only floats of size 4 or 8 can be decoded.");
     }
+  }
+
+  /**
+   * Converts unsigned byte to integer. You should use this, if you
+   * want unsigned conversion. Simply assigning byte to integer in java
+   * will cause the typically undesired sign preservation, so any
+   * byte that has the high bit set will result in an int that has high
+   * bit set.
+   *
+   *
+   * @param b Single unsigned byte.
+   * @return int
+   */
+  public static int unsignedByteToInt(final byte b) {
+    return 0x000000FF & b;
   }
 
 }

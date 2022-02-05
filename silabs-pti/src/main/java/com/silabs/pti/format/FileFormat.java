@@ -18,7 +18,7 @@ package com.silabs.pti.format;
  * Supported file formats.
  *
  * Created on Feb 15, 2017
- * 
+ *
  * @author timotej
  */
 public enum FileFormat {
@@ -27,7 +27,12 @@ public enum FileFormat {
   LOG(new LogFileFormat()),
   AEM(new AemFileFormat()),
   TEXT(new TextFileFormat()),
-  PCAPNG(new PcapngFormat());
+  PCAPNG(new PcapngFormat(PcapngFormat.Mode.DCH)),
+  PCAPNG_MATTER(new PcapngFormat(PcapngFormat.Mode.MATTER)),
+  PCAPNG_ZIGBEE(new PcapngFormat(PcapngFormat.Mode.ZIGBEE)),
+  PCAPNG_WISUN(new PcapngFormat(PcapngFormat.Mode.WISUN)),
+  PCAPNG_BLE(new PcapngFormat(PcapngFormat.Mode.BLUETOOTH)),
+  ;
 
   private IDebugChannelExportFormat<?> format;
 
@@ -37,7 +42,7 @@ public enum FileFormat {
 
   /**
    * Returns the underlying format implementation.
-   * 
+   *
    * @return IPtiFileFormat implementation.
    */
   public IDebugChannelExportFormat<?> format() {
@@ -46,7 +51,7 @@ public enum FileFormat {
 
   /**
    * returns formats as f1|f2|f3 to show in options.
-   * 
+   *
    * @return
    */
   public static String displayOptionsAsString() {

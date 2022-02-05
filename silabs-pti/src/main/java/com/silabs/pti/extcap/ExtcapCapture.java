@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import com.silabs.na.pcap.IPcapOutput;
-import com.silabs.na.pcap.Pcap;
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.AdapterSocketConnector;
 import com.silabs.pti.adapter.DebugChannelFramer;
@@ -12,12 +11,14 @@ import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IConnectionListener;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
+import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.format.PcapngFormat;
+import com.silabs.pti.format.PcapngFormat.Mode;
 import com.silabs.pti.log.PtiSeverity;
 
 /**
  * Class that facilitates the capturing from WSTK into a pcap file.
- * 
+ *
  * @author timotej
  *
  */
@@ -25,10 +26,11 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
 
   private final String ifc, fifo, filter;
   private AdapterSocketConnector adapterConnector;
-  private IPcapOutput output;
   private boolean isFinished = false;
   private int messageCount = 0;
   private IExtcapInterface ec;
+  private final PcapngFormat pcapFormat = new PcapngFormat(Mode.DCH);
+  private IDebugChannelExportOutput<IPcapOutput> output;
 
   public ExtcapCapture(final String ifc, final String fifo, final String filter) {
     this.ifc = ifc;
@@ -36,12 +38,12 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
     this.filter = filter;
   }
 
-  public void capture(final IExtcapInterface ec) throws IOException {
-    this.ec = ec;
+  public void capture(final IExtcapInterface extcapInterface) throws IOException {
+    this.ec = extcapInterface;
     ec.log("capture: start capturing on adapter '" + ifc + "'");
     adapterConnector = new AdapterSocketConnector();
-    output = Pcap.openForWriting(new File(fifo));
-    PcapngFormat.writeInterfaceDescriptionBlock(output);
+    output = pcapFormat.createOutput(new File(fifo),false);
+    pcapFormat.writeHeader(output);
     final IConnection c = adapterConnector.createConnection(ifc, AdapterPort.DEBUG.defaultPort(), this);
     final IFramer debugChannelFramer = new DebugChannelFramer(true);
     c.setFramers(debugChannelFramer, debugChannelFramer);
@@ -88,7 +90,7 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
   public void messageReceived(final byte[] message, final long pcTime) {
     messageCount++;
     try {
-      PcapngFormat.writeRawUnframedDebugMessage(output, 0, pcTime, message);
+      pcapFormat.formatRawBytes(output, pcTime, message, 0, message.length);
     } catch (final IOException ioe) {
       if (!isFinished)
         ec.log("capture error: could not write PCAP file any more [" + ioe.getMessage() + "]");

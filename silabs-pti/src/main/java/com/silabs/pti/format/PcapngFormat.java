@@ -30,6 +30,33 @@ import com.silabs.pti.debugchannel.EventType;
  */
 public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
+  public static enum Mode {
+    DCH(LinkType.USER12,
+        "PCAPNG format: capturing whole debug channel as custom linktype. All channel data is captured.",
+        true),
+    WISUN(LinkType.IEEE802_15_4_NOFCS,
+          "PCAPNG format for Wi-SUN: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+          false);
+
+    private LinkType linkType;
+    private String description;
+    private boolean usesRawBytes;
+    Mode(final LinkType linkType, final String description, final boolean usesRawBytes) {
+      this.linkType = linkType;
+      this.description = description;
+      this.usesRawBytes = usesRawBytes;
+    }
+
+    public LinkType linkType() { return linkType; }
+    public String description() { return description; }
+    public boolean usesRawBytes() { return usesRawBytes; }
+  }
+
+  private final Mode mode;
+
+  public PcapngFormat(final Mode mode) {
+    this.mode = mode;
+  }
   /**
    * Common method that actually writes out the raw unframed bytes into the pcap
    * stream.
@@ -53,8 +80,8 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
    * @param pcapOut
    * @throws IOException
    */
-  public static final void writeInterfaceDescriptionBlock(final IPcapOutput pcapOut) throws IOException {
-    pcapOut.writeInterfaceDescriptionBlock(LinkType.USER12, Pcap.RESOLUTION_MICROSECONDS);
+  public static final void writeInterfaceDescriptionBlock(final LinkType linkType, final IPcapOutput pcapOut) throws IOException {
+    pcapOut.writeInterfaceDescriptionBlock(linkType, Pcap.RESOLUTION_MICROSECONDS);
   }
 
   @Override
@@ -71,12 +98,12 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public String description() {
-    return "PCAPNG format as used by Wireshark and many other utilities.";
+    return mode.description();
   }
 
   @Override
   public void writeHeader(final IDebugChannelExportOutput<IPcapOutput> out) throws IOException {
-    writeInterfaceDescriptionBlock(out.writer());
+    writeInterfaceDescriptionBlock(mode.linkType(), out.writer());
   }
 
   @Override
@@ -84,7 +111,25 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
-    out.writer().writeEnhancedPacketBlock(0, dm.networkTime(), dm.contents());
+    // We end here in the case where mode is not using raw bytes.
+    byte[] content;
+    long time;
+    switch(mode) {
+    case WISUN:
+      // For WISUN mode, we ignore non-packets.
+      if ( !type.isPacket() ) return false;
+      if ( type.isFromEfr() ) {
+        // Here we have to extract the proper payload
+      }
+      content = dm.contents();
+      time = dm.networkTime();
+      break;
+    default:
+      content = dm.contents();
+      time = dm.networkTime();
+      break;
+    }
+    out.writer().writeEnhancedPacketBlock(0, time, content);
     return true;
   }
 
@@ -94,6 +139,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) throws IOException {
+    // We end here in the raw bytes case (mode == DCH)
     writeRawUnframedDebugMessage(out.writer(), 0, pcTimeMs, rawBytes);
     return true;
   }
@@ -113,6 +159,6 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public boolean isUsingRawBytes() {
-    return true;
+    return mode.usesRawBytes();
   }
 }

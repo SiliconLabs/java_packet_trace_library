@@ -21,6 +21,7 @@ import com.silabs.na.pcap.LinkType;
 import com.silabs.na.pcap.Pcap;
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.EventType;
+import com.silabs.pti.protocol.RadioInfoEfr32;
 
 /**
  * Format for PCAPNG writer.
@@ -32,8 +33,17 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   public static enum Mode {
     DCH(LinkType.USER12,
-        "PCAPNG format: capturing whole debug channel as custom linktype. All channel data is captured.",
+        "PCAPNG format: capturing whole debug channel as custom linktype 'user12'. All channel data is captured.",
         true),
+    ZIGBEE(LinkType.IEEE802_15_4_NOFCS,
+          "PCAPNG format for Zigbee: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+          false),
+    MATTER(LinkType.IEEE802_15_4_NOFCS,
+          "PCAPNG format for Matter: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+          false),
+    BLUETOOTH(LinkType.IEEE802_15_4_NOFCS,
+           "PCAPNG format for Bluetooth: using 802.15.4 no-FCS link type. Only Bluetooth packets are captured.",
+           false),
     WISUN(LinkType.IEEE802_15_4_NOFCS,
           "PCAPNG format for Wi-SUN: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
           false);
@@ -57,33 +67,6 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
   public PcapngFormat(final Mode mode) {
     this.mode = mode;
   }
-  /**
-   * Common method that actually writes out the raw unframed bytes into the pcap
-   * stream.
-   *
-   * @param pcapOut
-   * @param interfaceIndex
-   * @param pcTime
-   * @param rawBytes
-   * @throws IOException
-   */
-  public static final void writeRawUnframedDebugMessage(final IPcapOutput pcapOut,
-                                                        final int interfaceIndex,
-                                                        final long pcTime,
-                                                        final byte[] rawBytes) throws IOException {
-    pcapOut.writeEnhancedPacketBlock(interfaceIndex, pcTime, rawBytes);
-  }
-
-  /**
-   * Common method that writes out an initial interface description block.
-   *
-   * @param pcapOut
-   * @throws IOException
-   */
-  public static final void writeInterfaceDescriptionBlock(final LinkType linkType, final IPcapOutput pcapOut) throws IOException {
-    pcapOut.writeInterfaceDescriptionBlock(linkType, Pcap.RESOLUTION_MICROSECONDS);
-  }
-
   @Override
   public IDebugChannelExportOutput<IPcapOutput> createOutput(final File f, final boolean append) throws IOException {
     if (append)
@@ -103,7 +86,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
 
   @Override
   public void writeHeader(final IDebugChannelExportOutput<IPcapOutput> out) throws IOException {
-    writeInterfaceDescriptionBlock(mode.linkType(), out.writer());
+    out.writer().writeInterfaceDescriptionBlock(mode.linkType(), Pcap.RESOLUTION_MICROSECONDS);
   }
 
   @Override
@@ -116,12 +99,34 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
     long time;
     switch(mode) {
     case WISUN:
+    case BLUETOOTH:
+    case MATTER:
+    case ZIGBEE:
       // For WISUN mode, we ignore non-packets.
       if ( !type.isPacket() ) return false;
+      byte[] buff = dm.contents();
+      int startOffset = 0;
+      int endOffset = buff.length - 2;
       if ( type.isFromEfr() ) {
-        // Here we have to extract the proper payload
+        // For Efr, we know how to extract the payload.
+
+        // Adjust start offset.
+        if (buff[startOffset] == (byte) 0xF8 || buff[startOffset] == (byte) 0xFC) {
+          // omit leading encapsulation byte
+          startOffset++;
+        }
+
+        // Adjust endOffset
+        endOffset -= RadioInfoEfr32.determineRadioInfoLength(type, buff, mode == Mode.BLUETOOTH);
+
+        int len = endOffset - startOffset;
+        if ( len < 0 ) return false;
+
+        content = new byte[len];
+        System.arraycopy(buff, startOffset, content, 0, len);
+      } else {
+        content = buff;
       }
-      content = dm.contents();
       time = dm.networkTime();
       break;
     default:
@@ -140,7 +145,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
                                 final int offset,
                                 final int length) throws IOException {
     // We end here in the raw bytes case (mode == DCH)
-    writeRawUnframedDebugMessage(out.writer(), 0, pcTimeMs, rawBytes);
+    out.writer().writeEnhancedPacketBlock(0, pcTimeMs, rawBytes);
     return true;
   }
 

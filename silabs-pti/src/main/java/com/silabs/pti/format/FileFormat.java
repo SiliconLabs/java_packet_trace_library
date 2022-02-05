@@ -28,7 +28,11 @@ public enum FileFormat {
   AEM(new AemFileFormat()),
   TEXT(new TextFileFormat()),
   PCAPNG(new PcapngFormat(PcapngFormat.Mode.DCH)),
-  PCAPNG_WISUN(new PcapngFormat(PcapngFormat.Mode.WISUN));
+  PCAPNG_MATTER(new PcapngFormat(PcapngFormat.Mode.MATTER)),
+  PCAPNG_ZIGBEE(new PcapngFormat(PcapngFormat.Mode.ZIGBEE)),
+  PCAPNG_WISUN(new PcapngFormat(PcapngFormat.Mode.WISUN)),
+  PCAPNG_BLE(new PcapngFormat(PcapngFormat.Mode.BLUETOOTH)),
+  ;
 
   private IDebugChannelExportFormat<?> format;
 

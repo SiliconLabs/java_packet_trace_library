@@ -27,7 +27,7 @@ public enum FileFormat {
   LOG(new LogFileFormat()),
   AEM(new AemFileFormat()),
   TEXT(new TextFileFormat()),
-  PCAPNG_DCH(new PcapngFormat(PcapngFormat.Mode.DCH)),
+  PCAPNG(new PcapngFormat(PcapngFormat.Mode.DCH)),
   PCAPNG_WISUN(new PcapngFormat(PcapngFormat.Mode.WISUN));
 
   private IDebugChannelExportFormat<?> format;

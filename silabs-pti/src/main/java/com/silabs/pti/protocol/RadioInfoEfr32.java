@@ -32,13 +32,13 @@ public class RadioInfoEfr32 {
     int len = lengthFromLastByte(endByte);
     boolean isMissingPtiProtocol = isMissingPtiProtocol(endByte,
                                                         penultimateByte);
-  
+
     if (isMissingPtiProtocol) {
       int length;
       if ( hintBluetooth ) {
-        length = Protocol.crcLen(Protocol.BLE, payload);
+        length = Protocol.crcLen(Protocol.BLE, payload) + 1;
       } else {
-        length = 2;
+        length = 3;
       }
       if (type.isRx())
         length++; // RSSI

@@ -98,10 +98,10 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
     byte[] content;
     long time;
     switch(mode) {
-    case WISUN:
     case BLUETOOTH:
     case MATTER:
     case ZIGBEE:
+    case WISUN:
       // For WISUN mode, we ignore non-packets.
       if ( !type.isPacket() ) return false;
       byte[] buff = dm.contents();
@@ -110,11 +110,22 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
       if ( type.isFromEfr() ) {
         // For Efr, we know how to extract the payload.
 
-        // Adjust start offset.
+        // Adjust start offset...
+
         if (buff[startOffset] == (byte) 0xF8 || buff[startOffset] == (byte) 0xFC) {
-          // omit leading encapsulation byte
+          // omit leading encapsulation byte if there is one
           startOffset++;
         }
+
+        if ( mode == Mode.WISUN ) {
+          // Wisun has 2 byte length, so we add a byte to strip.
+          startOffset++;
+        }
+        if ( !type.hasNoLengthByte() ) {
+          // If we have a length byte, then we need to strip that out too.
+          startOffset++;
+        }
+
 
         // Adjust endOffset
         endOffset -= RadioInfoEfr32.determineRadioInfoLength(type, buff, mode == Mode.BLUETOOTH);

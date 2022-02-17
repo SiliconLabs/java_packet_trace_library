@@ -106,7 +106,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
       if ( !type.isPacket() ) return false;
       byte[] buff = dm.contents();
       int startOffset = 0;
-      int endOffset = buff.length - 2;
+      int endOffset = buff.length;
       if ( type.isFromEfr() ) {
         // For Efr, we know how to extract the payload.
 

@@ -375,10 +375,22 @@
       "longDescription": "exception_packet",
       "status": ""
     },
+    "LOGIC_ANALYZER": {
+      "code": "0x0066",
+      "shortDescription": "LogicAnlyz",
+      "longDescription": "Logic Analyzer Data",
+      "status": ""
+    },
     "CPU_USAGE": {
       "code": "0x0070",
       "shortDescription": "cpu_usage",
       "longDescription": "cpu_usage",
+      "status": ""
+    },
+    "CONFIG_OVER_SWO": {
+      "code": "0x0080",
+      "shortDescription": "CfgOverSWO",
+      "longDescription": "Configuration over SWO",
       "status": ""
     },
     "USER_COMMAND": {

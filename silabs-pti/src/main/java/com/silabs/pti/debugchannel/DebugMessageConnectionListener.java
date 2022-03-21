@@ -26,7 +26,7 @@ import com.silabs.pti.log.PtiLog;
 /**
  * Connection listener, responsible for forwarding the data into the appropriate
  * formater.
- * 
+ *
  * @author timotej
  *
  */
@@ -110,7 +110,8 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
       return format.formatRawBytes(outputStream, timeMs, bytes, 0, bytes.length);
     } else {
       final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
-      final EventType type = EventType.fromDebugMessage(DebugMessageType.get(dm.debugType()));
+      final DebugMessageType dmt = DebugMessageType.get(dm.debugType());
+      final EventType type = EventType.fromDebugMessage(dmt);
       // time correction
       DebugMessageConnectionListener.timeCorrection(timeSync, dm);
       return format.formatDebugMessage(outputStream, originator, dm, type);

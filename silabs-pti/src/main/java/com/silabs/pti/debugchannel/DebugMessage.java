@@ -84,7 +84,7 @@ public class DebugMessage {
   /**
    * This is a convenience method to return a human readable value for the various
    * debug types.
-   * 
+   *
    * @return a human readable String representing the debug type
    */
   public static String getTypeName(final int typeValue) {
@@ -109,6 +109,29 @@ public class DebugMessage {
   /** Returns the bytearray contents. */
   public byte[] contents() {
     return contents;
+  }
+
+  /**
+   * This method returns same value as contents() method if the debug
+   * message is valid type. Otherwise it prepends the content with the
+   * unknown debug message, and then puts the rest of the content there.
+   *
+   * @return
+   */
+  public byte[] eventContents() {
+    byte[] eventContents;
+    int dt = debugType();
+    DebugMessageType dmt = DebugMessageType.get(dt);
+    if ( dmt == DebugMessageType.INVALID ) {
+      byte[] c = contents();
+      eventContents = new byte[c.length + 2];
+      eventContents[0] = (byte)(0x00FF & (dt >> 8));
+      eventContents[1] = (byte)(0x00FF & dt);
+      System.arraycopy(c, 0, contents, 2, c.length);
+    } else {
+      eventContents = contents();
+    }
+    return eventContents;
   }
 
   /** Returns the length of the contents. */

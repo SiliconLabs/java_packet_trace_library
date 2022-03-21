@@ -25,7 +25,7 @@ import com.silabs.pti.debugchannel.RadioConfiguration;
 
 /**
  * Output format in Silicon Labs Network analyzer text log format.
- * 
+ *
  * @author timotej
  *
  */
@@ -66,10 +66,10 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
-    final byte[] contents = dm.contents();
+    final byte[] contents = dm.eventContents();
     final String x = "[" + dm.networkTime() + " " + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length)
         + " " + type.value() + " " + type.name() + "] [" + originator + "] ["
-        + ByteArrayUtil.formatByteArray(dm.contents()) + "]";
+        + ByteArrayUtil.formatByteArray(contents) + "]";
     out.writer().println(x);
     return true;
   }

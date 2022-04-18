@@ -24,6 +24,10 @@ silabs-pti/build/libs/silabs-pti-lib-X.Y.Z-javadoc.jar
 ```
 where X.Y.Z is the version of the library.
 
+# Where can I find the latest binaries?
+
+To download the binaries, go to the [actions tab of this repo](https://github.com/silabs-KrisY/java_packet_trace_library.git), click on the desired build there, and download the artifacts.
+
 # License
 
 This library was developed by Silicon Labs and is covered by a [standard Silicon Labs MSLA](https://www.silabs.com/about-us/legal/master-software-license-agreement).
@@ -34,5 +38,3 @@ This library was developed by Silicon Labs and is covered by a [standard Silicon
 - [Wireshark integration](doc/wireshark.md)
 - [Debug channel format](doc/debug-channel.md)
 - [Debug message types](doc/debug-message-types.md)
-
-

@@ -6,7 +6,7 @@ package com.silabs.pti.decode;
  * Individual sample of the AEM data, representing a single data point in the
  * same stream.
  */
-public class AemSample {
+public class AemSample implements IAemCurrentSample {
   private final long timestamp;
   private final float current;
   private final float voltage;
@@ -25,6 +25,7 @@ public class AemSample {
   /**
    * Timestamp in microseconds \
    */
+  @Override
   public long timestamp() {
     return timestamp;
   }
@@ -32,6 +33,7 @@ public class AemSample {
   /**
    * Current
    */
+  @Override
   public float current() {
     return current;
   }
@@ -39,6 +41,7 @@ public class AemSample {
   /**
    * Voltage
    */
+  @Override
   public float voltage() {
     return voltage;
   }

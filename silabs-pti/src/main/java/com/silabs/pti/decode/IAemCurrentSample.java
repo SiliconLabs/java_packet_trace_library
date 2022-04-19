@@ -8,12 +8,7 @@ package com.silabs.pti.decode;
  * @author timotej
  * Created on Apr 18, 2022
  */
-public interface IAemCurrentSample {
-
-  /**
-   * Timestamp in microseconds
-   */
-  public long timestamp();
+public interface IAemCurrentSample extends IAemTimedSample {
 
   /**
    * Current value

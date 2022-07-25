@@ -62,12 +62,21 @@ class MainTest {
     assertEquals(1, main.cli().exitCode());
   }
   
+  @Test
+  void test_CommandLine_PropertiesNotExist() {
+    Main main = new Main(new String[] { "-properties=\"~/nonExistantFile.properties\"" });
+    assertNotNull(main);
+    assertTrue(main.cli().shouldExit());
+    assertEquals(1, main.cli().exitCode());
+  }
+  
 
   @Test
-  void test_CommandLine_Properties() throws IOException {
+  void test_CommandLine_WithPropertiesArg() throws IOException {
     String outputLog = "output.log";
-    String delay = "1000";
+    String delayOverride = "5000";
     String threshold = "1000000";
+    String zeroTimeOverride = "3000000";
     String fileFormat = "text";
     
     Properties props = new Properties();
@@ -77,7 +86,7 @@ class MainTest {
     props.put("-time", "600000"); //10 minutes
     props.put("-driftCorrection", "enable");
     props.put("-driftCorrectionThreshold", threshold);
-    props.put("-delay", delay);
+    props.put("-delay", "1000");
     props.put("-zeroTimeThreshold", threshold);
     props.put("-format", fileFormat);
     props.put("-ip", "1.2.3.4,9.8.7.6");
@@ -96,8 +105,11 @@ class MainTest {
       throw e;
     }
     
-    //call Main with properties file that arguments as input
-    Main main = new Main(new String[] { "-properties=\""+propsFile.toFile().getAbsolutePath()+"\"" });
+    //call Main with properties file that arguments as input and override -delay
+    //using additional
+    Main main = new Main(new String[] { "-zeroTimeThreshold="+zeroTimeOverride, 
+                                        "-properties=\""+propsFile.toFile().getAbsolutePath()+"\"", 
+                                        "-delay="+delayOverride });
     
     //verify basic passing statuses
     assertNotNull(main, "Expected main object to be non-null");
@@ -111,10 +123,55 @@ class MainTest {
     assertTrue(fileFormat.equalsIgnoreCase(main.cli().fileFormat().name()), "Expected matching file format values");
 
     assertEquals( outputLog, main.cli().output(), "Expected matching path for output log");
-    assertEquals(Integer.valueOf(delay), main.cli().delayMs(),"Expected matching delay");
+    assertEquals(Integer.valueOf(delayOverride), main.cli().delayMs(),"Expected matching delay");
     assertEquals(Integer.valueOf(threshold), main.cli().driftCorrectionThreshold(), "Expected matching drift correction threshold");
     assertEquals(AdapterPort.SERIAL0, main.cli().port(), "Expected matching serial port");
-    assertEquals(Integer.valueOf(threshold), main.cli().zeroTimeThreshold(),"Expected matching zero time threshold");
+    assertEquals(Integer.valueOf(zeroTimeOverride), main.cli().zeroTimeThreshold(),"Expected matching zero time threshold");
+    
+  }
+  
+  @Test
+  void test_CommandLine_WithoutPropertiesArg() throws IOException {
+    String outputLog = "output.log";
+    String delayOverride = "5000";
+    String threshold = "1000000";
+    String zeroTimeOverride = "3000000";
+    String fileFormat = "text";
+    
+    //call Main with properties file that arguments as input and override -delay
+    //using additional
+    Main main = new Main(new String[] { "-sn=440012345,440098765",
+     "-out="+outputLog,
+     "-time=600000",
+      "-driftCorrection=enable",
+      "-driftCorrectionThreshold="+threshold,
+      "-delay=1000",
+      "-zeroTimeThreshold="+threshold,
+      "-format="+fileFormat,
+      "-ip=1.2.3.4,9.8.7.6",
+      "-admin",
+      "-discreteNodeCapture",
+      "-discover",
+      //Arg Overrides
+      "-delay=5000",
+      "-zeroTimeThreshold=3000000" });
+    
+    //verify basic passing statuses
+    assertNotNull(main, "Expected main object to be non-null");
+    assertFalse(main.cli().shouldExit(), "Expected CLI to not exit");
+    assertTrue(main.cli().exitCode() <= 0, "Expected successful exit code");
+    
+    //verify specific output
+    assertTrue(main.cli().driftCorrection(), "Expected drift correction to be enabled");
+    assertTrue(main.cli().isDiscovery(), "Expected discover to be set to enable");
+    assertTrue(main.cli().discreteNodeCapture(), "Expected discrete node capture to always be enabled");
+    assertTrue(fileFormat.equalsIgnoreCase(main.cli().fileFormat().name()), "Expected matching file format values");
+
+    assertEquals( outputLog, main.cli().output(), "Expected matching path for output log");
+    assertEquals(Integer.valueOf(delayOverride), main.cli().delayMs(),"Expected matching delay");
+    assertEquals(Integer.valueOf(threshold), main.cli().driftCorrectionThreshold(), "Expected matching drift correction threshold");
+    assertEquals(AdapterPort.ADMIN, main.cli().port(), "Expected matching serial port");
+    assertEquals(Integer.valueOf(zeroTimeOverride), main.cli().zeroTimeThreshold(),"Expected matching zero time threshold");
     
   }
 }

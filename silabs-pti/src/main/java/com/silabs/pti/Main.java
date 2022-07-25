@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -77,9 +77,10 @@ public class Main {
   }
 
   public Main(final String[] args) {
-    if (args.length > 0 && args[0].startsWith(PROPERTIES)) {
-      String[] argsFromProps = convertPropsToArgs(args);
-      cli = new CommandLine(argsFromProps);
+    int propertiesIndex = getPropertiesArgIndex(args);
+    if (propertiesIndex >= 0) {
+        String[] argsFromProps = convertPropsToArgs(args, propertiesIndex);
+        cli = new CommandLine(argsFromProps);
     } else {
       cli = new CommandLine(args);
     }
@@ -88,6 +89,22 @@ public class Main {
                                     cli.driftCorrectionThreshold(),
                                     cli.zeroTimeThreshold());
     adapterConnector = new AdapterSocketConnector();
+  }
+
+  /**
+   * Provide index of properties argument in args array
+   * @param args array of arguments
+   * @return index of properties argument; -1 if not found or null/empty input
+   */
+  private int getPropertiesArgIndex(final String[] args) {
+    if (args != null && args.length > 0) {
+      for (int index = 0; index < args.length; index++) {
+        if (args[index].startsWith(PROPERTIES)) {
+          return index;
+        }
+      }
+    }
+    return -1;
   }
 
   public CommandLine cli() {
@@ -328,10 +345,13 @@ public class Main {
    * NB: 
    * 1) expected format is <code>-properties=path_to_properties_file</code>,
    * where <code>path_to_properties_file</code> may be surrounded in double 
-   * quotes in case whitespace characters exists in path 
+   * quotes in case whitespace characters exists in path. ~ at start of path is 
+   * converted to user home directory.
    * 2) keys in properties file must be the same as CLI arguments, meaning they
-   * start with hyphen (e.g. <code>-ip</code> or <code>-delay</code>) 
-   * 3) in properties file, arguments without value will not have value 
+   * start with hyphen (e.g. <code>-ip</code> or <code>-delay</code>)
+   * 3) any additional arguments beside <code>-properties</code> arg will be
+   * appended as-is to end of arguments list. 
+   * 4) in properties file, arguments without value will not have value 
    * after '=' delimiter (e.g. <code>-discover=</code>).
    * <br/><br/>
    * Input Example (properties file content):
@@ -349,45 +369,55 @@ public class Main {
    *  <br/>
    * @param progArgs array of args provided to silabs-pti.jar; <code>progArgs[0]</code> is
    * argument <code>-properties=path_to_properties_file</code>
+   * @param propertiesIndex index of <code>-properties</code> argument in array of args
    * @return array of strings with arguments in CLI format; empty array of strings
    * if invalid input or error processing properties file; never null
+   * @throws IOException error while reading/processing properties file
    */
-  private String[] convertPropsToArgs(String[] progArgs) {
-    if (progArgs.length == 1 && progArgs[0].startsWith(PROPERTIES)) {
-      //remove any whitespace and escape chars surrounding file path
+  private String[] convertPropsToArgs(String[] progArgs, int propertiesIndex) {
+    List<String> args = new ArrayList<String>();
+    
+    if (progArgs.length > 0 && propertiesIndex >= 0) {
       
-      String propsFile =  progArgs[0].substring(PROPERTIES.length()).trim();
+      String propsFile =  progArgs[propertiesIndex].substring(PROPERTIES.length()).trim();
+      //remove any whitespace and escape chars surrounding file path
       if (propsFile.startsWith("\"")) {
         propsFile = propsFile.substring(1);
       }
       if (propsFile.endsWith("\"")) {
         propsFile = propsFile.substring(0, propsFile.length()-1);
       }
+      //update ~ with user home directory
+      propsFile = propsFile.replaceFirst("^~", System.getProperty("user.home"));
       
       Properties props = new Properties();
       try (BufferedReader propsReader = new BufferedReader(new FileReader(new File(propsFile)))) {
         props.load(propsReader);
 
-        String[] args = new String[props.size()];
-        final int[] index = new int[1];
-        index[0] = 0;
         props.forEach((k,v) -> {
           if (v instanceof String && !((String)v).isBlank()) {
-            args[index[0]] = k+"="+v;
+            args.add(k+"="+v);
           } else {
-            args[index[0]] = k.toString();
+            args.add(k.toString());
           }
-          index[0]++;
         });
-        
-        return args;
-      } catch (FileNotFoundException e) {
-        e.printStackTrace(new PrintStream(System.out));
       } catch (IOException e) {
-        e.printStackTrace(new PrintStream(System.out));
+        e.printStackTrace(System.out);
       }
     }
-    
-    return new String[0];
+    //append any additional arguments provided to list *after* arguments from
+    //properties file. Duplicate arguments later in list will override earlier 
+    //arguments when CommandLine processes them.
+    if (progArgs.length > 0) {
+      Arrays.stream(progArgs).forEach(e -> {
+        if (e.startsWith(PROPERTIES)) {
+          return;
+        }
+        args.add(e);
+        
+      });
+    }
+
+    return args.toArray(new String[0]);
   }
 }

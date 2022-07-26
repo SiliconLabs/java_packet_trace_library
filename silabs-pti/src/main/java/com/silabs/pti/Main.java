@@ -14,21 +14,25 @@
 
 package com.silabs.pti;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import com.silabs.pti.adapter.Adapter;
 import com.silabs.pti.adapter.AdapterPort;
+import com.silabs.pti.adapter.AdapterSocketConnector;
 import com.silabs.pti.adapter.AsciiFramer;
 import com.silabs.pti.adapter.CharacterCollector;
 import com.silabs.pti.adapter.DebugChannelFramer;
 import com.silabs.pti.adapter.IConnection;
 import com.silabs.pti.adapter.IFramer;
-import com.silabs.pti.adapter.AdapterSocketConnector;
 import com.silabs.pti.adapter.TimeSync;
 import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.adapter.UnframedConnectionListener;
@@ -51,6 +55,7 @@ import com.silabs.pti.util.LineTerminator;
  */
 public class Main {
 
+  private static final String PROPERTIES = "-properties=";
   private final AdapterSocketConnector adapterConnector;
   private final TimeSynchronizer timeSync;
 
@@ -72,12 +77,34 @@ public class Main {
   }
 
   public Main(final String[] args) {
-    cli = new CommandLine(args);
+    int propertiesIndex = getPropertiesArgIndex(args);
+    if (propertiesIndex >= 0) {
+        String[] argsFromProps = convertPropsToArgs(args, propertiesIndex);
+        cli = new CommandLine(argsFromProps);
+    } else {
+      cli = new CommandLine(args);
+    }
     timeSync = new TimeSynchronizer(TimeSynchronizer.DEFAULT_PC_TIME_SUPPLIER,
                                     cli.driftCorrection(),
                                     cli.driftCorrectionThreshold(),
                                     cli.zeroTimeThreshold());
     adapterConnector = new AdapterSocketConnector();
+  }
+
+  /**
+   * Provide index of properties argument in args array
+   * @param args array of arguments
+   * @return index of properties argument; -1 if not found or null/empty input
+   */
+  private int getPropertiesArgIndex(final String[] args) {
+    if (args != null && args.length > 0) {
+      for (int index = 0; index < args.length; index++) {
+        if (args[index].startsWith(PROPERTIES)) {
+          return index;
+        }
+      }
+    }
+    return -1;
   }
 
   public CommandLine cli() {
@@ -310,5 +337,87 @@ public class Main {
 
     c.close();
     return 0;
+  }
+
+  /**
+   * Convert arguments in properties file to CLI arguments format. 
+   * <br/><br/>
+   * NB: 
+   * 1) expected format is <code>-properties=path_to_properties_file</code>,
+   * where <code>path_to_properties_file</code> may be surrounded in double 
+   * quotes in case whitespace characters exists in path. ~ at start of path is 
+   * converted to user home directory.
+   * 2) keys in properties file must be the same as CLI arguments, meaning they
+   * start with hyphen (e.g. <code>-ip</code> or <code>-delay</code>)
+   * 3) any additional arguments beside <code>-properties</code> arg will be
+   * appended as-is to end of arguments list. 
+   * 4) in properties file, arguments without value will not have value 
+   * after '=' delimiter (e.g. <code>-discover=</code>).
+   * <br/><br/>
+   * Input Example (properties file content):
+   * <code><br/>
+   *  -zeroTimeThreshold=1000000<br/>
+      -format=text<br/>
+      -ip=1.2.3.4,9.8.7.6<br/>
+      -serial0=<br/>
+      -discreteNodeCapture=<br/>
+      -discover=<br/>
+   * </code>
+   *
+   * Output Example:
+   *  <code>-zeroTimeThreshold=1000000 -format=text -ip=1.2.3.4,9.8.7.6 -serial0 -discreteNodeCapture -discover</code>
+   *  <br/>
+   * @param progArgs array of args provided to silabs-pti.jar; <code>progArgs[0]</code> is
+   * argument <code>-properties=path_to_properties_file</code>
+   * @param propertiesIndex index of <code>-properties</code> argument in array of args
+   * @return array of strings with arguments in CLI format; empty array of strings
+   * if invalid input or error processing properties file; never null
+   * @throws IOException error while reading/processing properties file
+   */
+  private String[] convertPropsToArgs(String[] progArgs, int propertiesIndex) {
+    List<String> args = new ArrayList<String>();
+    
+    if (progArgs.length > 0 && propertiesIndex >= 0) {
+      
+      String propsFile =  progArgs[propertiesIndex].substring(PROPERTIES.length()).trim();
+      //remove any whitespace and escape chars surrounding file path
+      if (propsFile.startsWith("\"")) {
+        propsFile = propsFile.substring(1);
+      }
+      if (propsFile.endsWith("\"")) {
+        propsFile = propsFile.substring(0, propsFile.length()-1);
+      }
+      //update ~ with user home directory
+      propsFile = propsFile.replaceFirst("^~", System.getProperty("user.home"));
+      
+      Properties props = new Properties();
+      try (BufferedReader propsReader = new BufferedReader(new FileReader(new File(propsFile)))) {
+        props.load(propsReader);
+
+        props.forEach((k,v) -> {
+          if (v instanceof String && !((String)v).isBlank()) {
+            args.add(k+"="+v);
+          } else {
+            args.add(k.toString());
+          }
+        });
+      } catch (IOException e) {
+        e.printStackTrace(System.out);
+      }
+    }
+    //append any additional arguments provided to list *after* arguments from
+    //properties file. Duplicate arguments later in list will override earlier 
+    //arguments when CommandLine processes them.
+    if (progArgs.length > 0) {
+      Arrays.stream(progArgs).forEach(e -> {
+        if (e.startsWith(PROPERTIES)) {
+          return;
+        }
+        args.add(e);
+        
+      });
+    }
+
+    return args.toArray(new String[0]);
   }
 }

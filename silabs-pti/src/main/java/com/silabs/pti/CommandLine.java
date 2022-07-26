@@ -139,7 +139,7 @@ public class CommandLine implements IConnectivityLogger {
       } else if (arg.equals(DISCOVER)) {
         discovery = true;
       } else if (arg.startsWith(DRIFT_CORRECTION)) {
-        driftCorrection = arg.substring(FORMAT.length()).toLowerCase().indexOf("enable") == -1;
+        driftCorrection = arg.substring(DRIFT_CORRECTION.length()).toLowerCase().indexOf("enable") >= 0;
       } else if (arg.startsWith(DRIFT_CORRECTION_THRESHOLD)) {
         try {
           driftCorrectionThreshold = MiscUtil.parseInt(arg.substring(DRIFT_CORRECTION_THRESHOLD.length()));

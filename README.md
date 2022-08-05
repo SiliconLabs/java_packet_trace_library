@@ -26,7 +26,7 @@ where X.Y.Z is the version of the library.
 
 # Where can I find the latest binaries?
 
-To download the binaries, go to the [actions tab of this repo](https://github.com/silabs-KrisY/java_packet_trace_library.git), click on the desired build there, and download the artifacts.
+To download the binaries, go to the [actions tab of this repo](https://github.com/SiliconLabs/java_packet_trace_library/actions), click on the desired build there, and download the artifacts.
 
 # License
 

@@ -19,12 +19,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import com.silabs.pti.adapter.Adapter;
@@ -192,15 +190,8 @@ public class Main {
           connections.put(ip, debugConnections);
 
           // Debug connection
-          String hostName = ip;
-          int aPort = AdapterPort.DEBUG.defaultPort();
-          Map.Entry<String, Integer> addrAndPort = parseIpAddrAndPort(ip);
-          if (addrAndPort != null) {
-            hostName = addrAndPort.getKey();
-          //assume port is base port, so add offset for debug port
-            aPort = addrAndPort.getValue()+DEBUG_PORT_OFFSET;
-          }
-          final IConnection debug = adapterConnector.createConnection(hostName, aPort, cli);
+          AddressAndPort addrPort = parseIpAddrAndPort(ip, AdapterPort.DEBUG.defaultPort(), DEBUG_PORT_OFFSET);
+          final IConnection debug = adapterConnector.createConnection(addrPort.getAddress(), addrPort.getPort(), cli);
           final IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.setFramers(debugChannelFramer, debugChannelFramer);
           debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
@@ -212,15 +203,8 @@ public class Main {
 
           // Admin connection / configure Time Server
           if (!cli.testMode() && cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
-            hostName = ip;
-            aPort = AdapterPort.ADMIN.defaultPort();
-            addrAndPort = parseIpAddrAndPort(ip);
-            if (addrAndPort != null) {
-              hostName = addrAndPort.getKey();
-              //assume port is base port, so add offset for admin port
-              aPort = addrAndPort.getValue()+ADMIN_PORT_OFFSET;
-            }
-            final IConnection admin = adapterConnector.createConnection(hostName, aPort, cli);
+            addrPort = parseIpAddrAndPort(ip,AdapterPort.ADMIN.defaultPort(), ADMIN_PORT_OFFSET);
+            final IConnection admin = adapterConnector.createConnection(addrPort.getAddress(), addrPort.getPort(), cli);
             final IFramer asciiFramer = new AsciiFramer();
             admin.setFramers(asciiFramer, asciiFramer);
             admin.connect();
@@ -272,19 +256,21 @@ public class Main {
   }
 
   /**
-   *  Parse IP and return <address,port> pair
+   * Parse IP to extract base port, if included.
    * @param ip ip address to parse
-   * @return when IP has format address:port, return <address,port> pair. when IP
-   * does not have port or is invalid value (e.g. null or empty value), return null.
+   * @param defaultPort the default port to use
+   * @param basePortOffset when IP includes base port, add offset to get real port
+   * @return when IP has format address:port, return object <address,port>. when IP
+   * does not have port, return object <address,port> with provided ip and defaultPort. 
    */
-  private Map.Entry<String, Integer> parseIpAddrAndPort(String ip) {
-    Map.Entry<String, Integer> addrAndPort = null;
+  private AddressAndPort parseIpAddrAndPort(String ip, int defaultPort, int basePortOffset) {
+    AddressAndPort addrAndPort = new AddressAndPort(ip,defaultPort);
     
     if (ip != null && !ip.isBlank() && ip.indexOf(":") > 0) {
       int index = ip.indexOf(":");
       String hostName = ip.substring(0, index);
-      Integer aPort = Integer.valueOf(ip.substring(index+1));
-      addrAndPort = new AbstractMap.SimpleEntry<>(hostName,aPort);
+      Integer basePort = Integer.valueOf(ip.substring(index+1));
+      addrAndPort = new AddressAndPort(hostName, basePort+basePortOffset);
       }
     
     return addrAndPort;
@@ -457,5 +443,29 @@ public class Main {
     }
 
     return args.toArray(new String[0]);
+  }
+  
+  /**
+   * Stores IP address and its port
+   * @author daperez
+   *
+   */
+  private class AddressAndPort {
+    private String addr;
+    private int port;
+    
+    public AddressAndPort(String addr, int port) {
+      this.addr = addr;
+      this.port = port;
+    }
+
+    public String getAddress() {
+      return addr;
+    }
+
+    public int getPort() {
+      return port;
+    }
+    
   }
 }

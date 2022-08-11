@@ -19,10 +19,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.silabs.pti.adapter.Adapter;
@@ -55,7 +57,9 @@ import com.silabs.pti.util.LineTerminator;
  */
 public class Main {
 
-  private static final String PROPERTIES = "-properties=";
+  private static final int ADMIN_PORT_OFFSET = 2;
+  private static final int DEBUG_PORT_OFFSET = 5;
+  public static final String PROPERTIES = "-properties=";
   private final AdapterSocketConnector adapterConnector;
   private final TimeSynchronizer timeSync;
 
@@ -188,7 +192,15 @@ public class Main {
           connections.put(ip, debugConnections);
 
           // Debug connection
-          final IConnection debug = adapterConnector.createConnection(ip, AdapterPort.DEBUG.defaultPort(), cli);
+          String hostName = ip;
+          int aPort = AdapterPort.DEBUG.defaultPort();
+          Map.Entry<String, Integer> addrAndPort = parseIpAddrAndPort(ip);
+          if (addrAndPort != null) {
+            hostName = addrAndPort.getKey();
+          //assume port is base port, so add offset for debug port
+            aPort = addrAndPort.getValue()+DEBUG_PORT_OFFSET;
+          }
+          final IConnection debug = adapterConnector.createConnection(hostName, aPort, cli);
           final IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.setFramers(debugChannelFramer, debugChannelFramer);
           debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
@@ -200,7 +212,15 @@ public class Main {
 
           // Admin connection / configure Time Server
           if (!cli.testMode() && cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
-            final IConnection admin = adapterConnector.createConnection(ip, AdapterPort.ADMIN.defaultPort(), cli);
+            hostName = ip;
+            aPort = AdapterPort.ADMIN.defaultPort();
+            addrAndPort = parseIpAddrAndPort(ip);
+            if (addrAndPort != null) {
+              hostName = addrAndPort.getKey();
+              //assume port is base port, so add offset for admin port
+              aPort = addrAndPort.getValue()+ADMIN_PORT_OFFSET;
+            }
+            final IConnection admin = adapterConnector.createConnection(hostName, aPort, cli);
             final IFramer asciiFramer = new AsciiFramer();
             admin.setFramers(asciiFramer, asciiFramer);
             admin.connect();
@@ -252,6 +272,24 @@ public class Main {
   }
 
   /**
+   *  Parse IP and return <address,port> pair
+   * @param ip ip address to parse
+   * @return when IP has format address:port, return <address,port> pair. when IP
+   * does not have port or is invalid value (e.g. null or empty value), return null.
+   */
+  private Map.Entry<String, Integer> parseIpAddrAndPort(String ip) {
+    Map.Entry<String, Integer> addrAndPort = null;
+    
+    if (ip != null && !ip.isBlank() && ip.indexOf(":") > 0) {
+      int index = ip.indexOf(":");
+      String hostName = ip.substring(0, index);
+      Integer aPort = Integer.valueOf(ip.substring(index+1));
+      addrAndPort = new AbstractMap.SimpleEntry<>(hostName,aPort);
+      }
+    
+    return addrAndPort;
+  }
+  /**
    * Setup output stream to either write to a single, multiple files, or stdOut
    * 
    * @param cli
@@ -293,7 +331,7 @@ public class Main {
   public String makeCaptureFilenames(final String filename, final String filename_suffix) {
     String out = filename.substring(0, filename.lastIndexOf("."));
     out += "_";
-    out += filename_suffix;
+    out += filename_suffix.replace(':', '_');
     out += filename.substring(filename.lastIndexOf("."));
     return out;
   }
@@ -396,7 +434,7 @@ public class Main {
 
         props.forEach((k,v) -> {
           if (v instanceof String && !((String)v).isBlank()) {
-            args.add(k+"="+v);
+            args.add(k.toString().trim()+"="+v.toString().trim());
           } else {
             args.add(k.toString());
           }

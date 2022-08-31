@@ -55,7 +55,9 @@ import com.silabs.pti.util.LineTerminator;
  */
 public class Main {
 
-  private static final String PROPERTIES = "-properties=";
+  private static final int ADMIN_PORT_OFFSET = 2;
+  private static final int DEBUG_PORT_OFFSET = 5;
+  public static final String PROPERTIES = "-properties=";
   private final AdapterSocketConnector adapterConnector;
   private final TimeSynchronizer timeSync;
 
@@ -188,7 +190,8 @@ public class Main {
           connections.put(ip, debugConnections);
 
           // Debug connection
-          final IConnection debug = adapterConnector.createConnection(ip, AdapterPort.DEBUG.defaultPort(), cli);
+          AddressAndPort addrPort = parseIpAddrAndPort(ip, AdapterPort.DEBUG.defaultPort(), DEBUG_PORT_OFFSET);
+          final IConnection debug = adapterConnector.createConnection(addrPort.getAddress(), addrPort.getPort(), cli);
           final IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.setFramers(debugChannelFramer, debugChannelFramer);
           debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
@@ -200,7 +203,8 @@ public class Main {
 
           // Admin connection / configure Time Server
           if (!cli.testMode() && cli.discreteNodeCapture() == false && cli.hostnames().length > 1) {
-            final IConnection admin = adapterConnector.createConnection(ip, AdapterPort.ADMIN.defaultPort(), cli);
+            addrPort = parseIpAddrAndPort(ip,AdapterPort.ADMIN.defaultPort(), ADMIN_PORT_OFFSET);
+            final IConnection admin = adapterConnector.createConnection(addrPort.getAddress(), addrPort.getPort(), cli);
             final IFramer asciiFramer = new AsciiFramer();
             admin.setFramers(asciiFramer, asciiFramer);
             admin.connect();
@@ -252,6 +256,26 @@ public class Main {
   }
 
   /**
+   * Parse IP to extract base port, if included.
+   * @param ip ip address to parse
+   * @param defaultPort the default port to use
+   * @param basePortOffset when IP includes base port, add offset to get real port
+   * @return when IP has format address:port, return object <address,port>. when IP
+   * does not have port, return object <address,port> with provided ip and defaultPort. 
+   */
+  private AddressAndPort parseIpAddrAndPort(String ip, int defaultPort, int basePortOffset) {
+    AddressAndPort addrAndPort = new AddressAndPort(ip,defaultPort);
+    
+    if (ip != null && !ip.isBlank() && ip.indexOf(":") > 0) {
+      int index = ip.indexOf(":");
+      String hostName = ip.substring(0, index);
+      Integer basePort = Integer.valueOf(ip.substring(index+1));
+      addrAndPort = new AddressAndPort(hostName, basePort+basePortOffset);
+      }
+    
+    return addrAndPort;
+  }
+  /**
    * Setup output stream to either write to a single, multiple files, or stdOut
    * 
    * @param cli
@@ -293,7 +317,7 @@ public class Main {
   public String makeCaptureFilenames(final String filename, final String filename_suffix) {
     String out = filename.substring(0, filename.lastIndexOf("."));
     out += "_";
-    out += filename_suffix;
+    out += filename_suffix.replace(':', '_');
     out += filename.substring(filename.lastIndexOf("."));
     return out;
   }
@@ -396,7 +420,7 @@ public class Main {
 
         props.forEach((k,v) -> {
           if (v instanceof String && !((String)v).isBlank()) {
-            args.add(k+"="+v);
+            args.add(k.toString().trim()+"="+v.toString().trim());
           } else {
             args.add(k.toString());
           }
@@ -419,5 +443,29 @@ public class Main {
     }
 
     return args.toArray(new String[0]);
+  }
+  
+  /**
+   * Stores IP address and its port
+   * @author daperez
+   *
+   */
+  private class AddressAndPort {
+    private String addr;
+    private int port;
+    
+    public AddressAndPort(String addr, int port) {
+      this.addr = addr;
+      this.port = port;
+    }
+
+    public String getAddress() {
+      return addr;
+    }
+
+    public int getPort() {
+      return port;
+    }
+    
   }
 }

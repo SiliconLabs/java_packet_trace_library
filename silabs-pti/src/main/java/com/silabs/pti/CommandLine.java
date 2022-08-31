@@ -296,6 +296,8 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + ZERO_TIME_THRESHOLD + " - zero time threshold (micro-sec).");
     System.out.println("  " + DISCRETE_NODE_CAPTURE
         + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
+    System.out.println("  " + Main.PROPERTIES + "<FILE> - specify path to file, where each line in file has a single entry in format of argument=value. "
+        + "On Windows, path separators need to be escaped.");
     System.out.println("\nFile formats:\n");
     for (final FileFormat ff : FileFormat.values()) {
       System.out.println("  " + ff.name().toLowerCase() + " - " + ff.format().description());

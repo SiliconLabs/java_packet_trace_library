@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.junit.jupiter.api.AfterAll;
@@ -86,10 +87,10 @@ class MainTest {
     props.put("-time", "600000"); //10 minutes
     props.put("-driftCorrection", "enable");
     props.put("-driftCorrectionThreshold", threshold);
-    props.put("-delay", "1000");
+    props.put("-delay", " 1000");
     props.put("-zeroTimeThreshold", threshold);
     props.put("-format", fileFormat);
-    props.put("-ip", "1.2.3.4,9.8.7.6");
+    props.put("-ip ", " 1.2.3.4,9.8.7.6:54900");
     
     //Args without values
     props.put("-serial0", "");
@@ -116,11 +117,15 @@ class MainTest {
     assertFalse(main.cli().shouldExit(), "Expected CLI to not exit");
     assertTrue(main.cli().exitCode() <= 0, "Expected successful exit code");
     
+    
     //verify specific output
     assertTrue(main.cli().driftCorrection(), "Expected drift correction to be enabled");
     assertTrue(main.cli().isDiscovery(), "Expected discover to be set to enable");
     assertTrue(main.cli().discreteNodeCapture(), "Expected discrete node capture to always be enabled");
     assertTrue(fileFormat.equalsIgnoreCase(main.cli().fileFormat().name()), "Expected matching file format values");
+    assertTrue(
+               Arrays.compare(new String[] {"1.2.3.4","9.8.7.6:54900"}, main.cli().hostnames()) == 0, 
+               "Expected hostnames to match");
 
     assertEquals( outputLog, main.cli().output(), "Expected matching path for output log");
     assertEquals(Integer.valueOf(delayOverride), main.cli().delayMs(),"Expected matching delay");
@@ -148,7 +153,7 @@ class MainTest {
       "-delay=1000",
       "-zeroTimeThreshold="+threshold,
       "-format="+fileFormat,
-      "-ip=1.2.3.4,9.8.7.6",
+      "-ip=1.2.3.4,9.8.7.6:54900",
       "-admin",
       "-discreteNodeCapture",
       "-discover",

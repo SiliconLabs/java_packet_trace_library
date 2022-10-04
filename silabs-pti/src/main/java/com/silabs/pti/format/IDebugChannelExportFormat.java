@@ -90,7 +90,7 @@ public interface IDebugChannelExportFormat<T> {
    * If this format is NOT using debug messages, then this method is called for
    * each block of raw bytes received.
    *
-   * @param out
+   * @param outWriter
    * @param rawBytes
    * @param offset
    * @param length

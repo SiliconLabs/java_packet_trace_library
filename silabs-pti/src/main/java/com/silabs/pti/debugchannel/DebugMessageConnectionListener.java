@@ -54,7 +54,7 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
     for (final IDebugChannelExportOutput<T> v : output.values()) {
       if (!writtenHeader.contains(v)) {
         try {
-          format.writeHeader(v);
+          format.writeHeader(v.writer());
         } catch (final IOException ioe) {
           PtiLog.error("Could not write header.", ioe);
         }
@@ -70,6 +70,7 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
 
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
+    @SuppressWarnings("resource")
     final IDebugChannelExportOutput<T> outputStream = output.output(originator);
     long t;
     if (t0 == -1) {
@@ -107,14 +108,14 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
                                              final TimeSynchronizer timeSync,
                                              final IDebugChannelExportFormat<T> format) throws IOException {
     if (format.isUsingRawBytes()) {
-      return format.formatRawBytes(outputStream, timeMs, bytes, 0, bytes.length);
+      return format.formatRawBytes(outputStream.writer(), timeMs, bytes, 0, bytes.length);
     } else {
       final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
       final DebugMessageType dmt = DebugMessageType.get(dm.debugType());
       final EventType type = EventType.fromDebugMessage(dmt);
       // time correction
       DebugMessageConnectionListener.timeCorrection(timeSync, dm);
-      return format.formatDebugMessage(outputStream, originator, dm, type);
+      return format.formatDebugMessage(outputStream.writer(), originator, dm, type);
     }
   }
 }

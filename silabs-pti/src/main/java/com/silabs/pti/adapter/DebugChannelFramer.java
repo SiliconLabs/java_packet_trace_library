@@ -85,6 +85,8 @@ public class DebugChannelFramer extends BinaryFramer {
         return message;
       else
         return null;
+    default:
+      return null;
     }
     return null;
   }
@@ -106,15 +108,15 @@ public class DebugChannelFramer extends BinaryFramer {
    * Add the framing to a message.
    */
   @Override
-  public byte[] frame(final byte[] message) {
+  public byte[] frame(final byte[] msg) {
     byte[] temp;
     int extra = (twoByteLength ? 1 : 0);
-    temp = new byte[message.length + 3 + extra];
+    temp = new byte[msg.length + 3 + extra];
     temp[0] = OPEN_BRACKET;
-    temp[1] = (byte) (message.length - sizeError);
-    temp[2] = (byte) ((message.length - sizeError) >> 8);
-    System.arraycopy(message, 0, temp, 2 + extra, message.length);
-    temp[message.length + 2 + extra] = CLOSE_BRACKET;
+    temp[1] = (byte) (msg.length - sizeError);
+    temp[2] = (byte) ((msg.length - sizeError) >> 8);
+    System.arraycopy(msg, 0, temp, 2 + extra, msg.length);
+    temp[msg.length + 2 + extra] = CLOSE_BRACKET;
     return temp;
   }
 }

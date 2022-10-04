@@ -50,7 +50,7 @@ import com.silabs.pti.util.LineTerminator;
  * Main entry point to the standalone PTI functionality.
  *
  * Created on Feb 9, 2017
- * 
+ *
  * @author timotej
  */
 public class Main {
@@ -70,9 +70,9 @@ public class Main {
     } else {
       final Main m = new Main(args);
       if (m.cli.shouldExit())
-        System.exit(m.cli.exitCode());
+        System.exit(m.cli().exitCode());
 
-      final int code = m.run(m.cli);
+      final int code = m.run();
       m.closeConnections();
       System.exit(code);
     }
@@ -113,7 +113,7 @@ public class Main {
     return cli;
   }
 
-  public int run(final CommandLine cli) {
+  public int run() {
     try {
       if (cli.isInteractive()) {
         return Interactive.runInteractive(cli, timeSync);
@@ -123,11 +123,11 @@ public class Main {
         switch (cli.port()) {
         case TEST:
         case DEBUG:
-          return runCapture(cli.fileFormat().format(), cli, timeSync);
+          return runCapture(cli.fileFormat().format(), timeSync);
         case ADMIN:
         case SERIAL0:
         case SERIAL1:
-          return runCommandSequence(cli);
+          return runCommandSequence();
 
         default:
           PtiLog.error("Unknown port: " + cli.port());
@@ -140,12 +140,12 @@ public class Main {
     }
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private <T> int runCapture(final IDebugChannelExportFormat<T> format,
-                             final CommandLine cli,
                              final TimeSynchronizer timeSynchronizer) throws IOException {
     // inits
     final String outputFilename = cli.output();
-    UnframedConnectionListener dl = null;
+    UnframedConnectionListener<T> dl = null;
     final HashMap<String, List<IConnection>> connections = new HashMap<>();
 
     OutputMap<T> output = null;
@@ -164,7 +164,7 @@ public class Main {
         c.connect();
       }
     } else {
-      output = configOutputFiles(cli, format, outputFilename);
+      output = configOutputFiles(format, outputFilename);
 
       String timeServer = null;
       List<IConnection> adminConnections = new ArrayList<>();
@@ -277,16 +277,16 @@ public class Main {
   }
   /**
    * Setup output stream to either write to a single, multiple files, or stdOut
-   * 
+   *
    * @param cli
    * @param outFilename
    * @param output
    * @throws FileNotFoundException
    */
-  private <T> OutputMap<T> configOutputFiles(final CommandLine cli,
-                                             final IDebugChannelExportFormat<T> format,
+  @SuppressWarnings("resource")
+  private <T> OutputMap<T> configOutputFiles(final IDebugChannelExportFormat<T> format,
                                              final String outFilename) throws IOException {
-    final OutputMap<T> output = new OutputMap<T>();
+    final OutputMap<T> output = new OutputMap<>();
     if (outFilename != null && !outFilename.isEmpty()) {
       // We have a file specified.
       if (cli.testMode()) {
@@ -341,7 +341,7 @@ public class Main {
     }
   }
 
-  private int runCommandSequence(final CommandLine cli) throws IOException {
+  private int runCommandSequence() throws IOException {
     final String hostname = cli.hostnames()[0];
     final IConnection c = Adapter.createConnection(hostname, cli.port().defaultPort(), cli);
     c.connect();
@@ -364,18 +364,18 @@ public class Main {
   }
 
   /**
-   * Convert arguments in properties file to CLI arguments format. 
+   * Convert arguments in properties file to CLI arguments format.
    * <br/><br/>
-   * NB: 
+   * NB:
    * 1) expected format is <code>-properties=path_to_properties_file</code>,
-   * where <code>path_to_properties_file</code> may be surrounded in double 
-   * quotes in case whitespace characters exists in path. ~ at start of path is 
+   * where <code>path_to_properties_file</code> may be surrounded in double
+   * quotes in case whitespace characters exists in path. ~ at start of path is
    * converted to user home directory.
    * 2) keys in properties file must be the same as CLI arguments, meaning they
    * start with hyphen (e.g. <code>-ip</code> or <code>-delay</code>)
    * 3) any additional arguments beside <code>-properties</code> arg will be
-   * appended as-is to end of arguments list. 
-   * 4) in properties file, arguments without value will not have value 
+   * appended as-is to end of arguments list.
+   * 4) in properties file, arguments without value will not have value
    * after '=' delimiter (e.g. <code>-discover=</code>).
    * <br/><br/>
    * Input Example (properties file content):
@@ -398,11 +398,11 @@ public class Main {
    * if invalid input or error processing properties file; never null
    * @throws IOException error while reading/processing properties file
    */
-  private String[] convertPropsToArgs(String[] progArgs, int propertiesIndex) {
-    List<String> args = new ArrayList<String>();
-    
+  private String[] convertPropsToArgs(final String[] progArgs, final int propertiesIndex) {
+    List<String> args = new ArrayList<>();
+
     if (progArgs.length > 0 && propertiesIndex >= 0) {
-      
+
       String propsFile =  progArgs[propertiesIndex].substring(PROPERTIES.length()).trim();
       //remove any whitespace and escape chars surrounding file path
       if (propsFile.startsWith("\"")) {
@@ -413,7 +413,7 @@ public class Main {
       }
       //update ~ with user home directory
       propsFile = propsFile.replaceFirst("^~", System.getProperty("user.home"));
-      
+
       Properties props = new Properties();
       try (BufferedReader propsReader = new BufferedReader(new FileReader(new File(propsFile)))) {
         props.load(propsReader);
@@ -430,7 +430,7 @@ public class Main {
       }
     }
     //append any additional arguments provided to list *after* arguments from
-    //properties file. Duplicate arguments later in list will override earlier 
+    //properties file. Duplicate arguments later in list will override earlier
     //arguments when CommandLine processes them.
     if (progArgs.length > 0) {
       Arrays.stream(progArgs).forEach(e -> {
@@ -438,7 +438,7 @@ public class Main {
           return;
         }
         args.add(e);
-        
+
       });
     }
 

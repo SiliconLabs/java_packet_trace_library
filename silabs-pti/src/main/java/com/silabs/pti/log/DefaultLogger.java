@@ -20,7 +20,7 @@ import java.io.PrintStream;
  * Default logger implementation if there is no eclipse environment.
  *
  * Created on Feb 13, 2017
- * 
+ *
  * @author timotej
  * @since 4.6
  */
@@ -40,6 +40,7 @@ class DefaultLogger implements IPtiLogger {
       ps = System.out;
       break;
     case NONE:
+    default:
       ps = null;
       break;
     }

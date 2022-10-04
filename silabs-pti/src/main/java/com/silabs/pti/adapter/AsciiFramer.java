@@ -31,7 +31,7 @@ public class AsciiFramer implements ILineTerminatingFramer {
   private LineTerminator lineTerminator;
   private static final String CHARSET = "US-ASCII";
 
-  private List<Byte> message = new ArrayList<Byte>();
+  private final List<Byte> message = new ArrayList<>();
 
   private boolean ignoreNewline = false;
   private Charset cs;
@@ -83,24 +83,24 @@ public class AsciiFramer implements ILineTerminatingFramer {
   }
 
   @Override
-  public byte[] frame(final byte[] message) {
-    return toBytes(toString(message) + lineTerminator.terminator());
+  public byte[] frame(final byte[] msg) {
+    return toBytes(toString(msg) + lineTerminator.terminator());
   }
 
   @Override
-  public byte[] toBytes(final String message) {
-    if (message == null)
+  public byte[] toBytes(final String msg) {
+    if (msg == null)
       return null;
     else
-      return message.getBytes(cs);
+      return msg.getBytes(cs);
   }
 
   @Override
-  public String toString(final byte[] message) {
-    if (message == null)
+  public String toString(final byte[] msg) {
+    if (msg == null)
       return null;
     else
-      return new String(message, cs);
+      return new String(msg, cs);
   }
 
   /** Returns the line terminator that is used in output framing. */

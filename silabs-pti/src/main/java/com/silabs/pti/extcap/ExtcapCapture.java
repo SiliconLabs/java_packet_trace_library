@@ -24,7 +24,7 @@ import com.silabs.pti.log.PtiSeverity;
  */
 public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
 
-  private final String ifc, fifo, filter;
+  private final String ifc, fifo;
   private AdapterSocketConnector adapterConnector;
   private boolean isFinished = false;
   private int messageCount = 0;
@@ -32,18 +32,18 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
   private final PcapngFormat pcapFormat = new PcapngFormat(Mode.DCH);
   private IDebugChannelExportOutput<IPcapOutput> output;
 
-  public ExtcapCapture(final String ifc, final String fifo, final String filter) {
+  public ExtcapCapture(final String ifc, final String fifo) {
     this.ifc = ifc;
     this.fifo = fifo;
-    this.filter = filter;
   }
 
+  @SuppressWarnings("resource")
   public void capture(final IExtcapInterface extcapInterface) throws IOException {
     this.ec = extcapInterface;
     ec.log("capture: start capturing on adapter '" + ifc + "'");
     adapterConnector = new AdapterSocketConnector();
     output = pcapFormat.createOutput(new File(fifo),false);
-    pcapFormat.writeHeader(output);
+    pcapFormat.writeHeader(output.writer());
     final IConnection c = adapterConnector.createConnection(ifc, AdapterPort.DEBUG.defaultPort(), this);
     final IFramer debugChannelFramer = new DebugChannelFramer(true);
     c.setFramers(debugChannelFramer, debugChannelFramer);
@@ -86,11 +86,12 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
         + (throwable == null ? "" : (" [" + throwable.getMessage() + "]")));
   }
 
+  @SuppressWarnings("resource")
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
     messageCount++;
     try {
-      pcapFormat.formatRawBytes(output, pcTime, message, 0, message.length);
+      pcapFormat.formatRawBytes(output.writer(), pcTime, message, 0, message.length);
     } catch (final IOException ioe) {
       if (!isFinished)
         ec.log("capture error: could not write PCAP file any more [" + ioe.getMessage() + "]");

@@ -23,7 +23,7 @@ import com.silabs.pti.log.PtiLog;
 
 /**
  * Class containing output formatters.
- * 
+ *
  * @author timotej
  *
  */
@@ -32,12 +32,12 @@ public class OutputMap<T> {
   private final Map<String, IDebugChannelExportOutput<T>> outputMap;
 
   public OutputMap() {
-    this.outputMap = new HashMap<String, IDebugChannelExportOutput<T>>();
+    this.outputMap = new HashMap<>();
   }
 
   /**
    * Retrieves the output from the map by originator.
-   * 
+   *
    * @param originator
    * @return
    */
@@ -47,17 +47,18 @@ public class OutputMap<T> {
 
   /**
    * Inserts the output into the map, keyed by originator.
-   * 
+   *
    * @param originator
    * @param output
    */
+  @SuppressWarnings("resource")
   public void put(final String originator, final IDebugChannelExportOutput<T> output) {
     this.outputMap.put(originator, output);
   }
 
   /**
    * Returns all the output values in this map.
-   * 
+   *
    * @return maps
    */
   public Collection<IDebugChannelExportOutput<T>> values() {

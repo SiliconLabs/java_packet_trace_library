@@ -32,7 +32,7 @@ import com.silabs.pti.discovery.DiscoveryUtil;
  * When this jar file is used within wireshark, the extcap wireshark
  * functionality will pass 'extcap' as the first argument. If that happens then
  * we end up here.
- * 
+ *
  * @author timotej
  *
  */
@@ -52,11 +52,11 @@ public class Extcap implements IExtcapInterface {
   private File logFile = null;
   private PrintWriter logWriter;
   private final PrintStream extcapOut;
-  private final List<String> extcapArgs = new ArrayList<String>();
+  private final List<String> extcapArgs = new ArrayList<>();
 
   /**
    * Execute extcap function. Args will contain 'extcap' as the first argument.
-   * 
+   *
    * @param args
    * @return
    */
@@ -66,7 +66,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Entry point to create an instance.
-   * 
+   *
    * @param args
    */
   private Extcap(final String[] args) {
@@ -85,7 +85,7 @@ public class Extcap implements IExtcapInterface {
   /**
    * This method logs to the log file, unrelated to wireshark, so you can debug
    * what's happening.
-   * 
+   *
    * @param s
    */
   @Override
@@ -96,7 +96,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * This method prints output to the wireshark extcap communication protocol.
-   * 
+   *
    * @param s
    */
   @Override
@@ -107,7 +107,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * The method returns one of the toplevel commands for the extcap CLI protocol.
-   * 
+   *
    * @return command
    */
   private String extractCommandFromArgs() {
@@ -121,8 +121,9 @@ public class Extcap implements IExtcapInterface {
         return EC_CONFIG;
       case EC_CAPTURE:
         return EC_CAPTURE;
+      default:
+        break;
       }
-
     }
     return null;
   }
@@ -130,7 +131,7 @@ public class Extcap implements IExtcapInterface {
   /**
    * Given an argument, this returns the value of the argument, so essentially the
    * next argument.
-   * 
+   *
    * @param arg
    * @return value of a given argument.
    */
@@ -147,7 +148,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Main execution loop. Creates the logger and parses the command line.
-   * 
+   *
    * @return return code from the program.
    */
   private int run() {
@@ -169,6 +170,8 @@ public class Extcap implements IExtcapInterface {
           return extcapConfig(extractValueFromArg(EC_INTERFACE));
         case EC_CAPTURE:
           return extcapCapture(extractValueFromArg(EC_INTERFACE));
+        default:
+          break;
         }
       } else {
         return 1;
@@ -182,7 +185,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Entry point for the interfaces list command.
-   * 
+   *
    * @return program return code
    */
   private int extcapInterfaces() {
@@ -206,7 +209,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Entry point for the DLTs list.
-   * 
+   *
    * @return program return code
    */
   private int extcapDlts(final String ifc) {
@@ -218,7 +221,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Entry point for the capture initialization.
-   * 
+   *
    * @return program return code
    */
   private int extcapCapture(final String ifc) {
@@ -227,7 +230,7 @@ public class Extcap implements IExtcapInterface {
     final String fifo = extractValueFromArg(EC_FIFO);
     final String filter = extractValueFromArg(EC_CAPTURE_FILTER);
     log("capture: from " + ifc + " into " + fifo + (filter == null ? " with no filter" : (" with filter " + filter)));
-    final ExtcapCapture capture = new ExtcapCapture(ifc, fifo, filter);
+    final ExtcapCapture capture = new ExtcapCapture(ifc, fifo);
     try {
       capture.capture(this);
       return 0;
@@ -239,7 +242,7 @@ public class Extcap implements IExtcapInterface {
 
   /**
    * Entry point for the configuration information.
-   * 
+   *
    * @return program return code
    */
   private int extcapConfig(final String ifc) {

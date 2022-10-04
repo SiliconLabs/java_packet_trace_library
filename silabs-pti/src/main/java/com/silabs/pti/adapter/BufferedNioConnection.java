@@ -43,6 +43,7 @@ public class BufferedNioConnection extends BaseConnection {
     super(host, port, logger);
   }
 
+  @SuppressWarnings("resource")
   @Override
   public void connect() throws IOException {
     if (isConnected())

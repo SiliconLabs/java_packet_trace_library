@@ -22,7 +22,7 @@ import com.silabs.pti.debugchannel.EventType;
 
 /**
  * Raw binary dump of data.
- * 
+ *
  * @author timotej
  *
  */
@@ -39,7 +39,7 @@ public class DumpFileFormat implements IDebugChannelExportFormat<OutputStream> {
   }
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput<OutputStream> out) {
+  public void writeHeader(final OutputStream out) {
   }
 
   @Override
@@ -58,15 +58,15 @@ public class DumpFileFormat implements IDebugChannelExportFormat<OutputStream> {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput<OutputStream> out,
+  public void writeRawUnframedData(final OutputStream out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {
-    out.writer().write(rawBytes, offset, length);
+    out.write(rawBytes, offset, length);
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput<OutputStream> out,
+  public boolean formatDebugMessage(final OutputStream out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -74,7 +74,7 @@ public class DumpFileFormat implements IDebugChannelExportFormat<OutputStream> {
   }
 
   @Override
-  public final boolean formatRawBytes(final IDebugChannelExportOutput<OutputStream> out,
+  public final boolean formatRawBytes(final OutputStream out,
                                       final long pcTimeMs,
                                       final byte[] rawBytes,
                                       final int offset,

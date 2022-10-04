@@ -83,8 +83,8 @@ public class Interactive {
       host = cli.hostnames()[0];
     this.logger = cli;
     this.timeSync = timeSync;
-    this.cliOutputMap = new OutputMap<Object>();
-    this.captureOutputMap = new OutputMap<Object>();
+    this.cliOutputMap = new OutputMap<>();
+    this.captureOutputMap = new OutputMap<>();
   }
 
   /**
@@ -202,6 +202,7 @@ public class Interactive {
     }
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes", "resource" })
   private void cli(final String s) throws IOException {
     if (cliConnection == null || !cliConnection.isConnected()) {
       try {
@@ -375,6 +376,7 @@ public class Interactive {
 
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked", "resource" })
   @Cli(help = "Starts or stops capture", args = "start|stop")
   public void capture(final String... s) {
     if (s.length == 0) {

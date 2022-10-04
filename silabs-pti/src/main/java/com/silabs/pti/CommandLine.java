@@ -35,7 +35,7 @@ import com.silabs.pti.util.MiscUtil;
  * Command line parsing for the standalone PTI.
  *
  * Created on Feb 11, 2017
- * 
+ *
  * @author timotej
  */
 public class CommandLine implements IConnectivityLogger {
@@ -75,7 +75,7 @@ public class CommandLine implements IConnectivityLogger {
   private int driftCorrectionThreshold = 5000000; // micro-second
   private int zeroTimeThreshold = 2000000; // micro-second
   private boolean discreteNodeCapture = false;
-  private List<Integer> testPort = new ArrayList<Integer>();
+  private List<Integer> testPort = new ArrayList<>();
   private boolean testMode = false;
 
   private boolean shouldExit = false;
@@ -270,7 +270,7 @@ public class CommandLine implements IConnectivityLogger {
   /**
    * Prints usage and exits with a given exit code.
    */
-  public void usage(final int exitCode) {
+  public void usage(final int returnedExitCode) {
     final String filename = filename();
     System.out.println("Usage: java -jar " + filename + " [ARGUMENTS] [COMMANDS]");
     System.out.println("\nMandatory arguments:\n");
@@ -315,7 +315,7 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  'java -jar " + filename
         + " -ip=10.4.186.138 -format=log -time=5000 -out=capture.log'             => capture for 5 seconds into capture.log, using network analyzer format.");
     this.shouldExit = true;
-    this.exitCode = exitCode;
+    this.exitCode = returnedExitCode;
   }
 
   public boolean hasTimeLimit() {

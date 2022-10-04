@@ -3,7 +3,7 @@ package com.silabs.pti;
 public class MainRunner implements Runnable {
   Main m = null;
 
-  public MainRunner(String[] args) {
+  public MainRunner(final String[] args) {
     m = new Main(args);
   }
 
@@ -12,6 +12,6 @@ public class MainRunner implements Runnable {
     if (m.cli().shouldExit())
       System.exit(m.cli().exitCode());
 
-    m.run(m.cli());
+    m.run();
   }
 }

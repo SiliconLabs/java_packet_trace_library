@@ -38,6 +38,9 @@ import com.silabs.pti.discovery.DiscoveryUtil;
  */
 public class Extcap implements IExtcapInterface {
 
+  // CLI identifier
+  public static final String EXTCAP = "extcap";
+
   // Commands
   private static final String EC_INTERFACES = "--extcap-interfaces";
   private static final String EC_CONFIG = "--extcap-config";

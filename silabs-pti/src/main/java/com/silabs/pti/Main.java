@@ -58,13 +58,14 @@ public class Main {
   private static final int ADMIN_PORT_OFFSET = 2;
   private static final int DEBUG_PORT_OFFSET = 5;
   public static final String PROPERTIES = "-properties=";
+
   private final AdapterSocketConnector adapterConnector;
   private final TimeSynchronizer timeSync;
 
   private final CommandLine cli;
 
   public static void main(final String[] args) {
-    if (args.length > 0 && "extcap".equals(args[0])) {
+    if (args.length > 0 && Extcap.EXTCAP.equals(args[0])) {
       final int errorCode = Extcap.run(args);
       System.exit(errorCode);
     } else {
@@ -261,18 +262,18 @@ public class Main {
    * @param defaultPort the default port to use
    * @param basePortOffset when IP includes base port, add offset to get real port
    * @return when IP has format address:port, return object <address,port>. when IP
-   * does not have port, return object <address,port> with provided ip and defaultPort. 
+   * does not have port, return object <address,port> with provided ip and defaultPort.
    */
-  private AddressAndPort parseIpAddrAndPort(String ip, int defaultPort, int basePortOffset) {
+  private AddressAndPort parseIpAddrAndPort(final String ip, final int defaultPort, final int basePortOffset) {
     AddressAndPort addrAndPort = new AddressAndPort(ip,defaultPort);
-    
+
     if (ip != null && !ip.isBlank() && ip.indexOf(":") > 0) {
       int index = ip.indexOf(":");
       String hostName = ip.substring(0, index);
       Integer basePort = Integer.valueOf(ip.substring(index+1));
       addrAndPort = new AddressAndPort(hostName, basePort+basePortOffset);
       }
-    
+
     return addrAndPort;
   }
   /**
@@ -444,17 +445,17 @@ public class Main {
 
     return args.toArray(new String[0]);
   }
-  
+
   /**
    * Stores IP address and its port
    * @author daperez
    *
    */
   private class AddressAndPort {
-    private String addr;
-    private int port;
-    
-    public AddressAndPort(String addr, int port) {
+    private final String addr;
+    private final int port;
+
+    public AddressAndPort(final String addr, final int port) {
       this.addr = addr;
       this.port = port;
     }
@@ -466,6 +467,6 @@ public class Main {
     public int getPort() {
       return port;
     }
-    
+
   }
 }

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.DebugMessageType;
+import com.silabs.pti.util.MiscUtil;
 
 /**
  * Filter implementation fed from the CLI argument.
@@ -171,13 +172,7 @@ class TypeInFilter implements IDebugMessageFilter {
     for ( String s: types.split(Pattern.quote(","))) {
       s = s.toLowerCase();
       try {
-        int n;
-        if ( s.startsWith("0x") ) {
-          n = Integer.parseInt(s.substring(2), 16);
-        } else {
-          n = Integer.parseInt(s);
-        }
-        ints.add(n);
+        ints.add(MiscUtil.parseInt(s));
       } catch (NumberFormatException e) {
         names.add(s);
       }

@@ -14,7 +14,7 @@ import com.silabs.pti.debugchannel.DebugMessage;
  */
 public class CliDebugMessageFilter implements IDebugMessageFilter {
 
-  private final DebugMessageFilterExpression expression;
+  private final DebugMessageFilterExpression filterChain;
 
   /**
    * Create the filter with the initial filter expression.
@@ -23,7 +23,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
    * @throws ParseException
    */
   public CliDebugMessageFilter(final String expression) throws ParseException {
-    throw new ParseException("Not yet implemented.", 0);
+    filterChain = new DebugMessageFilterExpression(DebugMessageFilterExpression.FIRST, expression);
   }
 
   /**
@@ -33,7 +33,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
    * @throws ParseException
    */
   public void andFilter(final String expression) throws ParseException {
-    throw new ParseException("Not yet implemented.", 0);
+    filterChain.and(expression);
   }
 
   /**
@@ -43,7 +43,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
    * @throws ParseException
    */
   public void orFilter(final String expression) throws ParseException {
-    throw new ParseException("Not yet implemented.", 0);
+    filterChain.or(expression);
   }
 
   /**
@@ -51,7 +51,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
    */
   @Override
   public boolean isMessageKept(final DebugMessage message) {
-    return true;
+    return filterChain.isMessageKept(message);
   }
 
   public String helpText() {
@@ -67,17 +67,72 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
   }
 }
 
-class DebugMessageFilterExpression {
+// Single node in an expression, with an operator and an optional NOT
+class DebugMessageFilterExpression implements IDebugMessageFilter {
   public static final int FIRST = 0;
   public static final int AND = 1;
   public static final int OR = 2;
 
   private final int operator;
-  private final String expression;
-  private final DebugMessageFilterExpression next = null;
+  private DebugMessageFilterExpression next = null;
+  private final boolean negated;
 
-  public DebugMessageFilterExpression(final int op, final String expression) {
+  private boolean isKept;
+  
+  public DebugMessageFilterExpression(final int op, final String expression) throws ParseException {
     this.operator = op;
-    this.expression = expression;
+    
+    String exp = expression.strip();
+    if ( exp.startsWith("!") ) {
+      this.negated = true;
+      parseExpression(exp.substring(1).strip());
+    } else {
+      this.negated = false;
+      parseExpression(exp);
+    }
   }
+  
+  private void parseExpression(String expression) throws ParseException {
+    if ( "true".equals(expression) ) {
+      isKept = true;
+    } else if ( "false".equals(expression) ) {
+      isKept = false;
+    } else {
+      throw new ParseException("Invalid filter expression: " + expression, 0);
+    }
+  }
+  
+  @Override
+  public boolean isMessageKept(DebugMessage message) {
+    if ( negated ) {
+      return !isKept;
+    } else {
+      return isKept;
+    }
+  }
+  
+  public int operator() { return operator; }
+  
+  public void and(String expression) throws ParseException {
+    DebugMessageFilterExpression dmf = new DebugMessageFilterExpression(AND, expression);
+    if ( next == null ) {
+      next = dmf;
+    } else {
+      DebugMessageFilterExpression finger = next;
+      while ( finger.next != null ) finger = finger.next;
+      finger.next = dmf;
+    }
+  }
+  
+  public void or(String expression) throws ParseException {
+    DebugMessageFilterExpression dmf = new DebugMessageFilterExpression(OR, expression);    
+    if ( next == null ) {
+      next = dmf;
+    } else {
+      DebugMessageFilterExpression finger = next;
+      while ( finger.next != null ) finger = finger.next;
+      finger.next = dmf;
+    }
+  }
+
 }

@@ -19,7 +19,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
   /**
    * Create the filter with the initial filter expression.
    *
-   * @param argument
+   * @param expression
    * @throws ParseException
    */
   public CliDebugMessageFilter(final String expression) throws ParseException {
@@ -29,7 +29,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
   /**
    * Add another filter expression to the filter with AND operator.
    *
-   * @param argument
+   * @param expression
    * @throws ParseException
    */
   public void andFilter(final String expression) throws ParseException {
@@ -39,7 +39,7 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
   /**
    * Add another filter expression to the filter with AND operator.
    *
-   * @param argument
+   * @param expression
    * @throws ParseException
    */
   public void orFilter(final String expression) throws ParseException {

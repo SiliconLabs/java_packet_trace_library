@@ -19,6 +19,11 @@ public interface IDebugMessageFilter {
   public static final IDebugMessageFilter ALL_PASS_FILTER = message -> true;
 
   /**
+   * Default no pass filter.
+   */
+  public static final IDebugMessageFilter NO_PASS_FILTER = message -> false;
+
+  /**
    * If the method returns true, then the message is kept in the queue.
    * If it returns false, then it is discarded.
    *

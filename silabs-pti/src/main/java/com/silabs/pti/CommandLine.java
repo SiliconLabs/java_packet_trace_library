@@ -333,8 +333,8 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
     System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
     System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing.");
-    System.out.println("  " + FILTER_AND + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are left-to-right associative.");
-    System.out.println("  " + FILTER_OR + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are left-to-right associative.");
+    System.out.println("  " + FILTER_AND + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
+    System.out.println("  " + FILTER_OR + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION

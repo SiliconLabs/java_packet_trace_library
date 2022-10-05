@@ -81,7 +81,7 @@ public class CommandLine implements IConnectivityLogger {
   private boolean discreteNodeCapture = false;
   private List<Integer> testPort = new ArrayList<>();
   private boolean testMode = false;
-  private IDebugMessageFilter filter = null;
+  private CliDebugMessageFilter filter = null;
 
   private boolean shouldExit = false;
   private int exitCode = -1;
@@ -173,7 +173,10 @@ public class CommandLine implements IConnectivityLogger {
         }
       } else if ( arg.startsWith(FILTER)) {
         try {
-          filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
+          if ( filter == null )
+            filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
+          else
+            filter.additionalFilter(arg.substring(FILTER.length()));
         } catch (ParseException pe) {
           System.err.println("Filter format error: " + pe.getMessage());
           usage(1);
@@ -305,6 +308,7 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + SERIAL0 + " - connect to serial0 port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
     System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
+    System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing. You may specify multiple -filter arguments.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION

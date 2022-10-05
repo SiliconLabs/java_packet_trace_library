@@ -14,12 +14,32 @@ import com.silabs.pti.debugchannel.DebugMessage;
  */
 public class CliDebugMessageFilter implements IDebugMessageFilter {
 
-  public CliDebugMessageFilter(final String argument) throws ParseException {
+  /**
+   * Create the filter with the initial filter expression.
+   *
+   * @param argument
+   * @throws ParseException
+   */
+  public CliDebugMessageFilter(final String expression) throws ParseException {
+    throw new ParseException("Not yet implemented.", 0);
   }
 
+  /**
+   * Add another filter expression to the filter.
+   *
+   * @param argument
+   * @throws ParseException
+   */
+  public void additionalFilter(final String expression) throws ParseException {
+    throw new ParseException("Not yet implemented.", 0);
+  }
+
+  /**
+   * If it returns true, the message is kept.
+   */
   @Override
   public boolean isMessageKept(final DebugMessage message) {
-    return false;
+    return true;
   }
 
 }

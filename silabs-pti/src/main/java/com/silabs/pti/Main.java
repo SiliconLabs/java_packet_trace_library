@@ -195,10 +195,14 @@ public class Main {
           final IConnection debug = adapterConnector.createConnection(addrPort.getAddress(), addrPort.getPort(), cli);
           final IFramer debugChannelFramer = new DebugChannelFramer(true);
           debug.setFramers(debugChannelFramer, debugChannelFramer);
-          debug.addConnectionListener(new DebugMessageConnectionListener(cli.fileFormat().format(),
+          DebugMessageConnectionListener dml = new DebugMessageConnectionListener(cli.fileFormat().format(),
                                                                          ip,
                                                                          output,
-                                                                         timeSynchronizer));
+                                                                         timeSynchronizer);
+          if ( cli.filter() != null ) {
+            dml.setFilter(cli.filter());
+          }
+          debug.addConnectionListener(dml);
           debug.connect();
           debugConnections.add(debug);
 

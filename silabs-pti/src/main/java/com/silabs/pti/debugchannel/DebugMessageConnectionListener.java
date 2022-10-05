@@ -39,7 +39,7 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
   private long t0 = -1;
   private final TimeSynchronizer timeSync;
 
-  private final IDebugMessageFilter filter = null;
+  private IDebugMessageFilter filter = null;
 
 
   // typically we capture from N devices and write to 1 single file.
@@ -93,6 +93,10 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
 
   @Override
   public void connectionStateChanged(final boolean isConnected) {
+  }
+
+  public void setFilter(final IDebugMessageFilter debugMessageFilter) {
+    this.filter = debugMessageFilter;
   }
 
   private static void timeCorrection(final TimeSynchronizer timeSync, final DebugMessage message) {

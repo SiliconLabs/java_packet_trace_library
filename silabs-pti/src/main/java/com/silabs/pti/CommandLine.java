@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
+import com.silabs.pti.filter.CliDebugMessageFilter;
+import com.silabs.pti.filter.IDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.MiscUtil;
@@ -57,6 +60,7 @@ public class CommandLine implements IConnectivityLogger {
   private static final String ZERO_TIME_THRESHOLD = "-zeroTimeThreshold=";
   private static final String DISCRETE_NODE_CAPTURE = "-discreteNodeCapture";
   private static final String TEST_PORT = "-testPort=";
+  private static final String FILTER = "-filter=";
 
   private List<String> hostnames = new ArrayList<>();
   private String output = null;
@@ -77,6 +81,7 @@ public class CommandLine implements IConnectivityLogger {
   private boolean discreteNodeCapture = false;
   private List<Integer> testPort = new ArrayList<>();
   private boolean testMode = false;
+  private IDebugMessageFilter filter = null;
 
   private boolean shouldExit = false;
   private int exitCode = -1;
@@ -166,6 +171,14 @@ public class CommandLine implements IConnectivityLogger {
         } catch (final Exception e) {
           usage(1);
         }
+      } else if ( arg.startsWith(FILTER)) {
+        try {
+          filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
       } else {
         if (port != AdapterPort.DEBUG) {
           commands.add(arg);
@@ -193,6 +206,10 @@ public class CommandLine implements IConnectivityLogger {
 
   public int exitCode() {
     return exitCode;
+  }
+
+  public IDebugMessageFilter filter() {
+    return filter;
   }
 
   @Override

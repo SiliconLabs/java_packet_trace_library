@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
+import com.silabs.pti.filter.CliDebugMessageFilter;
+import com.silabs.pti.filter.IDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.MiscUtil;
@@ -35,7 +38,7 @@ import com.silabs.pti.util.MiscUtil;
  * Command line parsing for the standalone PTI.
  *
  * Created on Feb 11, 2017
- * 
+ *
  * @author timotej
  */
 public class CommandLine implements IConnectivityLogger {
@@ -57,6 +60,9 @@ public class CommandLine implements IConnectivityLogger {
   private static final String ZERO_TIME_THRESHOLD = "-zeroTimeThreshold=";
   private static final String DISCRETE_NODE_CAPTURE = "-discreteNodeCapture";
   private static final String TEST_PORT = "-testPort=";
+  private static final String FILTER = "-filter=";
+  private static final String FILTER_OR = "-orFilter=";
+  private static final String FILTER_AND = "-andFilter=";
 
   private List<String> hostnames = new ArrayList<>();
   private String output = null;
@@ -75,8 +81,9 @@ public class CommandLine implements IConnectivityLogger {
   private int driftCorrectionThreshold = 5000000; // micro-second
   private int zeroTimeThreshold = 2000000; // micro-second
   private boolean discreteNodeCapture = false;
-  private List<Integer> testPort = new ArrayList<Integer>();
+  private List<Integer> testPort = new ArrayList<>();
   private boolean testMode = false;
+  private CliDebugMessageFilter filter = null;
 
   private boolean shouldExit = false;
   private int exitCode = -1;
@@ -166,6 +173,39 @@ public class CommandLine implements IConnectivityLogger {
         } catch (final Exception e) {
           usage(1);
         }
+      } else if ( arg.startsWith(FILTER)) {
+        try {
+          if ( filter == null )
+            filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
+          else
+            throw new ParseException("Only one " + FILTER + " flag is allowed. Specify " + FILTER_AND + " or " + FILTER_OR + " for further expressions.", 0);
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
+      } else if ( arg.startsWith(FILTER_AND)) {
+        try {
+          if ( filter == null )
+            throw new ParseException(FILTER_AND + " is allowed only after " + FILTER, 0);
+          else
+            filter.andFilter(arg.substring(FILTER_AND.length()));
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
+      } else if ( arg.startsWith(FILTER_OR)) {
+        try {
+          if ( filter == null )
+            throw new ParseException(FILTER_OR + " is allowed only after " + FILTER, 0);
+          else
+            filter.orFilter(arg.substring(FILTER_OR.length()));
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
       } else {
         if (port != AdapterPort.DEBUG) {
           commands.add(arg);
@@ -193,6 +233,10 @@ public class CommandLine implements IConnectivityLogger {
 
   public int exitCode() {
     return exitCode;
+  }
+
+  public IDebugMessageFilter filter() {
+    return filter;
   }
 
   @Override
@@ -270,7 +314,7 @@ public class CommandLine implements IConnectivityLogger {
   /**
    * Prints usage and exits with a given exit code.
    */
-  public void usage(final int exitCode) {
+  public void usage(final int returnedExitCode) {
     final String filename = filename();
     System.out.println("Usage: java -jar " + filename + " [ARGUMENTS] [COMMANDS]");
     System.out.println("\nMandatory arguments:\n");
@@ -288,6 +332,9 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + SERIAL0 + " - connect to serial0 port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
     System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
+    System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing.");
+    System.out.println("  " + FILTER_AND + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
+    System.out.println("  " + FILTER_OR + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION
@@ -315,7 +362,7 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  'java -jar " + filename
         + " -ip=10.4.186.138 -format=log -time=5000 -out=capture.log'             => capture for 5 seconds into capture.log, using network analyzer format.");
     this.shouldExit = true;
-    this.exitCode = exitCode;
+    this.exitCode = returnedExitCode;
   }
 
   public boolean hasTimeLimit() {

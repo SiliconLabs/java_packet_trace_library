@@ -138,6 +138,7 @@ public class DualThreadBufferedConnection extends BaseConnection {
    * Implements Runnable in order to listen to inbound messages. The listen thread
    * is started by the <code>connect</code> method.
    */
+  @SuppressWarnings("resource")
   private void run() {
     logInfo("Reading thread start.");
     buffer.startThread();
@@ -201,6 +202,7 @@ public class DualThreadBufferedConnection extends BaseConnection {
    * @param message the message to send, as an array of ints.
    * @see #send(String)
    */
+  @SuppressWarnings("resource")
   @Override
   public void send(final byte[] message) throws IOException {
     OutputStream out = getOutputStream();

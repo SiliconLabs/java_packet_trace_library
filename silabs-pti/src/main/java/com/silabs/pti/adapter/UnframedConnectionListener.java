@@ -24,7 +24,7 @@ import com.silabs.pti.util.ICharacterListener;
 /**
  * Simple character listener that simply writes out the bytes as they are
  * received.
- * 
+ *
  * @author timotej
  *
  */
@@ -40,7 +40,7 @@ public class UnframedConnectionListener<T> implements ICharacterListener {
   @Override
   public void received(final byte[] ch, final int offset, final int len) {
     try {
-      fileFormat.writeRawUnframedData(out, ch, offset, len);
+      fileFormat.writeRawUnframedData(out.writer(), ch, offset, len);
     } catch (final IOException ioe) {
       PtiLog.error("Could not write data.", ioe);
     }

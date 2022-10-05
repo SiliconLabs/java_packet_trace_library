@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +41,8 @@ import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.debugchannel.TextConnectionListener;
+import com.silabs.pti.filter.CliDebugMessageFilter;
+import com.silabs.pti.filter.IDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.util.LineTerminator;
@@ -59,7 +62,7 @@ public class Interactive {
   private String host = null;
   private OutputMap<?> cliOutputMap = null;
   private OutputMap<?> captureOutputMap = null;
-  private IConnectionListener connectionListener = null;
+  private DebugMessageConnectionListener<?> connectionListener = null;
   private IConnectionListener cliConnectionListener = null;
 
   private String setChannelCommand = "set_channel";
@@ -69,6 +72,7 @@ public class Interactive {
 
   private final IConnectivityLogger logger;
   private final TimeSynchronizer timeSync;
+  private IDebugMessageFilter filter = null;
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)
@@ -83,8 +87,9 @@ public class Interactive {
       host = cli.hostnames()[0];
     this.logger = cli;
     this.timeSync = timeSync;
-    this.cliOutputMap = new OutputMap<Object>();
-    this.captureOutputMap = new OutputMap<Object>();
+    this.cliOutputMap = new OutputMap<>();
+    this.captureOutputMap = new OutputMap<>();
+    this.filter = cli.filter();
   }
 
   /**
@@ -169,6 +174,16 @@ public class Interactive {
     return true;
   }
 
+  @Cli(help = "Sets the filter")
+  public void filter(final String... arg) {
+    try {
+      CliDebugMessageFilter cf = new CliDebugMessageFilter(arg[0]);
+      this.filter = cf;
+    } catch (ParseException pe) {
+      System.out.println("Filter expression error: " + pe.getMessage());
+    }
+  }
+
   @Cli(help = "Prints out the available commands")
   public void help() {
     System.out.println("Valid commands:");
@@ -202,6 +217,7 @@ public class Interactive {
     }
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes", "resource" })
   private void cli(final String s) throws IOException {
     if (cliConnection == null || !cliConnection.isConnected()) {
       try {
@@ -375,6 +391,7 @@ public class Interactive {
 
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked", "resource" })
   @Cli(help = "Starts or stops capture", args = "start|stop")
   public void capture(final String... s) {
     if (s.length == 0) {
@@ -412,6 +429,7 @@ public class Interactive {
         return;
       }
       connectionListener = new DebugMessageConnectionListener(formatType.format(), host, captureOutputMap, timeSync);
+      connectionListener.setFilter(filter);
       debugConnection.addConnectionListener(connectionListener);
     } else {
       try {

@@ -21,7 +21,7 @@ import com.silabs.pti.debugchannel.EventType;
 
 /**
  * Each supported file format implements this interface.
- * 
+ *
  * @author timotej
  *
  */
@@ -33,7 +33,7 @@ public interface IDebugChannelExportFormat<T> {
 
   /**
    * Returns human readable description of this file format.
-   * 
+   *
    * @return
    */
   public String description();
@@ -41,15 +41,15 @@ public interface IDebugChannelExportFormat<T> {
   /**
    * Returns the header that is put on the top of the text file.
    */
-  public void writeHeader(IDebugChannelExportOutput<T> out) throws IOException;
+  public void writeHeader(T outWriter) throws IOException;
 
   /**
    * Formatter returns true if the raw bytes are used, or false if the debug
    * message is used after time synchronization.
-   * 
+   *
    * Note that deframing still happens. Deframing is controlled via
    * isUsingDebugMessages().
-   * 
+   *
    * @return true or false.
    */
   public boolean isUsingRawBytes();
@@ -58,7 +58,7 @@ public interface IDebugChannelExportFormat<T> {
    * If this is set to false, then no deframing happens on the input data, and
    * they are just passed to the formater as they come, simply a sequence of
    * bytes.
-   * 
+   *
    * @return true or false.
    */
   public boolean isUsingDebugMessages();
@@ -66,10 +66,10 @@ public interface IDebugChannelExportFormat<T> {
   /**
    * If isUsingRawBytes() return false, then this method is called to get the
    * formatting for a debug message.
-   * 
+   *
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatDebugMessage(IDebugChannelExportOutput<T> out,
+  public boolean formatDebugMessage(T outWriter,
                                     String originator,
                                     DebugMessage dm,
                                     EventType type) throws IOException;
@@ -77,10 +77,10 @@ public interface IDebugChannelExportFormat<T> {
   /**
    * If isUsingRawBytes() return true, then this method is called to get the
    * formatting for the raw bytes.
-   * 
+   *
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatRawBytes(IDebugChannelExportOutput<T> out,
+  public boolean formatRawBytes(T outWriter,
                                 long pcTimeMs,
                                 byte[] rawBytes,
                                 int offset,
@@ -89,14 +89,14 @@ public interface IDebugChannelExportFormat<T> {
   /**
    * If this format is NOT using debug messages, then this method is called for
    * each block of raw bytes received.
-   * 
-   * @param out
+   *
+   * @param outWriter
    * @param rawBytes
    * @param offset
    * @param length
    * @throws IOException
    */
-  public void writeRawUnframedData(IDebugChannelExportOutput<T> out,
+  public void writeRawUnframedData(T outWriter,
                                    byte[] rawBytes,
                                    int offset,
                                    int length) throws IOException;

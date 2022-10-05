@@ -43,7 +43,7 @@ public class RawFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) {
+  public void writeHeader(final PrintStream out) {
   }
 
   @Override
@@ -62,7 +62,7 @@ public class RawFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatDebugMessage(final PrintStream out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) {
@@ -70,18 +70,18 @@ public class RawFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatRawBytes(final PrintStream out,
                                 final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
                                 final int length) throws IOException {
     final String x = RAW_PREFIX + ByteArrayUtil.formatByteArray(rawBytes, offset, length, true, true) + RAW_SUFFIX;
-    out.writer().println(x);
+    out.println(x);
     return true;
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
+  public void writeRawUnframedData(final PrintStream out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

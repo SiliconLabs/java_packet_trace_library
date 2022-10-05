@@ -22,7 +22,7 @@ import com.silabs.pti.format.IDebugChannelExportOutput;
 /**
  * Connection listener, responsible for forwarding the data into the appropriate
  * formater.
- * 
+ *
  * @author timotej
  *
  */
@@ -43,6 +43,7 @@ public class TextConnectionListener implements IConnectionListener {
 
   @Override
   public void messageReceived(final byte[] message, final long pcTime) {
+    @SuppressWarnings("resource")
     final IDebugChannelExportOutput<?> out = output.output(originator);
     if (out.writer() instanceof PrintStream)
       ((PrintStream) out.writer()).println(new String(message));

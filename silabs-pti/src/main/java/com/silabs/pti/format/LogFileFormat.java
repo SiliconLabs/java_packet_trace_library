@@ -42,8 +42,8 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) throws IOException {
-    out.writer().println(PtiUtilities.ISD_LOG_HEADER);
+  public void writeHeader(final PrintStream out) throws IOException {
+    out.println(PtiUtilities.ISD_LOG_HEADER);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatDebugMessage(final PrintStream out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -70,12 +70,12 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
     final String x = "[" + dm.networkTime() + " " + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length)
         + " " + type.value() + " " + type.name() + "] [" + originator + "] ["
         + ByteArrayUtil.formatByteArray(contents) + "]";
-    out.writer().println(x);
+    out.println(x);
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatRawBytes(final PrintStream out,
                                 final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
@@ -84,7 +84,7 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
+  public void writeRawUnframedData(final PrintStream out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

@@ -24,7 +24,7 @@ import com.silabs.pti.util.WiresharkUtil;
 
 /**
  * Wireshark text2pcap format.
- * 
+ *
  * @author timotej
  *
  */
@@ -41,7 +41,7 @@ public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) {
+  public void writeHeader(final PrintStream out) {
   }
 
   @Override
@@ -60,7 +60,7 @@ public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatDebugMessage(final PrintStream out,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -76,12 +76,12 @@ public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
         return false; // Nothing we can do. There is no data left.
       contents = Arrays.copyOfRange(contents, drops[0], contents.length - drops[1]);
     }
-    out.writer().println(WiresharkUtil.printText2Pcap(timeMs, contents));
+    out.println(WiresharkUtil.printText2Pcap(timeMs, contents));
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatRawBytes(final PrintStream out,
                                 final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
@@ -90,7 +90,7 @@ public class TextFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
+  public void writeRawUnframedData(final PrintStream out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

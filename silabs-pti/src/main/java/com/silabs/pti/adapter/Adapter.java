@@ -47,8 +47,9 @@ public class Adapter {
       return new BufferedNioConnection(host, port, logger);
     case DUAL_THREAD_BUFFERED:
       return new DualThreadBufferedConnection(host, port, logger);
+    default:
+      throw new IllegalArgumentException("Must provide valid connection type.");
     }
-    throw new IllegalArgumentException("Must provide valid connection type.");
   }
 
   /**

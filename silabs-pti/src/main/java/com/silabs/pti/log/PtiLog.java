@@ -19,7 +19,7 @@ package com.silabs.pti.log;
  * should use it to log stuff.
  *
  * Created on Jul 26, 2005
- * 
+ *
  * @author Timotej (timotej@ember.com)
  * @since 4.6
  */
@@ -53,7 +53,7 @@ public class PtiLog {
 
   /**
    * Log error
-   * 
+   *
    * @since 5.0
    */
   public static void error(final Throwable throwable) {
@@ -87,6 +87,7 @@ public class PtiLog {
       logger.log(severity, message, t);
       break;
     case NONE:
+    default:
       break;
     }
   }

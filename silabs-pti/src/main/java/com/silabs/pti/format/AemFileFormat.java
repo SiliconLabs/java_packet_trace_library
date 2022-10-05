@@ -24,7 +24,7 @@ import com.silabs.pti.decode.AemSample;
 
 /**
  * AEM file format: triplet of numbers, time/current/voltage.
- * 
+ *
  * @author timotej
  */
 public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
@@ -40,8 +40,8 @@ public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeHeader(final IDebugChannelExportOutput<PrintStream> out) throws IOException {
-    out.writer().println("#     Time    Voltage    Current");
+  public void writeHeader(final PrintStream out) throws IOException {
+    out.println("#     Time    Voltage    Current");
   }
 
   @Override
@@ -60,7 +60,7 @@ public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public boolean formatDebugMessage(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatDebugMessage(final PrintStream outWriter,
                                     final String originator,
                                     final DebugMessage dm,
                                     final EventType type) throws IOException {
@@ -77,12 +77,12 @@ public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
       sb.append(String.format("%s%10d %10f %10f", sep, as.timestamp(), as.voltage(), as.current()));
       sep = "\n";
     }
-    out.writer().println(sb.toString());
+    outWriter.println(sb.toString());
     return true;
   }
 
   @Override
-  public boolean formatRawBytes(final IDebugChannelExportOutput<PrintStream> out,
+  public boolean formatRawBytes(final PrintStream out,
                                 final long pcTimeMs,
                                 final byte[] rawBytes,
                                 final int offset,
@@ -91,7 +91,7 @@ public class AemFileFormat implements IDebugChannelExportFormat<PrintStream> {
   }
 
   @Override
-  public void writeRawUnframedData(final IDebugChannelExportOutput<PrintStream> out,
+  public void writeRawUnframedData(final PrintStream out,
                                    final byte[] rawBytes,
                                    final int offset,
                                    final int length) throws IOException {

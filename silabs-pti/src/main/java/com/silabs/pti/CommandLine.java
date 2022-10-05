@@ -349,6 +349,8 @@ public class CommandLine implements IConnectivityLogger {
     for (final FileFormat ff : FileFormat.values()) {
       System.out.println("  " + ff.name().toLowerCase() + " - " + ff.format().description());
     }
+    System.out.println("\nFiltering expressions:\n");
+    System.out.println(CliDebugMessageFilter.helpText());
     System.out.println("\nExamples:\n");
     System.out.println("  'java -jar " + filename
         + " -ip=10.4.186.138'                                                     => capture from given device and print raw events to stdout.");

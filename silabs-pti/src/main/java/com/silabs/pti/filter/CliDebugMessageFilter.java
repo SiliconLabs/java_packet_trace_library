@@ -59,15 +59,14 @@ public class CliDebugMessageFilter implements IDebugMessageFilter {
     return filterChain.isMessageKept(message);
   }
 
-  public String helpText() {
+  public static String helpText() {
     StringBuilder sb = new StringBuilder();
-    sb.append("Valid filtering expressions:\n");
     sb.append("  " + FilterExpression.TYPE_IN.functionName() + "(x,y,z,...)       - type matches one of the values specified as numbers or text\n");
     sb.append("  " + FilterExpression.ORIGINATOR_IN.functionName() + "(x,y,z,...) - originator matches one of the values\n");
-    sb.append("  " + FilterExpression.CONTAINS.functionName() + "(x)       - payload contains specified string or hexblob\n");
-    sb.append("  " + FilterExpression.SIZE_WITHIN.functionName() + "(x,y)   - payload size must be within x and y, inclusive\n");
-    sb.append("  " + FilterExpression.TIME_WITHIN.functionName() + "(x,y)   - network time must be within x and y, inclusive\n");
-    sb.append("Expression can be prefixed with '!' denoting the negation.");
+    sb.append("  " + FilterExpression.CONTAINS.functionName() + "(x)             - payload contains specified string or hexblob\n");
+    sb.append("  " + FilterExpression.SIZE_WITHIN.functionName() + "(x,y)         - payload size must be within x and y, inclusive\n");
+    sb.append("  " + FilterExpression.TIME_WITHIN.functionName() + "(x,y)         - network time must be within x and y, inclusive\n");
+    sb.append("(Expression can be prefixed with '!' for negation.)\n");
     return sb.toString();
   }
 }

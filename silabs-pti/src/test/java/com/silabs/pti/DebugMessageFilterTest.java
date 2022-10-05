@@ -14,12 +14,16 @@ import com.silabs.pti.filter.CliDebugMessageFilter;
 public class DebugMessageFilterTest {
 
   @Test
-  public void basicFilter() throws ParseException {
+  public void basicFilters() throws ParseException {
     DebugMessage dm = new DebugMessage(0, 0, new byte[] { 0, 0});
     CliDebugMessageFilter f = new CliDebugMessageFilter("true");
     assertTrue(f.isMessageKept(dm));
+    f = new CliDebugMessageFilter("!true");
+    assertFalse(f.isMessageKept(dm));
     f = new CliDebugMessageFilter("false");
     assertFalse(f.isMessageKept(dm));
+    f = new CliDebugMessageFilter("!false");
+    assertTrue(f.isMessageKept(dm));
   }
   
   @Test

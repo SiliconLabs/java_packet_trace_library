@@ -61,6 +61,8 @@ public class CommandLine implements IConnectivityLogger {
   private static final String DISCRETE_NODE_CAPTURE = "-discreteNodeCapture";
   private static final String TEST_PORT = "-testPort=";
   private static final String FILTER = "-filter=";
+  private static final String FILTER_OR = "-orFilter=";
+  private static final String FILTER_AND = "-andFilter=";
 
   private List<String> hostnames = new ArrayList<>();
   private String output = null;
@@ -176,7 +178,29 @@ public class CommandLine implements IConnectivityLogger {
           if ( filter == null )
             filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
           else
-            filter.additionalFilter(arg.substring(FILTER.length()));
+            throw new ParseException("Only one " + FILTER + " flag is allowed. Specify " + FILTER_AND + " or " + FILTER_OR + " for further expressions.", 0);
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
+      } else if ( arg.startsWith(FILTER_AND)) {
+        try {
+          if ( filter == null )
+            throw new ParseException(FILTER_AND + " is allowed only after " + FILTER, 0);
+          else
+            filter.andFilter(arg.substring(FILTER_AND.length()));
+        } catch (ParseException pe) {
+          System.err.println("Filter format error: " + pe.getMessage());
+          usage(1);
+          return;
+        }
+      } else if ( arg.startsWith(FILTER_OR)) {
+        try {
+          if ( filter == null )
+            throw new ParseException(FILTER_OR + " is allowed only after " + FILTER, 0);
+          else
+            filter.orFilter(arg.substring(FILTER_OR.length()));
         } catch (ParseException pe) {
           System.err.println("Filter format error: " + pe.getMessage());
           usage(1);
@@ -308,7 +332,9 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + SERIAL0 + " - connect to serial0 port and execute COMMANDS one after another");
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
     System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
-    System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing. You may specify multiple -filter arguments.");
+    System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing.");
+    System.out.println("  " + FILTER_AND + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are left-to-right associative.");
+    System.out.println("  " + FILTER_OR + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are left-to-right associative.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION

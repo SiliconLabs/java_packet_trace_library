@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import com.silabs.pti.adapter.AdapterPort;
 import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.filter.CliDebugMessageFilter;
-import com.silabs.pti.filter.IDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.log.PtiSeverity;
 import com.silabs.pti.util.MiscUtil;
@@ -173,20 +172,21 @@ public class CommandLine implements IConnectivityLogger {
         } catch (final Exception e) {
           usage(1);
         }
-      } else if ( arg.startsWith(FILTER)) {
+      } else if (arg.startsWith(FILTER)) {
         try {
-          if ( filter == null )
+          if (filter == null)
             filter = new CliDebugMessageFilter(arg.substring(FILTER.length()));
           else
-            throw new ParseException("Only one " + FILTER + " flag is allowed. Specify " + FILTER_AND + " or " + FILTER_OR + " for further expressions.", 0);
+            throw new ParseException("Only one " + FILTER + " flag is allowed. Specify " + FILTER_AND + " or "
+                + FILTER_OR + " for further expressions.", 0);
         } catch (ParseException pe) {
           System.err.println("Filter format error: " + pe.getMessage());
           usage(1);
           return;
         }
-      } else if ( arg.startsWith(FILTER_AND)) {
+      } else if (arg.startsWith(FILTER_AND)) {
         try {
-          if ( filter == null )
+          if (filter == null)
             throw new ParseException(FILTER_AND + " is allowed only after " + FILTER, 0);
           else
             filter.andFilter(arg.substring(FILTER_AND.length()));
@@ -195,9 +195,9 @@ public class CommandLine implements IConnectivityLogger {
           usage(1);
           return;
         }
-      } else if ( arg.startsWith(FILTER_OR)) {
+      } else if (arg.startsWith(FILTER_OR)) {
         try {
-          if ( filter == null )
+          if (filter == null)
             throw new ParseException(FILTER_OR + " is allowed only after " + FILTER, 0);
           else
             filter.orFilter(arg.substring(FILTER_OR.length()));
@@ -235,7 +235,7 @@ public class CommandLine implements IConnectivityLogger {
     return exitCode;
   }
 
-  public IDebugMessageFilter filter() {
+  public CliDebugMessageFilter filter() {
     return filter;
   }
 
@@ -270,12 +270,20 @@ public class CommandLine implements IConnectivityLogger {
     return ips;
   }
 
-  private void printVersionAndExit() {
+  /**
+   * Returns a multi-line version string suitable for printout to the command
+   * line.
+   * 
+   * @return String
+   * @throws Exception
+   */
+  public static String getVersionString() throws Exception {
     String date = "unknown";
     String hash = "unknown";
     String version = "unknown";
+    StringBuilder versionString = new StringBuilder();
 
-    final URL u = getClass().getClassLoader().getResource("build_pti.stamp");
+    final URL u = CommandLine.class.getClassLoader().getResource("build_pti.stamp");
     if (u != null) {
       final Properties p = new Properties();
       try {
@@ -286,13 +294,22 @@ public class CommandLine implements IConnectivityLogger {
         hash = p.getProperty("hash");
         version = p.getProperty("version");
       } catch (final Exception e) {
-        System.err.println("Error reading build information.");
+        throw new Exception("Error reading build information.");
       }
     }
-    System.out.println("Library information:");
-    System.out.println("  - version: " + version);
-    System.out.println("  - date: " + date);
-    System.out.println("  - hash: " + hash);
+    versionString.append("Library information:");
+    versionString.append("\n  - version: " + version);
+    versionString.append("\n  - date: " + date);
+    versionString.append("\n  - hash: " + hash + "\n");
+    return versionString.toString();
+  }
+
+  private void printVersionAndExit() {
+    try {
+      System.out.println(getVersionString());
+    } catch (final Exception e) {
+      System.err.println("Error reading build information.");
+    }
     System.exit(0);
   }
 
@@ -333,8 +350,10 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + SERIAL1 + " - connect to serial1 port and execute COMMANDS one after another");
     System.out.println("  " + FORMAT + "[" + FileFormat.displayOptionsAsString() + "] - specify a format for output.");
     System.out.println("  " + FILTER + "FILTER - apply FILTER to the debug message capturing.");
-    System.out.println("  " + FILTER_AND + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
-    System.out.println("  " + FILTER_OR + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
+    System.out.println("  " + FILTER_AND
+        + "FILTER - add FILTER to the capturing with AND. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
+    System.out.println("  " + FILTER_OR
+        + "FILTER - add FILTER to the capturing with OR. May specify multiple ones, but only after -filter, and they are right-to-left associative.");
     System.out.println("  " + VERSION + " - print version and exit.");
     System.out.println("  " + DISCOVER + " - run UDP discovery and print results.");
     System.out.println("  " + DRIFT_CORRECTION
@@ -343,7 +362,8 @@ public class CommandLine implements IConnectivityLogger {
     System.out.println("  " + ZERO_TIME_THRESHOLD + " - zero time threshold (micro-sec).");
     System.out.println("  " + DISCRETE_NODE_CAPTURE
         + " - each node stream gets its own log file. Each filename is \"-out\" option combined with \"_$ip\" suffix. Time Sync is disabled. ");
-    System.out.println("  " + Main.PROPERTIES + "<FILE> - specify path to file, where each line in file has a single entry in format of argument=value. "
+    System.out.println("  " + Main.PROPERTIES
+        + "<FILE> - specify path to file, where each line in file has a single entry in format of argument=value. "
         + "On Windows, path separators need to be escaped.");
     System.out.println("\nFile formats:\n");
     for (final FileFormat ff : FileFormat.values()) {

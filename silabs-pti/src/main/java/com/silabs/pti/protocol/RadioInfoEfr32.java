@@ -8,8 +8,7 @@ import com.silabs.pti.util.MiscUtil;
 /**
  * Various utilities for the radio info protocol of efr32 parts.
  *
- * @author timotej
- * Created on Feb 5, 2022
+ * @author timotej Created on Feb 5, 2022
  */
 public class RadioInfoEfr32 {
 
@@ -19,9 +18,10 @@ public class RadioInfoEfr32 {
   /**
    * Determines the length of the radio info block.
    *
-   * @param type Event type.
-   * @param payload Payload
-   * @param hintBluetooth If you externally know this event is a BLE event, set this to true to deal with "UNKNOWN" protocol cases
+   * @param type          Event type.
+   * @param payload       Payload
+   * @param hintBluetooth If you externally know this event is a BLE event, set
+   *                      this to true to deal with "UNKNOWN" protocol cases
    * @return length
    */
   public static int determineRadioInfoLength(final EventType type, final byte[] payload, final boolean hintBluetooth) {
@@ -30,12 +30,11 @@ public class RadioInfoEfr32 {
     byte endByte = payload[payload.length - 1];
     byte penultimateByte = payload[payload.length - 2];
     int len = lengthFromLastByte(endByte);
-    boolean isMissingPtiProtocol = isMissingPtiProtocol(endByte,
-                                                        penultimateByte);
+    boolean isMissingPtiProtocol = isMissingPtiProtocol(endByte, penultimateByte);
 
     if (isMissingPtiProtocol) {
       int length;
-      if ( hintBluetooth ) {
+      if (hintBluetooth) {
         length = Protocol.crcLen(Protocol.BLE, payload) + 1;
       } else {
         length = 3;
@@ -57,8 +56,8 @@ public class RadioInfoEfr32 {
   }
 
   /**
-   * Given the length of the radio info block, decide if it contains radio
-   * config byte.
+   * Given the length of the radio info block, decide if it contains radio config
+   * byte.
    *
    * @param len
    * @return true or false.
@@ -147,8 +146,7 @@ public class RadioInfoEfr32 {
    * Physically, this detects if one of the two last bytes has an F as a first
    * nibble.
    */
-  public static boolean isMissingPtiProtocol(final byte lastByte,
-                                       final byte penultimateByte) {
+  public static boolean isMissingPtiProtocol(final byte lastByte, final byte penultimateByte) {
     int nibble1 = (MiscUtil.unsignedByteToInt(lastByte) >> 4);
     int nibble2 = (MiscUtil.unsignedByteToInt(penultimateByte) >> 4);
 
@@ -162,14 +160,14 @@ public class RadioInfoEfr32 {
 
   /**
    * Returns channel from the payload.
+   * 
    * @param payload
    * @return channel or -1 if error.
    */
   public static int channel(final byte[] payload) {
     if (payload.length < 2)
       return -1;
-    if (RadioInfoEfr32.isMissingPtiProtocol(payload[payload.length - 1],
-                             payload[payload.length - 2])) {
+    if (RadioInfoEfr32.isMissingPtiProtocol(payload[payload.length - 1], payload[payload.length - 2])) {
       return -1;
     } else {
       return payload[payload.length - 3] & 0x0000003F;

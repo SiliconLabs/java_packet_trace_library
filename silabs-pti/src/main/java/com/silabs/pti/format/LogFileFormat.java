@@ -68,8 +68,8 @@ public class LogFileFormat implements IDebugChannelExportFormat<PrintStream> {
                                     final EventType type) throws IOException {
     final byte[] contents = dm.eventContents();
     final String x = "[" + dm.networkTime() + " " + RadioConfiguration.FIFTEENFOUR.microsecondDuration(contents.length)
-        + " " + type.value() + " " + type.name() + "] [" + originator + "] ["
-        + ByteArrayUtil.formatByteArray(contents) + "]";
+        + " " + type.value() + " " + type.name() + "] [" + originator + "] [" + ByteArrayUtil.formatByteArray(contents)
+        + "]";
     out.println(x);
     return true;
   }

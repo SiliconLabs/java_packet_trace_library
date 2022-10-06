@@ -41,7 +41,6 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
 
   private IDebugMessageFilter filter = null;
 
-
   // typically we capture from N devices and write to 1 single file.
   // this ensures us to only write 1 header entry.
   private static HashSet<IDebugChannelExportOutput<?>> writtenHeader = new HashSet<>();
@@ -118,10 +117,11 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
                                              final IDebugMessageFilter filter) throws IOException {
     if (format.isUsingRawBytes()) {
 
-      // If we have a filter, we need to create a debug message just to deal with filtering.
-      if ( filter != null ) {
+      // If we have a filter, we need to create a debug message just to deal with
+      // filtering.
+      if (filter != null) {
         final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
-        if ( !filter.isMessageKept(dm))
+        if (!filter.isMessageKept(dm))
           return false;
       }
 
@@ -130,7 +130,7 @@ public class DebugMessageConnectionListener<T> implements IConnectionListener {
       final DebugMessage dm = DebugMessage.make("", bytes, timeMs);
 
       // If we have a filter, apply it.
-      if ( filter != null && !filter.isMessageKept(dm))
+      if (filter != null && !filter.isMessageKept(dm))
         return false;
 
       final DebugMessageType dmt = DebugMessageType.get(dm.debugType());

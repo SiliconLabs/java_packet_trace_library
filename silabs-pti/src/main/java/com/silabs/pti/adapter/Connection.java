@@ -62,7 +62,10 @@ public class Connection extends BaseConnection {
    * @param host the host to connect to.
    * @param port the port to connect to.
    */
-  Connection(final AdapterSocketConnector connector, final String host, final int port, final IConnectivityLogger logger) {
+  Connection(final AdapterSocketConnector connector,
+             final String host,
+             final int port,
+             final IConnectivityLogger logger) {
     super(host, port, logger);
     this.connector = connector.ioConnector();
     this.handler = connector.ioConnector().getHandler();

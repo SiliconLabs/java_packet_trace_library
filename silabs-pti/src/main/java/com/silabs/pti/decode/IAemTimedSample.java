@@ -5,8 +5,7 @@ package com.silabs.pti.decode;
 /**
  * All timed samples imlement this.
  *
- * @author timotej
- * Created on Apr 19, 2022
+ * @author timotej Created on Apr 19, 2022
  */
 public interface IAemTimedSample {
   /**

@@ -69,10 +69,7 @@ public interface IDebugChannelExportFormat<T> {
    *
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatDebugMessage(T outWriter,
-                                    String originator,
-                                    DebugMessage dm,
-                                    EventType type) throws IOException;
+  public boolean formatDebugMessage(T outWriter, String originator, DebugMessage dm, EventType type) throws IOException;
 
   /**
    * If isUsingRawBytes() return true, then this method is called to get the
@@ -80,11 +77,7 @@ public interface IDebugChannelExportFormat<T> {
    *
    * @return true if message was written out, false if it was filtered.
    */
-  public boolean formatRawBytes(T outWriter,
-                                long pcTimeMs,
-                                byte[] rawBytes,
-                                int offset,
-                                int length) throws IOException;
+  public boolean formatRawBytes(T outWriter, long pcTimeMs, byte[] rawBytes, int offset, int length) throws IOException;
 
   /**
    * If this format is NOT using debug messages, then this method is called for
@@ -96,8 +89,5 @@ public interface IDebugChannelExportFormat<T> {
    * @param length
    * @throws IOException
    */
-  public void writeRawUnframedData(T outWriter,
-                                   byte[] rawBytes,
-                                   int offset,
-                                   int length) throws IOException;
+  public void writeRawUnframedData(T outWriter, byte[] rawBytes, int offset, int length) throws IOException;
 }

@@ -47,8 +47,8 @@ public interface IConnectionListener {
   public void connectionStateChanged(boolean isConnected);
 
   /**
-   * Total count of messages received. It is allowed for the implementation
-   * to not track that, and return -1 instead.
+   * Total count of messages received. It is allowed for the implementation to not
+   * track that, and return -1 instead.
    *
    * @return count of messages
    */

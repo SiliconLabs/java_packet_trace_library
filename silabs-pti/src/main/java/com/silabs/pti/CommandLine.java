@@ -273,7 +273,7 @@ public class CommandLine implements IConnectivityLogger {
   /**
    * Returns a multi-line version string suitable for printout to the command
    * line.
-   * 
+   *
    * @return String
    * @throws Exception
    */

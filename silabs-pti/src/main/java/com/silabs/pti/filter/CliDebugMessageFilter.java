@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.silabs.na.pcap.util.ByteArrayUtil;
 import com.silabs.pti.debugchannel.DebugMessage;
 import com.silabs.pti.debugchannel.DebugMessageType;
 import com.silabs.pti.util.MiscUtil;

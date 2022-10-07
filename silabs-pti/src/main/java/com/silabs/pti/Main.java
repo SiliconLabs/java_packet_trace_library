@@ -96,7 +96,7 @@ public class Main {
 
   /**
    * Provide index of properties argument in args array
-   * 
+   *
    * @param args array of arguments
    * @return index of properties argument; -1 if not found or null/empty input
    */
@@ -263,7 +263,7 @@ public class Main {
 
   /**
    * Parse IP to extract base port, if included.
-   * 
+   *
    * @param ip             ip address to parse
    * @param defaultPort    the default port to use
    * @param basePortOffset when IP includes base port, add offset to get real port
@@ -397,7 +397,7 @@ public class Main {
    * Output Example:
    * <code>-zeroTimeThreshold=1000000 -format=text -ip=1.2.3.4,9.8.7.6 -serial0 -discreteNodeCapture -discover</code>
    * <br/>
-   * 
+   *
    * @param progArgs        array of args provided to silabs-pti.jar;
    *                        <code>progArgs[0]</code> is argument
    *                        <code>-properties=path_to_properties_file</code>
@@ -456,7 +456,7 @@ public class Main {
 
   /**
    * Stores IP address and its port
-   * 
+   *
    * @author daperez
    *
    */

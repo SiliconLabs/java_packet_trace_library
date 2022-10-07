@@ -7,8 +7,7 @@ import java.util.stream.Stream;
 /**
  * A window of samples.
  *
- * @author timotej
- * Created on Apr 19, 2022
+ * @author timotej Created on Apr 19, 2022
  */
 public interface IAemLogicAnalyzerSampleWindow {
 

@@ -5,8 +5,7 @@ package com.silabs.pti.decode;
 /**
  * Single class representing the state of the logic analyzer.
  *
- * @author timotej
- * Created on Apr 19, 2022
+ * @author timotej Created on Apr 19, 2022
  */
 public class LogicAnalyzerSample implements IAemLogicAnalyzerSample {
 

@@ -21,15 +21,17 @@ package com.silabs.pti.extcap;
  *
  */
 public interface IExtcapInterface {
-  
+
   /**
    * This method outputs the string for the extcap interface to read.
+   * 
    * @param s
    */
   void extcapPrintln(String s);
-  
+
   /**
    * This method logs message into the library specific log.
+   * 
    * @param s
    */
   void log(String s);

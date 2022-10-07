@@ -17,8 +17,7 @@ package com.silabs.pti.discovery;
 /**
  * Standard keys sent by the discovery.
  *
- * @author timotej
- * Created on Dec 28, 2021
+ * @author timotej Created on Dec 28, 2021
  */
 public enum DiscoveryKey {
   ADAPTER_TYPE("adapter type"),
@@ -38,6 +37,7 @@ public enum DiscoveryKey {
   NODE_EUI("node EUI");
 
   private String key;
+
   DiscoveryKey(final String key) {
     this.key = key;
   }

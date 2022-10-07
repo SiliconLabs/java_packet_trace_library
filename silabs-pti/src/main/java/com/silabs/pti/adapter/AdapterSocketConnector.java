@@ -20,7 +20,8 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 /**
- * A wrapper class that wraps an apache mina IO connector into 
+ * A wrapper class that wraps an apache mina IO connector into
+ * 
  * @author timotej
  *
  */

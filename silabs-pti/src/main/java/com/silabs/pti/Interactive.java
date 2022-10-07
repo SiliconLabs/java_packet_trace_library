@@ -42,7 +42,6 @@ import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
 import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.filter.CliDebugMessageFilter;
-import com.silabs.pti.filter.IDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
 import com.silabs.pti.format.IDebugChannelExportOutput;
 import com.silabs.pti.util.LineTerminator;
@@ -72,7 +71,7 @@ public class Interactive {
 
   private final IConnectivityLogger logger;
   private final TimeSynchronizer timeSync;
-  private IDebugMessageFilter filter = null;
+  private CliDebugMessageFilter filter = null;
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)
@@ -174,13 +173,57 @@ public class Interactive {
     return true;
   }
 
-  @Cli(help = "Sets the filter")
-  public void filter(final String... arg) {
+  @Cli(help = "Prints the version")
+  public void version() {
     try {
-      CliDebugMessageFilter cf = new CliDebugMessageFilter(arg[0]);
-      this.filter = cf;
-    } catch (ParseException pe) {
-      System.out.println("Filter expression error: " + pe.getMessage());
+      System.out.println(CommandLine.getVersionString());
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+
+  @Cli(help = "Clears the filter")
+  public void clearFilter() {
+    this.filter = null;
+  }
+
+  @Cli(help = "Sets the filter", args = "[EXPRESSION | help]")
+  public void filter(final String... args) {
+    if ("help".equals(args[0])) {
+      System.out.println("Valid expressions:\n" + CliDebugMessageFilter.helpText());
+    } else {
+      try {
+        CliDebugMessageFilter cf = new CliDebugMessageFilter(args[0]);
+        this.filter = cf;
+      } catch (ParseException pe) {
+        System.out.println("Filter expression error: " + pe.getMessage());
+      }
+    }
+  }
+
+  @Cli(help = "Adds the filter expression with an AND operator", args = "EXPRESSION")
+  public void andFilter(final String... args) {
+    if (this.filter == null) {
+      System.out.println("No filter yet. First use 'filter' command.");
+    } else {
+      try {
+        this.filter.andFilter(args[0]);
+      } catch (ParseException pe) {
+        System.out.println("Filter expression error: " + pe.getMessage());
+      }
+    }
+  }
+
+  @Cli(help = "Adds the filter expression with an OR operator", args = "EXPRESSION")
+  public void orFilter(final String... args) {
+    if (this.filter == null) {
+      System.out.println("No filter yet. First use 'filter' command.");
+    } else {
+      try {
+        this.filter.orFilter(args[0]);
+      } catch (ParseException pe) {
+        System.out.println("Filter expression error: " + pe.getMessage());
+      }
     }
   }
 

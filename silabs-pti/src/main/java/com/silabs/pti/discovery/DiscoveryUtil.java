@@ -48,11 +48,14 @@ public class DiscoveryUtil {
     }
   }
 
-  private static void discoverIndividualAddress(final InetAddress localAddress, final int durationMs, final IDiscoveryListener listener) {
+  private static void discoverIndividualAddress(final InetAddress localAddress,
+                                                final int durationMs,
+                                                final IDiscoveryListener listener) {
     String log = localAddress.getHostName();
     try (DatagramSocket socket = new DatagramSocket(0, localAddress)) {
       socket.setSoTimeout(durationMs / 10);
-      DatagramPacket dp = new DatagramPacket(DiscoveryProtocol.DISCOVERY_MESSAGE, DiscoveryProtocol.DISCOVERY_MESSAGE.length);
+      DatagramPacket dp = new DatagramPacket(DiscoveryProtocol.DISCOVERY_MESSAGE,
+                                             DiscoveryProtocol.DISCOVERY_MESSAGE.length);
       dp.setAddress(InetAddress.getByAddress(broadcast));
       dp.setPort(4920);
       try {
@@ -91,7 +94,7 @@ public class DiscoveryUtil {
   public static Map<DiscoveryKey, String> parseDiscoveryMap(DatagramPacket packet) {
     return parseDiscoveryMap(new String(packet.getData()));
   }
-  
+
   /**
    * Given the string text from the discovery, this parses the data into a map.
    * 
@@ -100,8 +103,8 @@ public class DiscoveryUtil {
    */
   public static Map<DiscoveryKey, String> parseDiscoveryMap(final String info) {
     Map<DiscoveryKey, String> map = new LinkedHashMap<>();
-    String [] tokens = info.split("\\n");
-    outer: for ( String token: tokens ) {
+    String[] tokens = info.split("\\n");
+    outer: for (String token : tokens) {
       token = token.trim();
       String[] subToks = token.split("=");
       if (subToks.length != 2)
@@ -123,8 +126,8 @@ public class DiscoveryUtil {
           // Ignore bogus connection times.
         }
       } else {
-        for ( DiscoveryKey t: DiscoveryKey.values() ) {
-          if ( t.key().equals(subToks[0])) {
+        for (DiscoveryKey t : DiscoveryKey.values()) {
+          if (t.key().equals(subToks[0])) {
             map.put(t, subToks[1]);
             continue outer;
           }

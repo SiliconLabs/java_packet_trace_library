@@ -42,7 +42,7 @@ public class ExtcapCapture implements IConnectivityLogger, IConnectionListener {
     this.ec = extcapInterface;
     ec.log("capture: start capturing on adapter '" + ifc + "'");
     adapterConnector = new AdapterSocketConnector();
-    output = pcapFormat.createOutput(new File(fifo),false);
+    output = pcapFormat.createOutput(new File(fifo), false);
     pcapFormat.writeHeader(output.writer());
     final IConnection c = adapterConnector.createConnection(ifc, AdapterPort.DEBUG.defaultPort(), this);
     final IFramer debugChannelFramer = new DebugChannelFramer(true);

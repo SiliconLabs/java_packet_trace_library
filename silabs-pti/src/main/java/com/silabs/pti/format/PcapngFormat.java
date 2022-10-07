@@ -36,30 +36,39 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
         "PCAPNG format: capturing whole debug channel as custom linktype 'user12'. All channel data is captured.",
         true),
     ZIGBEE(LinkType.IEEE802_15_4_NOFCS,
-          "PCAPNG format for Zigbee: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
-          false),
+        "PCAPNG format for Zigbee: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+        false),
     MATTER(LinkType.IEEE802_15_4_NOFCS,
-          "PCAPNG format for Matter: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
-          false),
+        "PCAPNG format for Matter: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+        false),
     BLUETOOTH(LinkType.BLUETOOTH_LE_LL,
-           "PCAPNG format for Bluetooth: using Bluetooth LE_LL link type. Only Bluetooth packets are captured.",
-           false),
+        "PCAPNG format for Bluetooth: using Bluetooth LE_LL link type. Only Bluetooth packets are captured.",
+        false),
     WISUN(LinkType.IEEE802_15_4_NOFCS,
-          "PCAPNG format for Wi-SUN: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
-          false);
+        "PCAPNG format for Wi-SUN: using 802.15.4 no-FCS link type. Only 15.4 packets are captured.",
+        false);
 
     private LinkType linkType;
     private String description;
     private boolean usesRawBytes;
+
     Mode(final LinkType linkType, final String description, final boolean usesRawBytes) {
       this.linkType = linkType;
       this.description = description;
       this.usesRawBytes = usesRawBytes;
     }
 
-    public LinkType linkType() { return linkType; }
-    public String description() { return description; }
-    public boolean usesRawBytes() { return usesRawBytes; }
+    public LinkType linkType() {
+      return linkType;
+    }
+
+    public String description() {
+      return description;
+    }
+
+    public boolean usesRawBytes() {
+      return usesRawBytes;
+    }
   }
 
   private final Mode mode;
@@ -67,6 +76,7 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
   public PcapngFormat(final Mode mode) {
     this.mode = mode;
   }
+
   @Override
   public IDebugChannelExportOutput<IPcapOutput> createOutput(final File f, final boolean append) throws IOException {
     if (append)
@@ -97,17 +107,18 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
     // We end here in the case where mode is not using raw bytes.
     byte[] content;
     long time;
-    switch(mode) {
+    switch (mode) {
     case BLUETOOTH:
     case MATTER:
     case ZIGBEE:
     case WISUN:
       // For WISUN mode, we ignore non-packets.
-      if ( !type.isPacket() ) return false;
+      if (!type.isPacket())
+        return false;
       byte[] buff = dm.contents();
       int startOffset = 0;
       int endOffset = buff.length;
-      if ( type.isFromEfr() ) {
+      if (type.isFromEfr()) {
         // For Efr, we know how to extract the payload.
 
         // Adjust start offset...
@@ -117,21 +128,21 @@ public class PcapngFormat implements IDebugChannelExportFormat<IPcapOutput> {
           startOffset++;
         }
 
-        if ( mode == Mode.WISUN ) {
+        if (mode == Mode.WISUN) {
           // Wisun has 2 byte length, so we add a byte to strip.
           startOffset++;
         }
-        if ( !type.hasNoLengthByte() ) {
+        if (!type.hasNoLengthByte()) {
           // If we have a length byte, then we need to strip that out too.
           startOffset++;
         }
-
 
         // Adjust endOffset
         endOffset -= RadioInfoEfr32.determineRadioInfoLength(type, buff, mode == Mode.BLUETOOTH);
 
         int len = endOffset - startOffset;
-        if ( len < 0 ) return false;
+        if (len < 0)
+          return false;
 
         content = new byte[len];
         System.arraycopy(buff, startOffset, content, 0, len);

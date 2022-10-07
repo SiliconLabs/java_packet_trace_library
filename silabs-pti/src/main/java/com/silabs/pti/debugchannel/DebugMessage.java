@@ -112,9 +112,9 @@ public class DebugMessage {
   }
 
   /**
-   * This method returns same value as contents() method if the debug
-   * message is valid type. Otherwise it prepends the content with the
-   * unknown debug message, and then puts the rest of the content there.
+   * This method returns same value as contents() method if the debug message is
+   * valid type. Otherwise it prepends the content with the unknown debug message,
+   * and then puts the rest of the content there.
    *
    * @return
    */
@@ -122,11 +122,11 @@ public class DebugMessage {
     byte[] eventContents;
     int dt = debugType();
     DebugMessageType dmt = DebugMessageType.get(dt);
-    if ( dmt == DebugMessageType.INVALID ) {
+    if (dmt == DebugMessageType.INVALID) {
       byte[] c = contents();
       eventContents = new byte[c.length + 2];
-      eventContents[0] = (byte)(0x00FF & (dt >> 8));
-      eventContents[1] = (byte)(0x00FF & dt);
+      eventContents[0] = (byte) (0x00FF & (dt >> 8));
+      eventContents[1] = (byte) (0x00FF & dt);
       System.arraycopy(c, 0, contents, 2, c.length);
     } else {
       eventContents = contents();

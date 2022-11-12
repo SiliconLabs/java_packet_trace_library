@@ -18,6 +18,8 @@ Byte        Description
 All tooling that deals with the discrete debug messages is expected to remove the stream framing, so what is left is individual 
 debug messages, without the framing and the length bytes. Therefore, any discrete per-event file formats, such as PCAP or PCAPNG, are expected to hold just the individual debug messages, without the stripped `[`, `]` characters, or the two length bytes.
 
+A stray `]` inside a content does not trigger a false end-of-message, since the reader is expected to simply skip the number of characters indicated in the two-byte length, and look for a `]` only after that. That ensures a decent recovery if a stream gets broken.
+
 The following two chapters describe the format of individual debug messages, after the framing bytes are removed.
 
 ## Debug Message Version 1.0
@@ -74,6 +76,11 @@ Byte        Description
 17   Sequence number / MSB
 ...  Debug-message-type-specific payload.
 ```
+
+Note regarding the "arbitrary value" bytes: The systems that read this are typically embedded systems, for which the knowledge of actual length of message headers matters. In that environment it is useful to know that next minor version update might start using those fields, while the overall message size doesn't change. So if you have a version 3.0, for example, the value in those bytes is ignored. But if your toplevel format version is 3.1, then the values in some of those fields become important. However, because the overall size of the messages didn't change, all the readers that know how to read 3.0 will not break because those fields gain meaningful data points, they will simply continue ignoring them instead.
+
+Note regarding the "sequence numbers": Sequence number is used to detect if there were gaps in the stream of messages. This is extremely important, as this indicates that somewhere in the long chain of travel of these messages from the originating system, down to your PC which analyzes this data, some firmware ran out of buffer space or memory or something like that, so the whole chain needs to be analyzed and a faulting hardware/software needs to be updated for higher bandwidth.
+It's what tells you that a "missing transmission" in your analysis is possibly due to your instrumentation, not because the transmission didn't happen on the actual radio system being analyzed.
 
 ## Type-specific debug message payload
 

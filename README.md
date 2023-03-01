@@ -11,7 +11,7 @@ It is also suitable for direct integration with the Wireshark extcap interface, 
 
 # How do I build this library?
 
-You should build it using gradle via:
+You can build it using gradle via:
 ```
 ./gradlew all
 ```

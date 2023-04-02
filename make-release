@@ -1,0 +1,24 @@
+#!/bin/bash
+
+TAG=release-`cat silabs-pti/VERSION`
+
+echo "Preparing release with tag $TAG..."
+git tag $TAG
+if [ $? != 0 ]; then
+  echo "This release already exists. You can not create another one. Aborting..."
+  exit
+fi
+
+echo "Clean everything..."
+mkdir -p release
+rm -f release/*
+./gradlew clean
+
+echo "Build libraries..."
+./gradlew all
+
+echo "Copy libraries to release/ folder..."
+cp silabs-pti/build/libs/* release/
+
+echo "Use gh to create a release."
+gh release create $TAG --generate-notes release/*

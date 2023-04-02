@@ -12,3 +12,5 @@ bin
 
 # Ignore some generated files
 silabs-pti/debug-message-type-gen.h
+
+release/

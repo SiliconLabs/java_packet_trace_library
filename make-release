@@ -1,6 +1,7 @@
 #!/bin/bash
 
-TAG=release-`cat silabs-pti/VERSION`
+VERSION=`cat silabs-pti/VERSION`
+TAG=release-${VERSION}
 
 echo "Preparing release with tag $TAG..."
 git tag $TAG
@@ -19,6 +20,9 @@ echo "Build libraries..."
 
 echo "Copy libraries to release/ folder..."
 cp silabs-pti/build/libs/* release/
+cp release/silabs-pti-lib-${VERSION}.jar release/silabs-pti-lib.jar
+cp release/silabs-pti-${VERSION}.jar release/silabs-pti.jar
 
 echo "Use gh to create a release."
+git push --tags upstream
 gh release create $TAG --generate-notes release/*

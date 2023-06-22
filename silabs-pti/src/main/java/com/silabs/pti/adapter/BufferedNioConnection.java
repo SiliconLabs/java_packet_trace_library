@@ -43,12 +43,11 @@ public class BufferedNioConnection extends BaseConnection {
     super(host, port, logger);
   }
 
-  @SuppressWarnings("resource")
   @Override
   public void connect() throws IOException {
     if (isConnected())
       return;
-    InetSocketAddress address = new InetSocketAddress(host, port);
+    final InetSocketAddress address = new InetSocketAddress(host, port);
     if (connectionEnabler != null)
       connectionEnabler.prepareConnection(host + ":" + port);
     channel = SocketChannel.open(address);
@@ -58,30 +57,30 @@ public class BufferedNioConnection extends BaseConnection {
       @Override
       public void run() {
         logInfo("Reading thread start.");
-        ByteBuffer buffer = ByteBuffer.allocate(100000);
+        final ByteBuffer buffer = ByteBuffer.allocate(100000);
         readLoop: while (true) {
           try {
-            int ret = selector.select();
+            final int ret = selector.select();
             if (ret > 0) {
               if (selector.selectedKeys().contains(readKey)) {
                 // We can read:
                 buffer.rewind();
-                int readCount = channel.read(buffer);
-                long readTime = System.currentTimeMillis();
+                final int readCount = channel.read(buffer);
+                final long readTime = System.currentTimeMillis();
                 if (readCount == -1) {
                   // End of stream
                   break readLoop;
                 } else if (readCount > 0) {
-                  byte[] data = new byte[readCount];
+                  final byte[] data = new byte[readCount];
                   buffer.rewind();
                   buffer.get(data);
                   processIncomingData(readTime, readCount, data);
                 }
               }
             }
-          } catch (ClosedSelectorException cse) {
+          } catch (final ClosedSelectorException cse) {
             break readLoop;
-          } catch (IOException ioe) {
+          } catch (final IOException ioe) {
             reportProblem("Error reading data", ioe);
             logError("Reading thread error.", ioe);
           }
@@ -103,7 +102,7 @@ public class BufferedNioConnection extends BaseConnection {
       logInfo("Disconnect.");
       channel.close();
       selector.close();
-    } catch (IOException ioe) {
+    } catch (final IOException ioe) {
       reportProblem("Close socket.", ioe);
       logError("Disconnect error.", ioe);
     }
@@ -118,7 +117,7 @@ public class BufferedNioConnection extends BaseConnection {
       logError("Attempting to write, but socket is not connected.", null);
       return;
     }
-    byte[] outgoing = (frameOutgoing ? outgoingFramer.frame(message) : message);
+    final byte[] outgoing = (frameOutgoing ? outgoingFramer.frame(message) : message);
 
     logInfo("Write " + outgoing.length + " bytes.");
     channel.write(ByteBuffer.wrap(outgoing));

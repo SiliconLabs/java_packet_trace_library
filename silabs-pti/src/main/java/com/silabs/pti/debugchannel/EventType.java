@@ -95,9 +95,9 @@ public class EventType implements Comparable<EventType> {
     EventType et = debugMessageEventTypes[t.ordinal()];
     if (et == null) {
       int mask = 0;
-      if (t.name().startsWith("PACKET"))
+      if (isPacket(t))
         mask = MASK_PACKET;
-      else if (t.name().startsWith("AEM"))
+      else if (isAem(t))
         mask = MASK_AEM;
       String name = t.description();
       if (name.length() > MAX_NAME_LENGTH)
@@ -108,8 +108,16 @@ public class EventType implements Comparable<EventType> {
     return et;
   }
 
+  private static boolean isAem(final DebugMessageType t) {
+    return t.name().startsWith("AEM");
+  }
+
+  private static boolean isPacket(final DebugMessageType t) {
+    return t.name().startsWith("PACKET");
+  }
+
   static {
-    for (DebugMessageType dmt : DebugMessageType.values()) {
+    for (final DebugMessageType dmt : DebugMessageType.values()) {
       if (dmt == DebugMessageType.INVALID)
         continue;
       fromDebugMessage(dmt);
@@ -530,8 +538,8 @@ public class EventType implements Comparable<EventType> {
   // Retrieves or creates the event type
   private static EventType
           make(final int mask, final byte category, final short subtype, final String name, final String description) {
-    int value = makeValue(mask, category, subtype);
-    String key = "" + value;
+    final int value = makeValue(mask, category, subtype);
+    final String key = "" + value;
     EventType eventType = storage.get(key);
     if (eventType != null)
       throw new IllegalArgumentException("Duplicate event type: " + name + "(" + mask + "/" + category + "/" + subtype
@@ -573,7 +581,7 @@ public class EventType implements Comparable<EventType> {
    * Returns all the event types. This is used by filters.
    */
   public static final EventType[] getAllTypes() {
-    EventType[] array = storage.values().toArray(new EventType[0]);
+    final EventType[] array = storage.values().toArray(new EventType[0]);
     Arrays.sort(array);
     return array;
   }
@@ -739,8 +747,8 @@ public class EventType implements Comparable<EventType> {
 
   // Internal method that constructs the value from individual elements
   private static int makeValue(final int mask, final byte category, final short subtype) {
-    int st = (0x0000FFFF & subtype);
-    int ct = (0x000000FF & category) << 16;
+    final int st = (0x0000FFFF & subtype);
+    final int ct = (0x000000FF & category) << 16;
     return ct | st | mask;
   }
 
@@ -750,7 +758,7 @@ public class EventType implements Comparable<EventType> {
    * @return EventType
    */
   public static final EventType findByName(final String name) {
-    for (EventType et : getAllTypes()) {
+    for (final EventType et : getAllTypes()) {
       if (et.name().equalsIgnoreCase(name))
         return et;
     }
@@ -760,7 +768,7 @@ public class EventType implements Comparable<EventType> {
   // Sorts according to name
   @Override
   public int compareTo(final EventType o) {
-    EventType et = o;
+    final EventType et = o;
     return name.compareTo(et.name);
   }
 
@@ -785,7 +793,7 @@ public class EventType implements Comparable<EventType> {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    EventType other = (EventType) obj;
+    final EventType other = (EventType) obj;
     return (value == other.value);
   }
 }

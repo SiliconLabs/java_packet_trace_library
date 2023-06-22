@@ -177,7 +177,7 @@ public class Interactive {
   public void version() {
     try {
       System.out.println(CommandLine.getVersionString());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.out.println(e.getMessage());
     }
   }
@@ -193,9 +193,9 @@ public class Interactive {
       System.out.println("Valid expressions:\n" + CliDebugMessageFilter.helpText());
     } else {
       try {
-        CliDebugMessageFilter cf = new CliDebugMessageFilter(args[0]);
+        final CliDebugMessageFilter cf = new CliDebugMessageFilter(args[0]);
         this.filter = cf;
-      } catch (ParseException pe) {
+      } catch (final ParseException pe) {
         System.out.println("Filter expression error: " + pe.getMessage());
       }
     }
@@ -208,7 +208,7 @@ public class Interactive {
     } else {
       try {
         this.filter.andFilter(args[0]);
-      } catch (ParseException pe) {
+      } catch (final ParseException pe) {
         System.out.println("Filter expression error: " + pe.getMessage());
       }
     }
@@ -221,7 +221,7 @@ public class Interactive {
     } else {
       try {
         this.filter.orFilter(args[0]);
-      } catch (ParseException pe) {
+      } catch (final ParseException pe) {
         System.out.println("Filter expression error: " + pe.getMessage());
       }
     }

@@ -19,16 +19,22 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.demux.MessageDecoderAdapter;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
+/**
+ * Various classes for apache mina connectivity.
+ * 
+ * @author Jing
+ */
 public class PtiMessageDecoder extends MessageDecoderAdapter {
 
   @Override
-  public MessageDecoderResult decodable(IoSession session, IoBuffer in) {
+  public MessageDecoderResult decodable(final IoSession session, final IoBuffer in) {
     return MessageDecoderResult.OK;
   }
 
   @Override
-  public MessageDecoderResult decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-    byte[] array = new byte[in.remaining()];
+  public MessageDecoderResult
+         decode(final IoSession session, final IoBuffer in, final ProtocolDecoderOutput out) throws Exception {
+    final byte[] array = new byte[in.remaining()];
     in.get(array);
     out.write(array);
     return MessageDecoderResult.OK;

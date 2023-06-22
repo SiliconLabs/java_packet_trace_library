@@ -18,10 +18,15 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderAdapter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
+/**
+ * Various classes for apache mina connectivity.
+ * 
+ * @author Jing
+ */
 public class PtiProtocolDecoder extends ProtocolDecoderAdapter {
   @Override
-  public void decode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
-    byte[] array = new byte[in.remaining()];
+  public void decode(final IoSession session, final IoBuffer in, final ProtocolDecoderOutput out) throws Exception {
+    final byte[] array = new byte[in.remaining()];
     in.get(array);
     out.write(array);
   }

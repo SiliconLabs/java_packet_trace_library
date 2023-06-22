@@ -42,7 +42,7 @@ public class DiscoveryUtil {
     try {
       discover(500, listener);
       return 0;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       e.printStackTrace();
       return 1;
     }
@@ -51,22 +51,22 @@ public class DiscoveryUtil {
   private static void discoverIndividualAddress(final InetAddress localAddress,
                                                 final int durationMs,
                                                 final IDiscoveryListener listener) {
-    String log = localAddress.getHostName();
+    final String log = localAddress.getHostName();
     try (DatagramSocket socket = new DatagramSocket(0, localAddress)) {
       socket.setSoTimeout(durationMs / 10);
-      DatagramPacket dp = new DatagramPacket(DiscoveryProtocol.DISCOVERY_MESSAGE,
-                                             DiscoveryProtocol.DISCOVERY_MESSAGE.length);
+      final DatagramPacket dp = new DatagramPacket(DiscoveryProtocol.DISCOVERY_MESSAGE,
+                                                   DiscoveryProtocol.DISCOVERY_MESSAGE.length);
       dp.setAddress(InetAddress.getByAddress(broadcast));
-      dp.setPort(4920);
+      dp.setPort(DiscoveryProtocol.UDP_PORT);
       try {
         socket.send(dp);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         System.err.println(log + ": failed to send discovery packet.");
         return;
       }
 
-      byte[] inBuff = new byte[DiscoveryProtocol.RECEIVE_LENGTH];
-      DatagramPacket incoming = new DatagramPacket(inBuff, inBuff.length);
+      final byte[] inBuff = new byte[DiscoveryProtocol.RECEIVE_LENGTH];
+      final DatagramPacket incoming = new DatagramPacket(inBuff, inBuff.length);
       incoming.setPort(DiscoveryProtocol.UDP_PORT);
       long lastDiscoverTime = System.currentTimeMillis();
       do {
@@ -74,11 +74,11 @@ public class DiscoveryUtil {
           socket.receive(incoming);
           lastDiscoverTime = System.currentTimeMillis();
           listener.discovered(incoming);
-        } catch (SocketTimeoutException ste) {
+        } catch (final SocketTimeoutException ste) {
           // Not a big deal. Keep going.
         }
       } while (System.currentTimeMillis() - lastDiscoverTime < durationMs);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println(log + ": discovery failed.");
       e.printStackTrace();
     }
@@ -91,7 +91,7 @@ public class DiscoveryUtil {
    * @param packet
    * @return map of discovery keys.
    */
-  public static Map<DiscoveryKey, String> parseDiscoveryMap(DatagramPacket packet) {
+  public static Map<DiscoveryKey, String> parseDiscoveryMap(final DatagramPacket packet) {
     return parseDiscoveryMap(new String(packet.getData()));
   }
 
@@ -102,31 +102,31 @@ public class DiscoveryUtil {
    * @return map of discovery keys
    */
   public static Map<DiscoveryKey, String> parseDiscoveryMap(final String info) {
-    Map<DiscoveryKey, String> map = new LinkedHashMap<>();
-    String[] tokens = info.split("\\n");
+    final Map<DiscoveryKey, String> map = new LinkedHashMap<>();
+    final String[] tokens = info.split("\\n");
     outer: for (String token : tokens) {
       token = token.trim();
-      String[] subToks = token.split("=");
+      final String[] subToks = token.split("=");
       if (subToks.length != 2)
         continue;
       // ignore values that aren't set
       if (subToks[1].equals("NotSet"))
         continue;
       if (subToks[0].equals(DiscoveryKey.CONNECTION_TIME.key())) {
-        String[] timeToken = subToks[1].split(":");
+        final String[] timeToken = subToks[1].split(":");
         try {
-          int day = Integer.parseInt(timeToken[0]);
-          int hour = Integer.parseInt(timeToken[1]);
-          int minute = Integer.parseInt(timeToken[2]);
-          int second = Integer.parseInt(timeToken[3]);
-          long timePassed = ((((((day * 24) + hour) * 60) + minute) * 60) + second) * 1000;
-          Date connectTime = new Date((new Date()).getTime() - timePassed);
+          final int day = Integer.parseInt(timeToken[0]);
+          final int hour = Integer.parseInt(timeToken[1]);
+          final int minute = Integer.parseInt(timeToken[2]);
+          final int second = Integer.parseInt(timeToken[3]);
+          final long timePassed = ((((((day * 24) + hour) * 60) + minute) * 60) + second) * 1000;
+          final Date connectTime = new Date((new Date()).getTime() - timePassed);
           map.put(DiscoveryKey.CONNECTION_TIME, connectTime.toString());
-        } catch (Exception e) {
+        } catch (final Exception e) {
           // Ignore bogus connection times.
         }
       } else {
-        for (DiscoveryKey t : DiscoveryKey.values()) {
+        for (final DiscoveryKey t : DiscoveryKey.values()) {
           if (t.key().equals(subToks[0])) {
             map.put(t, subToks[1]);
             continue outer;
@@ -139,15 +139,15 @@ public class DiscoveryUtil {
   }
 
   private static void discover(final int durationMs, final IDiscoveryListener listener) throws Exception {
-    List<Thread> threads = new ArrayList<>();
-    List<InetAddress> allLocalAddresses = MiscUtil.getIpAddresses();
-    for (InetAddress localAddress : allLocalAddresses) {
-      Runnable r = () -> discoverIndividualAddress(localAddress, durationMs, listener);
+    final List<Thread> threads = new ArrayList<>();
+    final List<InetAddress> allLocalAddresses = MiscUtil.getIpAddresses();
+    for (final InetAddress localAddress : allLocalAddresses) {
+      final Runnable r = () -> discoverIndividualAddress(localAddress, durationMs, listener);
       threads.add(new Thread(r));
     }
-    for (Thread t : threads)
+    for (final Thread t : threads)
       t.start();
-    for (Thread t : threads)
+    for (final Thread t : threads)
       t.join();
   }
 

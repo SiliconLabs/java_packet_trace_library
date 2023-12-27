@@ -20,23 +20,28 @@ import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.demux.DemuxingProtocolCodecFactory;
 
+/**
+ * Various classes for apache mina connectivity.
+ * 
+ * @author Jing
+ */
 public class PtiCodecFactory extends DemuxingProtocolCodecFactory {
 
-  private ProtocolDecoder decoder;
-  private ProtocolEncoder encoder;
+  private final ProtocolDecoder decoder;
+  private final ProtocolEncoder encoder;
 
-  public PtiCodecFactory(Charset charset) {
+  public PtiCodecFactory(final Charset charset) {
     decoder = new PtiProtocolDecoder();
     encoder = new PtiProtocolEncoder(charset);
   }
 
   @Override
-  public ProtocolEncoder getEncoder(IoSession ioSession) throws Exception {
+  public ProtocolEncoder getEncoder(final IoSession ioSession) throws Exception {
     return encoder;
   }
 
   @Override
-  public ProtocolDecoder getDecoder(IoSession ioSession) throws Exception {
+  public ProtocolDecoder getDecoder(final IoSession ioSession) throws Exception {
     return decoder;
   }
 }

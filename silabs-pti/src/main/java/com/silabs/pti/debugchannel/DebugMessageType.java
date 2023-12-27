@@ -11,10 +11,8 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-    
-    
-// !!!! This file is generated via 'gradle createDebugMessageTypes' command. Please do not edit manually!!!!!
 
+// !!!! This file is generated via 'gradle createDebugMessageTypes' command. Please do not edit manually!!!!!
 
 package com.silabs.pti.debugchannel;
 
@@ -142,10 +140,14 @@ public enum DebugMessageType {
       }
     }
     return DebugMessageType.INVALID;
-  } 
+  }
 
-  public static int featureLevel() { return 22; }
+  public static int featureLevel() {
+    return 22;
+  }
 
-  public static String featureDate() { return "2022.1.8"; }
+  public static String featureDate() {
+    return "2022.1.8";
+  }
 
 }

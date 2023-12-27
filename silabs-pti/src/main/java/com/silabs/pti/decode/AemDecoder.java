@@ -1,4 +1,16 @@
-// Copyright (c) 2021 Silicon Labs. All rights reserved.
+/*******************************************************************************
+ * # License
+ * Copyright 2021 Silicon Laboratories Inc. www.silabs.com
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
 
 package com.silabs.pti.decode;
 
@@ -27,14 +39,14 @@ public class AemDecoder {
   // Little endian int decoding.
   private int decode(final int length) {
     final int offset = index;
-    int val = ByteArrayUtil.byteArrayToInt(contents, offset, length, false);
+    final int val = ByteArrayUtil.byteArrayToInt(contents, offset, length, false);
     index += length;
     return val;
   }
 
   // Little endian float decoding.
   private float decodeFloat(final int length) {
-    float val = MiscUtil.byteArrayToFloat(contents, index, length, false).floatValue();
+    final float val = MiscUtil.byteArrayToFloat(contents, index, length, false).floatValue();
     index += length;
     return val;
   }
@@ -60,10 +72,10 @@ public class AemDecoder {
   }
 
   private AemSample subsequentSample() {
-    long sampleT = time + (1000000 * sampleCount) / sampleRate;
+    final long sampleT = time + (1000000 * sampleCount) / sampleRate;
     if (notEnoughBytesLeft(AemField.current.length()))
       return null;
-    float current = decodeFloat(AemField.current.length());
+    final float current = decodeFloat(AemField.current.length());
     sampleCount++;
     return new AemSample(sampleT, current, voltage);
   }

@@ -21,18 +21,23 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
+/**
+ * Various classes for apache mina connectivity.
+ * 
+ * @author Jing
+ */
 public class PtiProtocolEncoder extends ProtocolEncoderAdapter {
   private final Charset charset;
 
-  public PtiProtocolEncoder(Charset charset) {
+  public PtiProtocolEncoder(final Charset charset) {
     this.charset = charset;
   }
 
   @Override
-  public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
-    CharsetEncoder encoder = charset.newEncoder();
-    String value = message == null ? "" : message.toString();
-    IoBuffer buf = IoBuffer.allocate(value.length()).setAutoExpand(true);
+  public void encode(final IoSession session, final Object message, final ProtocolEncoderOutput out) throws Exception {
+    final CharsetEncoder encoder = charset.newEncoder();
+    final String value = message == null ? "" : message.toString();
+    final IoBuffer buf = IoBuffer.allocate(value.length()).setAutoExpand(true);
     buf.putString(value, encoder);
     buf.flip();
     out.write(buf);

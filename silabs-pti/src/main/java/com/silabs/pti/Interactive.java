@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import com.silabs.pti.adapter.IConnectivityLogger;
 import com.silabs.pti.adapter.IFramer;
 import com.silabs.pti.adapter.TimeSynchronizer;
 import com.silabs.pti.debugchannel.DebugMessageConnectionListener;
+import com.silabs.pti.debugchannel.EventType;
 import com.silabs.pti.debugchannel.TextConnectionListener;
 import com.silabs.pti.filter.CliDebugMessageFilter;
 import com.silabs.pti.format.FileFormat;
@@ -500,4 +502,18 @@ public class Interactive {
     System.out.println("Current format: " + formatType.name());
   }
 
+  @Cli(help = "Print all event type")
+  public void eventTypes(final String... s) {
+    EventType[] types = EventType.getAllTypes();
+    Arrays.sort(types, 0, types.length, new Comparator<EventType>() {
+      @Override
+      public int compare(EventType o1, EventType o2) {
+        return o1.value() - o2.value();
+      }
+    });
+    for (EventType e : types) {
+      System.out.println("0x" + Integer.toHexString(e.value()) + " / " + e.value() + ": '" + e.name() + "', "
+          + e.description());
+    }
+  }
 }
